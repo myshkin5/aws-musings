@@ -1,7 +1,7 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
 
-    "Description": "",
+    "Description": "Creates a bastion VPC with a NAT and jump server. Project specific VPCs are connected to this VPC.",
 
     "Parameters": {
         "ShortName": {
@@ -33,18 +33,16 @@
             }
         },
 
-        "PublicSubnet1": {
+        "Subnet": {
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "CidrBlock": "10.0.0.0/24",
-                "AvailabilityZone": "us-west-2a",
-                "VpcId": {
-                    "Ref": "BastionVPC"
-                },
+                "AvailabilityZone": { "Ref": "AvailabilityZone" },
+                "VpcId": { "Ref": "BastionVPC" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, { "Ref": "AWS::Region" }, "public-subnet" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, { "Ref": "AvailabilityZone" }, "subnet" ] ] }
                     }
                 ]
             }
@@ -56,7 +54,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "vkzone-us-west-2-igw"
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, { "Ref": "AWS::Region" }, "igw" ] ] }
                     }
                 ]
             }
@@ -68,41 +66,35 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "vkzone-us-west-2-dopt"
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, { "Ref": "AWS::Region" }, "dopt" ] ] }
                     }
                 ],
-                "DomainName": "us-west-2.compute.internal",
-                "DomainNameServers": [
-                    "AmazonProvidedDNS"
-                ]
+                "DomainName": { "Fn::Join": [ ".", [ { "Ref": "AWS::Region" }, "compute.internal" ] ] },
+                "DomainNameServers": [ "AmazonProvidedDNS" ]
             }
         },
 
         "NetworkACL": {
             "Type": "AWS::EC2::NetworkAcl",
             "Properties": {
-                "VpcId": {
-                    "Ref": "BastionVPC"
-                },
+                "VpcId": { "Ref": "BastionVPC" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "vkzone-us-west-2-acl"
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, { "Ref": "AWS::Region" }, "acl" ] ] }
                     }
                 ]
             }
         },
 
-        "PublicRouteTable": {
+        "RouteTable": {
             "Type": "AWS::EC2::RouteTable",
             "Properties": {
-                "VpcId": {
-                    "Ref": "BastionVPC"
-                },
+                "VpcId": { "Ref": "BastionVPC" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "vkzone-public-us-west-2-rtb"
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, { "Ref": "AWS::Region" }, "rtb" ] ] }
                     }
                 ]
             }
@@ -119,7 +111,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "vkzone-bastion"
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, "jump" ] ] }
                     }
                 ],
                 "NetworkInterfaces": [
@@ -127,9 +119,7 @@
                         "DeleteOnTermination": "true",
                         "Description": "Primary network interface",
                         "DeviceIndex": 0,
-                        "SubnetId": {
-                            "Ref": "PublicSubnet1"
-                        },
+                        "SubnetId": { "Ref": "Subnet" },
                         "PrivateIpAddresses": [
                             {
                                 "PrivateIpAddress": "10.0.0.2",
@@ -158,7 +148,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "vkzone-nat"
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, "nat" ] ] }
                     }
                 ],
                 "NetworkInterfaces": [
@@ -166,23 +156,14 @@
                         "DeleteOnTermination": "true",
                         "Description": "Primary network interface",
                         "DeviceIndex": 0,
-                        "SubnetId": {
-                            "Ref": "PublicSubnet1"
-                        },
+                        "SubnetId": { "Ref": "Subnet" },
                         "PrivateIpAddresses": [
                             {
                                 "PrivateIpAddress": "10.0.0.3",
                                 "Primary": "true"
                             }
                         ],
-                        "GroupSet": [
-                            {
-                                "Ref": "NATSecurityGroup"
-                            },
-                            {
-                                "Ref": "PrivateSecurityGroup"
-                            }
-                        ]
+                        "GroupSet": [ { "Ref": "NATSecurityGroup" }, { "Ref": "PrivateSecurityGroup" } ]
                     }
                 ]
             }
@@ -192,9 +173,7 @@
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "GroupDescription": "bastion host security group",
-                "VpcId": {
-                    "Ref": "BastionVPC"
-                },
+                "VpcId": { "Ref": "BastionVPC" },
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
@@ -216,9 +195,7 @@
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "GroupDescription": "network address translation security group",
-                "VpcId": {
-                    "Ref": "BastionVPC"
-                },
+                "VpcId": { "Ref": "BastionVPC" },
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "-1",
@@ -238,9 +215,7 @@
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "GroupDescription": "private security group",
-                "VpcId": {
-                    "Ref": "BastionVPC"
-                },
+                "VpcId": { "Ref": "BastionVPC" },
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "-1",
@@ -256,52 +231,36 @@
             }
         },
 
-        "PublicSubnet1NetworkACLAssociation": {
+        "SubnetNetworkACLAssociation": {
             "Type": "AWS::EC2::SubnetNetworkAclAssociation",
             "Properties": {
-                "NetworkAclId": {
-                    "Ref": "NetworkACL"
-                },
-                "SubnetId": {
-                    "Ref": "PublicSubnet1"
-                }
+                "NetworkAclId": { "Ref": "NetworkACL" },
+                "SubnetId": { "Ref": "Subnet" }
             }
         },
 
         "GatewayAttachment": {
             "Type": "AWS::EC2::VPCGatewayAttachment",
             "Properties": {
-                "VpcId": {
-                    "Ref": "BastionVPC"
-                },
-                "InternetGatewayId": {
-                    "Ref": "InternetGateway"
-                }
+                "VpcId": { "Ref": "BastionVPC" },
+                "InternetGatewayId": { "Ref": "InternetGateway" }
             }
         },
 
-        "PublicSubnetRouteTableAssociation": {
+        "SubnetRouteTableAssociation": {
             "Type": "AWS::EC2::SubnetRouteTableAssociation",
             "Properties": {
-                "RouteTableId": {
-                    "Ref": "PublicRouteTable"
-                },
-                "SubnetId": {
-                    "Ref": "PublicSubnet1"
-                }
+                "RouteTableId": { "Ref": "RouteTable" },
+                "SubnetId": { "Ref": "Subnet" }
             }
         },
 
-        "PublicSubnetRoute": {
+        "SubnetRoute": {
             "Type": "AWS::EC2::Route",
             "Properties": {
                 "DestinationCidrBlock": "0.0.0.0/0",
-                "RouteTableId": {
-                    "Ref": "PublicRouteTable"
-                },
-                "GatewayId": {
-                    "Ref": "InternetGateway"
-                }
+                "RouteTableId": { "Ref": "RouteTable" },
+                "GatewayId": { "Ref": "InternetGateway" }
             },
             "DependsOn": "GatewayAttachment"
         },
@@ -309,12 +268,8 @@
         "VPCDHCPOptionsAssociation": {
             "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
             "Properties": {
-                "VpcId": {
-                    "Ref": "BastionVPC"
-                },
-                "DhcpOptionsId": {
-                    "Ref": "DHCPOptions"
-                }
+                "VpcId": { "Ref": "BastionVPC" },
+                "DhcpOptionsId": { "Ref": "DHCPOptions" }
             }
         }
 
