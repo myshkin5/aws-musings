@@ -102,6 +102,7 @@
         "BastionInstance": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
+                "AvailabilityZone": { "Ref": "AvailabilityZone" },
                 "DisableApiTermination": "FALSE",
                 "ImageId": "ami-d13845e1",
                 "InstanceType": "t2.micro",
@@ -115,13 +116,14 @@
                 ],
                 "NetworkInterfaces": [
                     {
+                        "AssociatePublicIpAddress": "true",
                         "DeleteOnTermination": "true",
                         "Description": "Primary network interface",
                         "DeviceIndex": 0,
                         "SubnetId": { "Ref": "Subnet" },
                         "PrivateIpAddresses": [
                             {
-                                "PrivateIpAddress": "10.0.0.2",
+                                "PrivateIpAddress": "10.0.0.10",
                                 "Primary": "true"
                             }
                         ],
@@ -138,6 +140,7 @@
         "NATInstance": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
+                "AvailabilityZone": { "Ref": "AvailabilityZone" },
                 "DisableApiTermination": "FALSE",
                 "ImageId": "ami-f032acc0",
                 "InstanceType": "t1.micro",
@@ -152,13 +155,14 @@
                 ],
                 "NetworkInterfaces": [
                     {
+                        "AssociatePublicIpAddress": "true",
                         "DeleteOnTermination": "true",
                         "Description": "Primary network interface",
                         "DeviceIndex": 0,
                         "SubnetId": { "Ref": "Subnet" },
                         "PrivateIpAddresses": [
                             {
-                                "PrivateIpAddress": "10.0.0.3",
+                                "PrivateIpAddress": "10.0.0.11",
                                 "Primary": "true"
                             }
                         ],
