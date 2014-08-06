@@ -86,6 +86,40 @@
             }
         },
 
+        "EgressACLEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "CidrBlock": "0.0.0.0/0",
+                "Egress": true,
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "RuleNumber": "100",
+                "NetworkAclId": {
+                    "Ref": "NetworkACL"
+                }
+            }
+        },
+        "IngressACLEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "CidrBlock": "0.0.0.0/0",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "RuleNumber": "100",
+                "NetworkAclId": {
+                    "Ref": "NetworkACL"
+                }
+            }
+        },
+
+        "SubnetNetworkACLAssociation": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": { "Ref": "NetworkACL" },
+                "SubnetId": { "Ref": "Subnet" }
+            }
+        },
+
         "RouteTable": {
             "Type": "AWS::EC2::RouteTable",
             "Properties": {
@@ -177,6 +211,12 @@
             "Properties": {
                 "GroupDescription": "bastion host security group",
                 "VpcId": { "Ref": "BastionVPC" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, "bastion-sg" ] ] }
+                    }
+                ],
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
@@ -199,6 +239,12 @@
             "Properties": {
                 "GroupDescription": "network address translation security group",
                 "VpcId": { "Ref": "BastionVPC" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, "nat-sg" ] ] }
+                    }
+                ],
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "-1",
@@ -219,6 +265,12 @@
             "Properties": {
                 "GroupDescription": "private security group",
                 "VpcId": { "Ref": "BastionVPC" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, "private-sg" ] ] }
+                    }
+                ],
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "-1",
@@ -231,14 +283,6 @@
                         "CidrIp": "0.0.0.0/0"
                     }
                 ]
-            }
-        },
-
-        "SubnetNetworkACLAssociation": {
-            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
-            "Properties": {
-                "NetworkAclId": { "Ref": "NetworkACL" },
-                "SubnetId": { "Ref": "Subnet" }
             }
         },
 
