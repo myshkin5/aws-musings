@@ -6,12 +6,11 @@
     "Parameters": {
         "ShortName": {
             "Type": "String",
-            "Default": { "Ref": "AWS::StackName" },
-            "Description": "Short name of the new VPC. Name will have the AWS Region and '-vpc' appended (i.e.: example-us-west-2-vpc)."
+            "Default": "bastion",
+            "Description": "Short name of the new VPC. Name will have the AWS Region and '-vpc' appended (i.e.: bastion-us-west-2-vpc)."
         },
         "AvailabilityZone": {
             "Type": "String",
-            "Default": { "Fn::Select": [ "0", { "Fn::GetAZs": { "Ref": "AWS::Region" } } ] },
             "Description": "Availability zone where bastion VPC instances such as the NAT and jump servers will be placed."
         }
     },
