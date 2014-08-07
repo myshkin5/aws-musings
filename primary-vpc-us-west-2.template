@@ -1,22 +1,36 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
 
-    "Description": "Creates a bastion VPC with a NAT and jump server. Project specific VPCs are connected to this VPC.",
+    "Description": "Creates the primary VPC with a NAT and bastion server. Project specific VPCs are connected to this VPC.",
 
     "Parameters": {
-        "ShortName": {
-            "Type": "String",
-            "Default": "bastion",
-            "Description": "Short name of the new VPC. Name will have the AWS Region and '-vpc' appended (i.e.: bastion-us-west-2-vpc)."
-        },
         "AvailabilityZone": {
             "Type": "String",
-            "Description": "Availability zone where bastion VPC instances such as the NAT and jump servers will be placed."
+            "Default": "us-west-2a",
+            "Description": "Availability zone where primary VPC instances such as the NAT and bastion servers will be placed."
+        },
+        "BastionKeyName": {
+            "Type": "String",
+            "Default": "default",
+            "Description": "SSH key name used to connect with the bastion server via the ec2-user account.",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[\\x20-\\x7E]*",
+            "ConstraintDescription": "can contain only ASCII characters."
+        },
+        "InternalKeyName": {
+            "Type": "String",
+            "Default": "internal",
+            "Description": "SSH key name used to connect from the bastion server to other servers via the ec2-user account.",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[\\x20-\\x7E]*",
+            "ConstraintDescription": "can contain only ASCII characters."
         }
     },
 
     "Resources": {
-        "BastionVPC": {
+        "PrimaryVPC": {
             "Type": "AWS::EC2::VPC",
             "Properties": {
                 "CidrBlock": "10.0.0.0/24",
@@ -26,7 +40,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, { "Ref": "AWS::Region" }, "vpc" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "vpc" ] ] }
                     }
                 ]
             }
@@ -37,11 +51,11 @@
             "Properties": {
                 "CidrBlock": "10.0.0.0/24",
                 "AvailabilityZone": { "Ref": "AvailabilityZone" },
-                "VpcId": { "Ref": "BastionVPC" },
+                "VpcId": { "Ref": "PrimaryVPC" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, { "Ref": "AvailabilityZone" }, "subnet" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AvailabilityZone" }, "subnet" ] ] }
                     }
                 ]
             }
@@ -53,7 +67,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, { "Ref": "AWS::Region" }, "igw" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "igw" ] ] }
                     }
                 ]
             }
@@ -65,7 +79,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, { "Ref": "AWS::Region" }, "dopt" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "dopt" ] ] }
                     }
                 ],
                 "DomainName": { "Fn::Join": [ ".", [ { "Ref": "AWS::Region" }, "compute.internal" ] ] },
@@ -76,11 +90,11 @@
         "NetworkACL": {
             "Type": "AWS::EC2::NetworkAcl",
             "Properties": {
-                "VpcId": { "Ref": "BastionVPC" },
+                "VpcId": { "Ref": "PrimaryVPC" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, { "Ref": "AWS::Region" }, "acl" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "acl" ] ] }
                     }
                 ]
             }
@@ -123,11 +137,11 @@
         "RouteTable": {
             "Type": "AWS::EC2::RouteTable",
             "Properties": {
-                "VpcId": { "Ref": "BastionVPC" },
+                "VpcId": { "Ref": "PrimaryVPC" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, { "Ref": "AWS::Region" }, "rtb" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "rtb" ] ] }
                     }
                 ]
             }
@@ -140,12 +154,12 @@
                 "DisableApiTermination": "FALSE",
                 "ImageId": "ami-d13845e1",
                 "InstanceType": "t2.micro",
-                "KeyName": "default",
+                "KeyName": { "Ref": "BastionKeyName" },
                 "Monitoring": "false",
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, "jump" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "bastion" ] ] }
                     }
                 ],
                 "NetworkInterfaces": [
@@ -179,12 +193,12 @@
                 "ImageId": "ami-f032acc0",
                 "InstanceType": "t1.micro",
                 "KernelId": "aki-fc37bacc",
-                "KeyName": "internal",
+                "KeyName": { "Ref": "InternalKeyName" },
                 "Monitoring": "false",
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, "nat" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "nat" ] ] }
                     }
                 ],
                 "NetworkInterfaces": [
@@ -209,12 +223,12 @@
         "BastionSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "GroupDescription": "bastion host security group",
-                "VpcId": { "Ref": "BastionVPC" },
+                "GroupDescription": "bastion server security group",
+                "VpcId": { "Ref": "PrimaryVPC" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, "bastion-sg" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "bastion-sg" ] ] }
                     }
                 ],
                 "SecurityGroupIngress": [
@@ -238,11 +252,11 @@
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "GroupDescription": "network address translation security group",
-                "VpcId": { "Ref": "BastionVPC" },
+                "VpcId": { "Ref": "PrimaryVPC" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, "nat-sg" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "nat-sg" ] ] }
                     }
                 ],
                 "SecurityGroupIngress": [
@@ -264,11 +278,11 @@
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "GroupDescription": "private security group",
-                "VpcId": { "Ref": "BastionVPC" },
+                "VpcId": { "Ref": "PrimaryVPC" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "ShortName" }, "private-sg" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "private-sg" ] ] }
                     }
                 ],
                 "SecurityGroupIngress": [
@@ -289,7 +303,7 @@
         "GatewayAttachment": {
             "Type": "AWS::EC2::VPCGatewayAttachment",
             "Properties": {
-                "VpcId": { "Ref": "BastionVPC" },
+                "VpcId": { "Ref": "PrimaryVPC" },
                 "InternetGatewayId": { "Ref": "InternetGateway" }
             }
         },
@@ -315,7 +329,7 @@
         "VPCDHCPOptionsAssociation": {
             "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
             "Properties": {
-                "VpcId": { "Ref": "BastionVPC" },
+                "VpcId": { "Ref": "PrimaryVPC" },
                 "DhcpOptionsId": { "Ref": "DHCPOptions" }
             }
         }
