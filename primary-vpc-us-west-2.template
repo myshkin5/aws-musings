@@ -30,10 +30,10 @@
     },
 
     "Resources": {
-        "PrimaryVPC": {
+        "VPC": {
             "Type": "AWS::EC2::VPC",
             "Properties": {
-                "CidrBlock": "10.0.0.0/24",
+                "CidrBlock": "10.0.0.0/16",
                 "InstanceTenancy": "default",
                 "EnableDnsSupport": "true",
                 "EnableDnsHostnames": "true",
@@ -51,7 +51,7 @@
             "Properties": {
                 "CidrBlock": "10.0.0.0/24",
                 "AvailabilityZone": { "Ref": "AvailabilityZone" },
-                "VpcId": { "Ref": "PrimaryVPC" },
+                "VpcId": { "Ref": "VPC" },
                 "Tags": [
                     {
                         "Key": "Name",
@@ -73,24 +73,49 @@
             }
         },
 
-        "DHCPOptions": {
-            "Type": "AWS::EC2::DHCPOptions",
+        "GatewayAttachment": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
             "Properties": {
+                "VpcId": { "Ref": "VPC" },
+                "InternetGatewayId": { "Ref": "InternetGateway" }
+            }
+        },
+
+        "RouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": { "Ref": "VPC" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "dopt" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "rtb" ] ] }
                     }
-                ],
-                "DomainName": { "Fn::Join": [ ".", [ { "Ref": "AWS::Region" }, "compute.internal" ] ] },
-                "DomainNameServers": [ "AmazonProvidedDNS" ]
+                ]
+            }
+        },
+
+        "Route": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "RouteTableId": { "Ref": "RouteTable" },
+                "GatewayId": { "Ref": "InternetGateway" }
+            },
+            "DependsOn": "GatewayAttachment"
+        },
+
+        "SubnetRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": { "Ref": "RouteTable" },
+                "SubnetId": { "Ref": "Subnet" }
             }
         },
 
         "NetworkACL": {
             "Type": "AWS::EC2::NetworkAcl",
             "Properties": {
-                "VpcId": { "Ref": "PrimaryVPC" },
+                "VpcId": { "Ref": "VPC" },
                 "Tags": [
                     {
                         "Key": "Name",
@@ -134,14 +159,81 @@
             }
         },
 
-        "RouteTable": {
-            "Type": "AWS::EC2::RouteTable",
+        "BastionSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "VpcId": { "Ref": "PrimaryVPC" },
+                "GroupDescription": "bastion server security group",
+                "VpcId": { "Ref": "VPC" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "rtb" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "bastion-sg" ] ] }
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": "24.9.253.190/32"
+                    }
+                ],
+                "SecurityGroupEgress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
+
+        "NATSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "network address translation security group",
+                "VpcId": { "Ref": "VPC" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "nat-sg" ] ] }
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "10.0.0.0/16"
+                    }
+                ],
+                "SecurityGroupEgress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
+
+        "PrivateSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "private security group",
+                "VpcId": { "Ref": "VPC" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "private-sg" ] ] }
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "10.0.0.0/16"
+                    }
+                ],
+                "SecurityGroupEgress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "0.0.0.0/0"
                     }
                 ]
             }
@@ -220,116 +312,24 @@
             }
         },
 
-        "BastionSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
+        "DHCPOptions": {
+            "Type": "AWS::EC2::DHCPOptions",
             "Properties": {
-                "GroupDescription": "bastion server security group",
-                "VpcId": { "Ref": "PrimaryVPC" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "bastion-sg" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "dopt" ] ] }
                     }
                 ],
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "CidrIp": "24.9.253.190/32"
-                    }
-                ],
-                "SecurityGroupEgress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "0.0.0.0/0"
-                    }
-                ]
+                "DomainName": { "Fn::Join": [ ".", [ { "Ref": "AWS::Region" }, "compute.internal" ] ] },
+                "DomainNameServers": [ "AmazonProvidedDNS" ]
             }
-        },
-
-        "NATSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "network address translation security group",
-                "VpcId": { "Ref": "PrimaryVPC" },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "nat-sg" ] ] }
-                    }
-                ],
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "10.0.0.0/16"
-                    }
-                ],
-                "SecurityGroupEgress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "0.0.0.0/0"
-                    }
-                ]
-            }
-        },
-
-        "PrivateSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "private security group",
-                "VpcId": { "Ref": "PrimaryVPC" },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "private-sg" ] ] }
-                    }
-                ],
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "10.0.0.0/16"
-                    }
-                ],
-                "SecurityGroupEgress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "0.0.0.0/0"
-                    }
-                ]
-            }
-        },
-
-        "GatewayAttachment": {
-            "Type": "AWS::EC2::VPCGatewayAttachment",
-            "Properties": {
-                "VpcId": { "Ref": "PrimaryVPC" },
-                "InternetGatewayId": { "Ref": "InternetGateway" }
-            }
-        },
-
-        "SubnetRouteTableAssociation": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "Properties": {
-                "RouteTableId": { "Ref": "RouteTable" },
-                "SubnetId": { "Ref": "Subnet" }
-            }
-        },
-
-        "SubnetRoute": {
-            "Type": "AWS::EC2::Route",
-            "Properties": {
-                "DestinationCidrBlock": "0.0.0.0/0",
-                "RouteTableId": { "Ref": "RouteTable" },
-                "GatewayId": { "Ref": "InternetGateway" }
-            },
-            "DependsOn": "GatewayAttachment"
         },
 
         "VPCDHCPOptionsAssociation": {
             "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
             "Properties": {
-                "VpcId": { "Ref": "PrimaryVPC" },
+                "VpcId": { "Ref": "VPC" },
                 "DhcpOptionsId": { "Ref": "DHCPOptions" }
             }
         }
