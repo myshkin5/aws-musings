@@ -26,6 +26,11 @@
             "MaxLength": "255",
             "AllowedPattern": "[\\x20-\\x7E]*",
             "ConstraintDescription": "can contain only ASCII characters."
+        },
+        "BashRCSource": {
+            "Type": "String",
+            "Default": "https://raw.githubusercontent.com/myshkin5/aws-musings/master/bashrc.sh",
+            "Description": "Web location of .bashrc to be installed on system accounts."
         }
     },
 
@@ -244,6 +249,7 @@
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "config": {
+                        "files": {
                             "/etc/cfn/cfn-hup.conf": {
                                 "content": {
                                     "Fn::Join": ["", [ "[main]\n",
@@ -267,10 +273,26 @@
                                         "runas=root\n"
                                     ]]
                                 }
+                            },
+
+                            "/home/ec2-user/.bashrc": {
+                                "source": { "Ref": "BashRCSource" },
+                                "mode": "000644",
+                                "owner": "ec2-user",
+                                "group": "ec2-user"
+                            },
+                            "/root/.bashrc": {
+                                "source": {
+                                    "Ref": "BashRCSource"
+                                },
+                                "mode": "000644",
+                                "owner": "root",
+                                "group": "root"
                             }
                         }
                     }
-                },
+                }
+            },
             "Properties": {
                 "AvailabilityZone": { "Ref": "AvailabilityZone" },
                 "DisableApiTermination": "FALSE",
@@ -350,6 +372,7 @@
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "config": {
+                        "files": {
                             "/etc/cfn/cfn-hup.conf": {
                                 "content": {
                                     "Fn::Join": ["", [ "[main]\n",
@@ -373,10 +396,24 @@
                                         "runas=root\n"
                                     ]]
                                 }
+                            },
+
+                            "/home/ec2-user/.bashrc": {
+                                "source": { "Ref": "BashRCSource" },
+                                "mode": "000644",
+                                "owner": "ec2-user",
+                                "group": "ec2-user"
+                            },
+                            "/root/.bashrc": {
+                                "source": { "Ref": "BashRCSource" },
+                                "mode": "000644",
+                                "owner": "root",
+                                "group": "root"
                             }
                         }
                     }
-                },
+                }
+            },
             "Properties": {
                 "AvailabilityZone": { "Ref": "AvailabilityZone" },
                 "DisableApiTermination": "FALSE",
