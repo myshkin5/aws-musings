@@ -34,15 +34,11 @@
         "SubnetId": {
             "Type": "String",
             "Description": "The id of the subnet where the server will be added."
-        },
-        "PrivateSecurityGroupId": {
-            "Type": "String",
-            "Description": "The id of the private security group used to protect internal servers."
         }
     },
 
     "Resources": {
-        "NATSecurityGroup": {
+        "SecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "GroupDescription": "network address translation security group",
@@ -142,7 +138,7 @@
                                 "Primary": "true"
                             }
                         ],
-                        "GroupSet": [ { "Ref": "NATSecurityGroup" }, { "Ref": "PrivateSecurityGroupId" } ]
+                        "GroupSet": [ { "Ref": "SecurityGroup" } ]
                     }
                 ],
                 "UserData": {

@@ -38,7 +38,7 @@
     },
 
     "Resources": {
-        "BastionSecurityGroup": {
+        "SecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "GroupDescription": "bastion server security group",
@@ -139,7 +139,7 @@
                                 "Primary": "true"
                             }
                         ],
-                        "GroupSet": [ { "Ref": "BastionSecurityGroup" } ]
+                        "GroupSet": [ { "Ref": "SecurityGroup" } ]
                     }
                 ],
                 "UserData": {

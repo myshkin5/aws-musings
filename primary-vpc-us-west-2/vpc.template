@@ -164,32 +164,6 @@
             }
         },
 
-        "PrivateSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "private security group",
-                "VpcId": { "Ref": "VPC" },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "private-sg" ] ] }
-                    }
-                ],
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "10.0.0.0/16"
-                    }
-                ],
-                "SecurityGroupEgress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "0.0.0.0/0"
-                    }
-                ]
-            }
-        },
-
         "DHCPOptions": {
             "Type": "AWS::EC2::DHCPOptions",
             "Properties": {
@@ -237,8 +211,7 @@
                     "BashRCSource": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
                     "VPCId": { "Ref": "VPC" },
                     "VPCName": { "Ref": "AWS::StackName" },
-                    "SubnetId": { "Ref": "Subnet" },
-                    "PrivateSecurityGroupId": { "Ref": "PrivateSecurityGroup" }
+                    "SubnetId": { "Ref": "Subnet" }
                 }
             }
         }
