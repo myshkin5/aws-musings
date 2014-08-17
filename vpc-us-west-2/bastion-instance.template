@@ -149,6 +149,12 @@
             }
         }
 
+    },
+
+    "Outputs": {
+        "PrivateIP": {
+            "Value": { "Fn::GetAtt": [ "BastionInstance", "PrivateIp" ] }
+        }
     }
 
 }

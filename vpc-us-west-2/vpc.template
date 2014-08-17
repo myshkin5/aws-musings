@@ -222,9 +222,10 @@
                         "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "dopt" ] ] }
                     }
                 ],
-                "DomainName": { "Fn::Join": [ ".", [ { "Ref": "AWS::Region" }, "compute.internal" ] ] },
-                "DomainNameServers": [ "AmazonProvidedDNS" ]
-            }
+                "DomainName": { "Fn::Join": [ ".", [ { "Ref": "AWS::StackName" }, "compute.internal" ] ] },
+                "DomainNameServers": [ { "Fn::GetAtt" : [ "BastionInstanceStack", "Outputs.PrivateIP" ] } ]
+            },
+            "DependsOn": "BastionInstanceStack"
         },
 
         "VPCDHCPOptionsAssociation": {
