@@ -4,24 +4,17 @@
     "Description": "The primary VPC with a NAT and bastion server. Project specific VPCs are connected to this VPC.",
 
     "Parameters": {
-        "AvailabilityZone": {
+        "16CIDRBlock": {
             "Type": "String",
-            "Default": "us-west-2a",
-            "Description": "Availability zone where primary VPC instances such as the NAT and bastion servers will be placed."
+            "Default": "10.0",
+            "Description": "The first 16 bits of the CIDR block for the VPC.",
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})",
+            "ConstraintDescription": "must be the first two digits of a valid IP CIDR of the form x.x"
         },
         "BastionKeyName": {
             "Type": "String",
             "Default": "default",
             "Description": "SSH key name used to connect with the bastion server via the ec2-user account.",
-            "MinLength": "1",
-            "MaxLength": "255",
-            "AllowedPattern": "[\\x20-\\x7E]*",
-            "ConstraintDescription": "can contain only ASCII characters."
-        },
-        "InternalKeyName": {
-            "Type": "String",
-            "Default": "internal",
-            "Description": "SSH key name used to connect from the bastion server to other servers via the ec2-user account.",
             "MinLength": "1",
             "MaxLength": "255",
             "AllowedPattern": "[\\x20-\\x7E]*",
@@ -38,7 +31,7 @@
         "VPC": {
             "Type": "AWS::EC2::VPC",
             "Properties": {
-                "CidrBlock": "10.0.0.0/24",
+                "CidrBlock": { "Fn::Join": [ ".", [ { "Ref": "16CIDRBlock" }, "0.0/16" ] ] },
                 "InstanceTenancy": "default",
                 "EnableDnsSupport": "true",
                 "EnableDnsHostnames": "true",
@@ -51,16 +44,44 @@
             }
         },
 
-        "Subnet": {
+        "SubnetA": {
             "Type": "AWS::EC2::Subnet",
             "Properties": {
-                "CidrBlock": "10.0.0.0/24",
-                "AvailabilityZone": { "Ref": "AvailabilityZone" },
+                "CidrBlock": { "Fn::Join": [ ".", [ { "Ref": "16CIDRBlock" }, "0.0/24" ] ] },
+                "AvailabilityZone": "us-west-2a",
                 "VpcId": { "Ref": "VPC" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AvailabilityZone" }, "subnet" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2a-subnet" ] ] }
+                    }
+                ]
+            }
+        },
+        "SubnetB": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": { "Fn::Join": [ ".", [ { "Ref": "16CIDRBlock" }, "1.0/24" ] ] },
+                "AvailabilityZone": "us-west-2b",
+                "VpcId": { "Ref": "VPC" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2b-subnet" ] ] }
+                    }
+                ]
+            }
+        },
+        "SubnetC": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": { "Fn::Join": [ ".", [ { "Ref": "16CIDRBlock" }, "2.0/24" ] ] },
+                "AvailabilityZone": "us-west-2c",
+                "VpcId": { "Ref": "VPC" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2c-subnet" ] ] }
                     }
                 ]
             }
@@ -109,11 +130,25 @@
             "DependsOn": "GatewayAttachment"
         },
 
-        "SubnetRouteTableAssociation": {
+        "SubnetARouteTableAssociation": {
             "Type": "AWS::EC2::SubnetRouteTableAssociation",
             "Properties": {
                 "RouteTableId": { "Ref": "RouteTable" },
-                "SubnetId": { "Ref": "Subnet" }
+                "SubnetId": { "Ref": "SubnetA" }
+            }
+        },
+        "SubnetBRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": { "Ref": "RouteTable" },
+                "SubnetId": { "Ref": "SubnetB" }
+            }
+        },
+        "SubnetCRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": { "Ref": "RouteTable" },
+                "SubnetId": { "Ref": "SubnetC" }
             }
         },
 
@@ -156,11 +191,25 @@
             }
         },
 
-        "SubnetNetworkACLAssociation": {
+        "SubnetANetworkACLAssociation": {
             "Type": "AWS::EC2::SubnetNetworkAclAssociation",
             "Properties": {
                 "NetworkAclId": { "Ref": "NetworkACL" },
-                "SubnetId": { "Ref": "Subnet" }
+                "SubnetId": { "Ref": "SubnetA" }
+            }
+        },
+        "SubnetBNetworkACLAssociation": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": { "Ref": "NetworkACL" },
+                "SubnetId": { "Ref": "SubnetB" }
+            }
+        },
+        "SubnetCNetworkACLAssociation": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": { "Ref": "NetworkACL" },
+                "SubnetId": { "Ref": "SubnetC" }
             }
         },
 
@@ -191,27 +240,13 @@
             "Properties": {
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "primary-vpc-us-west-2", "bastion-instance.template" ] ] },
                 "Parameters": {
-                    "AvailabilityZone": { "Ref": "AvailabilityZone" },
+                    "AvailabilityZone": "us-west-2a",
                     "KeyName": { "Ref": "BastionKeyName" },
                     "BashRCSource": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
                     "VPCId": { "Ref": "VPC" },
                     "VPCName": { "Ref": "AWS::StackName" },
-                    "SubnetId": { "Ref": "Subnet" }
-                }
-            }
-        },
-
-        "NATInstanceStack": {
-            "Type": "AWS::CloudFormation::Stack",
-            "Properties": {
-                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "primary-vpc-us-west-2", "nat-instance.template" ] ] },
-                "Parameters": {
-                    "AvailabilityZone": { "Ref": "AvailabilityZone" },
-                    "KeyName": { "Ref": "InternalKeyName" },
-                    "BashRCSource": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
-                    "VPCId": { "Ref": "VPC" },
-                    "VPCName": { "Ref": "AWS::StackName" },
-                    "SubnetId": { "Ref": "Subnet" }
+                    "SubnetId": { "Ref": "SubnetA" },
+                    "PrivateIPAddress": { "Fn::Join": [ ".", [ { "Ref": "16CIDRBlock" }, "0.10" ] ] }
                 }
             }
         }

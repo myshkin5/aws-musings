@@ -20,7 +20,7 @@
         },
         "BashRCSource": {
             "Type": "String",
-            "Default": "https://raw.githubusercontent.com/myshkin5/aws-musings/master/bashrc.sh",
+            "Default": "https://s3-us-west-2.amazonaws.com/aws-musings/bashrc.sh",
             "Description": "Web location of .bashrc to be installed on system accounts."
         },
         "VPCId": {
@@ -32,6 +32,10 @@
             "Description": "The name of the VPC. Used in names of objects."
         },
         "SubnetId": {
+            "Type": "String",
+            "Description": "The id of the subnet where the server will be added."
+        },
+        "PrivateIPAddress": {
             "Type": "String",
             "Description": "The id of the subnet where the server will be added."
         }
@@ -135,7 +139,7 @@
                         "SubnetId": { "Ref": "SubnetId" },
                         "PrivateIpAddresses": [
                             {
-                                "PrivateIpAddress": "10.0.0.10",
+                                "PrivateIpAddress": { "Ref": "PrivateIPAddress" },
                                 "Primary": "true"
                             }
                         ],
