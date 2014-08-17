@@ -1,18 +1,17 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
 
-    "Description": "The primary VPC's bastion server.",
+    "Description": "The VPC's bastion server.",
 
     "Parameters": {
-        "AvailabilityZone": {
+        "InstanceName": {
             "Type": "String",
-            "Default": "us-west-2a",
-            "Description": "Availability zone where primary VPC instances such as the NAT and bastion servers will be placed."
+            "Description": "The name of the instance."
         },
         "KeyName": {
             "Type": "String",
-            "Default": "default",
-            "Description": "SSH key name used to connect with the bastion server via the ec2-user account.",
+            "Default": "internal",
+            "Description": "SSH key name used to connect to the bastion server via the ec2-user account.",
             "MinLength": "1",
             "MaxLength": "255",
             "AllowedPattern": "[\\x20-\\x7E]*",
@@ -23,53 +22,17 @@
             "Default": "https://s3-us-west-2.amazonaws.com/aws-musings/bashrc.sh",
             "Description": "Web location of .bashrc to be installed on system accounts."
         },
-        "VPCId": {
-            "Type": "String",
-            "Description": "The id of the VPC where the bastion server will be added."
-        },
-        "VPCName": {
-            "Type": "String",
-            "Description": "The name of the VPC. Used in names of objects."
-        },
         "SubnetId": {
             "Type": "String",
             "Description": "The id of the subnet where the server will be added."
         },
-        "PrivateIPAddress": {
+        "SecurityGroupId": {
             "Type": "String",
-            "Description": "The id of the subnet where the server will be added."
+            "Description": "The id of the security group protecting the bastion server."
         }
     },
 
     "Resources": {
-        "SecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "bastion server security group",
-                "VpcId": { "Ref": "VPCId" },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion-sg" ] ] }
-                    }
-                ],
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "CidrIp": "24.9.253.190/32"
-                    }
-                ],
-                "SecurityGroupEgress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "0.0.0.0/0"
-                    }
-                ]
-            }
-        },
-
         "BastionInstance": {
             "Type": "AWS::EC2::Instance",
             "Metadata": {
@@ -118,16 +81,16 @@
                 }
             },
             "Properties": {
-                "AvailabilityZone": { "Ref": "AvailabilityZone" },
                 "DisableApiTermination": "FALSE",
-                "ImageId": "ami-d13845e1",
-                "InstanceType": "t2.micro",
+                "ImageId": "ami-f032acc0",
+                "InstanceType": "t1.micro",
+                "KernelId": "aki-fc37bacc",
                 "KeyName": { "Ref": "KeyName" },
                 "Monitoring": "false",
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }
+                        "Value": { "Ref": "InstanceName" }
                     }
                 ],
                 "NetworkInterfaces": [
@@ -137,13 +100,7 @@
                         "Description": "Primary network interface",
                         "DeviceIndex": 0,
                         "SubnetId": { "Ref": "SubnetId" },
-                        "PrivateIpAddresses": [
-                            {
-                                "PrivateIpAddress": { "Ref": "PrivateIPAddress" },
-                                "Primary": "true"
-                            }
-                        ],
-                        "GroupSet": [ { "Ref": "SecurityGroup" } ]
+                        "GroupSet": [ { "Ref": "SecurityGroupId" } ]
                     }
                 ],
                 "UserData": {
@@ -160,8 +117,8 @@
 
                             "yum update -y || error_exit 'yum update failed'\n",
 
-                            "sed -i -e \"s/localhost/", { "Ref": "VPCName" }, "-bastion/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/", { "Ref": "VPCName" }, "-bastion ", { "Ref": "VPCName" }, "-bastion.localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
+                            "sed -i -e \"s/localhost/", { "Ref": "InstanceName" }, "/g\" /etc/sysconfig/network\n",
+                            "sed -i -e \"s/localhost localhost.localdomain/", { "Ref": "InstanceName" }, " ", { "Ref": "InstanceName" }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
 
                             "# Initialize CloudFormation\n",
                             "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r BastionInstance ",

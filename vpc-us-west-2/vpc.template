@@ -10,6 +10,20 @@
             "Description": "The first 16 bits of the CIDR block for the VPC.",
             "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})",
             "ConstraintDescription": "must be the first two digits of a valid IP CIDR of the form x.x"
+        },
+        "BastionKeyName": {
+            "Type": "String",
+            "Default": "default",
+            "Description": "SSH key name used to connect with the bastion server via the ec2-user account.",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[\\x20-\\x7E]*",
+            "ConstraintDescription": "can contain only ASCII characters."
+        },
+        "AWSMusingsS3URL": {
+            "Type": "String",
+            "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
+            "Description": "S3 path to aws-musings."
         }
     },
 
@@ -218,6 +232,52 @@
             "Properties": {
                 "VpcId": { "Ref": "VPC" },
                 "DhcpOptionsId": { "Ref": "DHCPOptions" }
+            }
+        },
+
+        "BastionSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "bastion server security group",
+                "VpcId": { "Ref": "VPC" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "bastion-sg" ] ] }
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": "24.9.253.190/32"
+                    },
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "10.0.0.0/16"
+                    }
+                ],
+                "SecurityGroupEgress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
+
+        "BastionInstanceStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "Properties": {
+                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "vpc-us-west-2", "bastion-instance.template" ] ] },
+                "Parameters": {
+                    "InstanceName": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "bastion" ] ] },
+                    "KeyName": { "Ref": "BastionKeyName" },
+                    "BashRCSource": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
+                    "SubnetId": { "Ref": "SubnetA" },
+                    "SecurityGroupId": { "Ref": "BastionSecurityGroup" }
+                }
             }
         }
 
