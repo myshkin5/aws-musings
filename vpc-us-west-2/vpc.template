@@ -44,7 +44,7 @@
             }
         },
 
-        "SubnetA": {
+        "PublicSubnetA": {
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "CidrBlock": { "Fn::Join": [ ".", [ { "Ref": "16CIDRBlock" }, "0.0/24" ] ] },
@@ -53,12 +53,12 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2a-subnet" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2a-public-subnet" ] ] }
                     }
                 ]
             }
         },
-        "SubnetB": {
+        "PublicSubnetB": {
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "CidrBlock": { "Fn::Join": [ ".", [ { "Ref": "16CIDRBlock" }, "1.0/24" ] ] },
@@ -67,12 +67,12 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2b-subnet" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2b-public-subnet" ] ] }
                     }
                 ]
             }
         },
-        "SubnetC": {
+        "PublicSubnetC": {
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "CidrBlock": { "Fn::Join": [ ".", [ { "Ref": "16CIDRBlock" }, "2.0/24" ] ] },
@@ -81,7 +81,49 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2c-subnet" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2c-public-subnet" ] ] }
+                    }
+                ]
+            }
+        },
+        "PrivateSubnetA": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": { "Fn::Join": [ ".", [ { "Ref": "16CIDRBlock" }, "10.0/24" ] ] },
+                "AvailabilityZone": "us-west-2a",
+                "VpcId": { "Ref": "VPC" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2a-private-subnet" ] ] }
+                    }
+                ]
+            }
+        },
+        "PrivateSubnetB": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": { "Fn::Join": [ ".", [ { "Ref": "16CIDRBlock" }, "11.0/24" ] ] },
+                "AvailabilityZone": "us-west-2b",
+                "VpcId": { "Ref": "VPC" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2b-private-subnet" ] ] }
+                    }
+                ]
+            }
+        },
+        "PrivateSubnetC": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": { "Fn::Join": [ ".", [ { "Ref": "16CIDRBlock" }, "12.0/24" ] ] },
+                "AvailabilityZone": "us-west-2c",
+                "VpcId": { "Ref": "VPC" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2c-private-subnet" ] ] }
                     }
                 ]
             }
@@ -107,48 +149,89 @@
             }
         },
 
-        "RouteTable": {
+        "PublicRouteTable": {
             "Type": "AWS::EC2::RouteTable",
             "Properties": {
                 "VpcId": { "Ref": "VPC" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "rtb" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "public-rtb" ] ] }
                     }
                 ]
             }
         },
-
-        "Route": {
+        "PublicDefaultRoute": {
             "Type": "AWS::EC2::Route",
             "Properties": {
                 "DestinationCidrBlock": "0.0.0.0/0",
-                "RouteTableId": { "Ref": "RouteTable" },
+                "RouteTableId": { "Ref": "PublicRouteTable" },
                 "GatewayId": { "Ref": "InternetGateway" }
             },
             "DependsOn": "GatewayAttachment"
         },
+        "PublicSubnetARouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": { "Ref": "PublicRouteTable" },
+                "SubnetId": { "Ref": "PublicSubnetA" }
+            }
+        },
+        "PublicSubnetBRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": { "Ref": "PublicRouteTable" },
+                "SubnetId": { "Ref": "PublicSubnetB" }
+            }
+        },
+        "PublicSubnetCRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": { "Ref": "PublicRouteTable" },
+                "SubnetId": { "Ref": "PublicSubnetC" }
+            }
+        },
 
-        "SubnetARouteTableAssociation": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "PrivateRouteTable": {
+            "Type": "AWS::EC2::RouteTable",
             "Properties": {
-                "RouteTableId": { "Ref": "RouteTable" },
-                "SubnetId": { "Ref": "SubnetA" }
+                "VpcId": { "Ref": "VPC" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "private-rtb" ] ] }
+                    }
+                ]
             }
         },
-        "SubnetBRouteTableAssociation": {
+        "PrivateDefaultRoute": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "RouteTableId": { "Ref": "PrivateRouteTable" },
+                "InstanceId": { "Fn::GetAtt" : [ "BastionInstanceStack", "Outputs.BastionInstanceId" ] }
+            },
+            "DependsOn": [ "GatewayAttachment", "BastionInstanceStack" ]
+        },
+        "PrivateSubnetARouteTableAssociation": {
             "Type": "AWS::EC2::SubnetRouteTableAssociation",
             "Properties": {
-                "RouteTableId": { "Ref": "RouteTable" },
-                "SubnetId": { "Ref": "SubnetB" }
+                "RouteTableId": { "Ref": "PrivateRouteTable" },
+                "SubnetId": { "Ref": "PrivateSubnetA" }
             }
         },
-        "SubnetCRouteTableAssociation": {
+        "PrivateSubnetBRouteTableAssociation": {
             "Type": "AWS::EC2::SubnetRouteTableAssociation",
             "Properties": {
-                "RouteTableId": { "Ref": "RouteTable" },
-                "SubnetId": { "Ref": "SubnetC" }
+                "RouteTableId": { "Ref": "PrivateRouteTable" },
+                "SubnetId": { "Ref": "PrivateSubnetB" }
+            }
+        },
+        "PrivateSubnetCRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": { "Ref": "PrivateRouteTable" },
+                "SubnetId": { "Ref": "PrivateSubnetC" }
             }
         },
 
@@ -191,25 +274,46 @@
             }
         },
 
-        "SubnetANetworkACLAssociation": {
+        "PublicSubnetANetworkACLAssociation": {
             "Type": "AWS::EC2::SubnetNetworkAclAssociation",
             "Properties": {
                 "NetworkAclId": { "Ref": "NetworkACL" },
-                "SubnetId": { "Ref": "SubnetA" }
+                "SubnetId": { "Ref": "PublicSubnetA" }
             }
         },
-        "SubnetBNetworkACLAssociation": {
+        "PublicSubnetBNetworkACLAssociation": {
             "Type": "AWS::EC2::SubnetNetworkAclAssociation",
             "Properties": {
                 "NetworkAclId": { "Ref": "NetworkACL" },
-                "SubnetId": { "Ref": "SubnetB" }
+                "SubnetId": { "Ref": "PublicSubnetB" }
             }
         },
-        "SubnetCNetworkACLAssociation": {
+        "PublicSubnetCNetworkACLAssociation": {
             "Type": "AWS::EC2::SubnetNetworkAclAssociation",
             "Properties": {
                 "NetworkAclId": { "Ref": "NetworkACL" },
-                "SubnetId": { "Ref": "SubnetC" }
+                "SubnetId": { "Ref": "PublicSubnetC" }
+            }
+        },
+        "PrivateSubnetANetworkACLAssociation": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": { "Ref": "NetworkACL" },
+                "SubnetId": { "Ref": "PrivateSubnetA" }
+            }
+        },
+        "PrivateSubnetBNetworkACLAssociation": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": { "Ref": "NetworkACL" },
+                "SubnetId": { "Ref": "PrivateSubnetB" }
+            }
+        },
+        "PrivateSubnetCNetworkACLAssociation": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": { "Ref": "NetworkACL" },
+                "SubnetId": { "Ref": "PrivateSubnetC" }
             }
         },
 
@@ -276,7 +380,7 @@
                     "InstanceName": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "bastion" ] ] },
                     "KeyName": { "Ref": "BastionKeyName" },
                     "BashRCSource": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
-                    "SubnetId": { "Ref": "SubnetA" },
+                    "SubnetId": { "Ref": "PublicSubnetA" },
                     "SecurityGroupId": { "Ref": "BastionSecurityGroup" }
                 }
             }
