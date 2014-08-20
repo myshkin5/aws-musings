@@ -20,6 +20,15 @@
             "AllowedPattern": "[\\x20-\\x7E]*",
             "ConstraintDescription": "can contain only ASCII characters."
         },
+        "InternalKeyName": {
+            "Type": "String",
+            "Default": "internal",
+            "Description": "SSH key name used to connect with internal servers via the ec2-user account.",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[\\x20-\\x7E]*",
+            "ConstraintDescription": "can contain only ASCII characters."
+        },
         "AWSMusingsS3URL": {
             "Type": "String",
             "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
@@ -209,9 +218,9 @@
             "Properties": {
                 "DestinationCidrBlock": "0.0.0.0/0",
                 "RouteTableId": { "Ref": "PrivateRouteTable" },
-                "InstanceId": { "Fn::GetAtt" : [ "BastionInstanceStack", "Outputs.BastionInstanceId" ] }
+                "InstanceId": { "Fn::GetAtt" : [ "NATInstanceStack", "Outputs.NATInstanceId" ] }
             },
-            "DependsOn": [ "GatewayAttachment", "BastionInstanceStack" ]
+            "DependsOn": [ "GatewayAttachment", "NATInstanceStack" ]
         },
         "PrivateSubnetARouteTableAssociation": {
             "Type": "AWS::EC2::SubnetRouteTableAssociation",
@@ -327,9 +336,9 @@
                     }
                 ],
                 "DomainName": { "Fn::Join": [ ".", [ { "Ref": "AWS::StackName" }, "compute.internal" ] ] },
-                "DomainNameServers": [ { "Fn::GetAtt" : [ "BastionInstanceStack", "Outputs.PrivateIP" ] } ]
+                "DomainNameServers": [ { "Fn::GetAtt" : [ "NATInstanceStack", "Outputs.PrivateIP" ] } ]
             },
-            "DependsOn": "BastionInstanceStack"
+            "DependsOn": "NATInstanceStack"
         },
 
         "VPCDHCPOptionsAssociation": {
@@ -371,6 +380,31 @@
                 ]
             }
         },
+        "NATSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "NAT server security group",
+                "VpcId": { "Ref": "VPC" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "nat-sg" ] ] }
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "10.0.0.0/16"
+                    }
+                ],
+                "SecurityGroupEgress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
 
         "BastionInstanceStack": {
             "Type": "AWS::CloudFormation::Stack",
@@ -382,6 +416,19 @@
                     "BashRCSource": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
                     "SubnetId": { "Ref": "PublicSubnetA" },
                     "SecurityGroupId": { "Ref": "BastionSecurityGroup" }
+                }
+            }
+        },
+        "NATInstanceStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "Properties": {
+                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "vpc-us-west-2", "nat-instance.template" ] ] },
+                "Parameters": {
+                    "InstanceName": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "nat" ] ] },
+                    "KeyName": { "Ref": "InternalKeyName" },
+                    "BashRCSource": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
+                    "SubnetId": { "Ref": "PublicSubnetA" },
+                    "SecurityGroupId": { "Ref": "NATSecurityGroup" }
                 }
             }
         }
