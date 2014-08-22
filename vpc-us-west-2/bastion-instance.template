@@ -17,10 +17,10 @@
             "AllowedPattern": "[\\x20-\\x7E]*",
             "ConstraintDescription": "can contain only ASCII characters."
         },
-        "BashRCSource": {
+        "AWSMusingsS3URL": {
             "Type": "String",
-            "Default": "https://s3-us-west-2.amazonaws.com/aws-musings/bashrc.sh",
-            "Description": "Web location of .bashrc to be installed on system accounts."
+            "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
+            "Description": "S3 path to aws-musings."
         },
         "SubnetId": {
             "Type": "String",
@@ -65,13 +65,13 @@
                             },
 
                             "/home/ec2-user/.bashrc": {
-                                "source": { "Ref": "BashRCSource" },
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
                                 "mode": "000644",
                                 "owner": "ec2-user",
                                 "group": "ec2-user"
                             },
                             "/root/.bashrc": {
-                                "source": { "Ref": "BashRCSource" },
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
                                 "mode": "000644",
                                 "owner": "root",
                                 "group": "root"

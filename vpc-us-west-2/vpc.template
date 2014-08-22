@@ -413,7 +413,7 @@
                 "Parameters": {
                     "InstanceName": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "bastion" ] ] },
                     "KeyName": { "Ref": "BastionKeyName" },
-                    "BashRCSource": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
+                    "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
                     "SubnetId": { "Ref": "PublicSubnetA" },
                     "SecurityGroupId": { "Ref": "BastionSecurityGroup" }
                 }
@@ -426,8 +426,8 @@
                 "Parameters": {
                     "InstanceName": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "nat" ] ] },
                     "KeyName": { "Ref": "InternalKeyName" },
-                    "BashRCSource": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
-                    "SubnetId": { "Ref": "PublicSubnetA" },
+                    "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
+                    "SubnetId": { "Ref": "PublicSubnetB" },
                     "SecurityGroupId": { "Ref": "NATSecurityGroup" }
                 }
             }
