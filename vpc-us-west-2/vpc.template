@@ -20,6 +20,11 @@
             "AllowedPattern": "[\\x20-\\x7E]*",
             "ConstraintDescription": "can contain only ASCII characters."
         },
+        "BastionSSHCIDRIP": {
+            "Type": "String",
+            "Default": "24.9.253.190/32",
+            "Description": "Range of IP addresses that will be able to connect to the bastion server via SSH"
+        },
         "InternalKeyName": {
             "Type": "String",
             "Default": "internal",
@@ -365,7 +370,7 @@
                         "IpProtocol": "tcp",
                         "FromPort": "22",
                         "ToPort": "22",
-                        "CidrIp": "24.9.253.190/32"
+                        "CidrIp": { "Ref": "BastionSSHCIDRIP" }
                     },
                     {
                         "IpProtocol": "-1",
