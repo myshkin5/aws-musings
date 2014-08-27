@@ -29,6 +29,31 @@
         "SecurityGroupId": {
             "Type": "String",
             "Description": "The id of the security group protecting the NAT server."
+        },
+        "ProjectName": {
+            "Type": "String",
+            "Default": "Distributed Delivery",
+            "Description": "The name of the project."
+        },
+        "ProjectPOC": {
+            "Type": "String",
+            "Default": "Steve Parker",
+            "Description": "The point of contact for the project."
+        },
+        "ProjectWBSCode": {
+            "Type": "String",
+            "Default": "DISTDEL.EXP.14",
+            "Description": "The work breakdown structure code for the project."
+        },
+        "ProjectPONumber": {
+            "Type": "String",
+            "Default": "TBD",
+            "Description": "The purchase order number for the project."
+        },
+        "ExpirationDate": {
+            "Type": "String",
+            "Default": "20141120",
+            "Description": "The expiration date for the project."
         }
     },
 
@@ -104,6 +129,30 @@
                     {
                         "Key": "Name",
                         "Value": { "Ref": "InstanceName" }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": { "Ref": "AWS::AccountId" }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": { "Ref": "ProjectName" }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": { "Ref": "ProjectPOC" }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": { "Ref": "ProjectWBSCode" }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": { "Ref": "ProjectPONumber" }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": { "Ref": "ExpirationDate" }
                     }
                 ],
                 "NetworkInterfaces": [
