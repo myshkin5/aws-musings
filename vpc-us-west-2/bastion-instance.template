@@ -4,9 +4,9 @@
     "Description": "The VPC's bastion server.",
 
     "Parameters": {
-        "InstanceName": {
+        "VPCName": {
             "Type": "String",
-            "Description": "The name of the instance."
+            "Description": "The name of the VPC. Used in names of objects."
         },
         "KeyName": {
             "Type": "String",
@@ -114,7 +114,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "InstanceName" }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -165,8 +165,8 @@
 
                             "yum update -y || error_exit 'yum update failed'\n",
 
-                            "sed -i -e \"s/localhost/", { "Ref": "InstanceName" }, "/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/", { "Ref": "InstanceName" }, " ", { "Ref": "InstanceName" }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
+                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }, "/g\" /etc/sysconfig/network\n",
+                            "sed -i -e \"s/localhost localhost.localdomain/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }, " ", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
 
                             "# Initialize CloudFormation\n",
                             "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r BastionInstance ",

@@ -777,7 +777,7 @@
             "Properties": {
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "vpc-us-west-2", "bastion-instance.template" ] ] },
                 "Parameters": {
-                    "InstanceName": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "bastion" ] ] },
+                    "VPCName": { "Ref": "AWS::StackName" },
                     "KeyName": { "Ref": "BastionKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
                     "SubnetId": { "Ref": "PublicSubnetA" },
@@ -795,9 +795,10 @@
             "Properties": {
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "vpc-us-west-2", "nat-instance.template" ] ] },
                 "Parameters": {
-                    "InstanceName": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "nat" ] ] },
+                    "VPCName": { "Ref": "AWS::StackName" },
                     "KeyName": { "Ref": "InternalKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
+                    "16CIDRBlock": { "Ref": "16CIDRBlock" },
                     "SubnetId": { "Ref": "PublicSubnetB" },
                     "SecurityGroupId": { "Ref": "NATSecurityGroup" },
                     "ProjectName": { "Ref": "ProjectName" },

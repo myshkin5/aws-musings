@@ -4,9 +4,9 @@
     "Description": "The VPC's NAT server.",
 
     "Parameters": {
-        "InstanceName": {
+        "VPCName": {
             "Type": "String",
-            "Description": "The name of the instance."
+            "Description": "The name of the VPC. Used in names of objects."
         },
         "KeyName": {
             "Type": "String",
@@ -21,6 +21,13 @@
             "Type": "String",
             "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
             "Description": "S3 path to aws-musings."
+        },
+        "16CIDRBlock": {
+            "Type": "String",
+            "Default": "10.80",
+            "Description": "The first 16 bits of the CIDR block for the VPC.",
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})",
+            "ConstraintDescription": "must be the first two digits of a valid IP CIDR of the form x.x"
         },
         "SubnetId": {
             "Type": "String",
@@ -76,13 +83,25 @@
                             "/etc/named.conf": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "vpc-us-west-2/named.conf" ] ] }
                             },
+                            "/etc/sysconfig/network-scripts/ifcfg-eth0": {
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "vpc-us-west-2/ifcfg-eth0" ] ] }
+                            },
+                            "/etc/resolv.conf": {
+                                "content": {
+                                    "Fn::Join": [ "", [
+                                        "search ", { "Ref": "VPCName" }, ".compute.internal\n",
+                                        "nameserver ", { "Ref": "16CIDRBlock" }, ".0.2\n"
+                                    ] ]
+                                }
+                            },
 
                             "/etc/cfn/cfn-hup.conf": {
                                 "content": {
-                                    "Fn::Join": ["", [ "[main]\n",
+                                    "Fn::Join": [ "", [
+                                        "[main]\n",
                                         "stack=", { "Ref": "AWS::StackId" }, "\n",
                                         "region=", { "Ref": "AWS::Region" }, "\n"
-                                    ]]
+                                    ] ]
                                 },
                                 "mode": "000400",
                                 "owner": "root",
@@ -91,14 +110,14 @@
 
                             "/etc/cfn/hooks.d/cfn-auto-reloader.conf": {
                                 "content": {
-                                    "Fn::Join": ["", [
+                                    "Fn::Join": [ "", [
                                         "[cfn-auto-reloader-hook]\n",
                                         "triggers=post.update\n",
                                         "path=Resources.NATInstance.Metadata.AWS::CloudFormation::Init\n",
                                         "action=/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" },
                                             " -r NATInstance ", " --region     ", { "Ref": "AWS::Region" }, "\n",
                                         "runas=root\n"
-                                    ]]
+                                    ] ]
                                 }
                             },
 
@@ -128,7 +147,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "InstanceName" }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "nat" ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -179,8 +198,8 @@
 
                             "yum update -y || error_exit 'yum update failed'\n",
 
-                            "sed -i -e \"s/localhost/", { "Ref": "InstanceName" }, "/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/", { "Ref": "InstanceName" }, " ", { "Ref": "InstanceName" }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
+                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "nat" ] ] }, "/g\" /etc/sysconfig/network\n",
+                            "sed -i -e \"s/localhost localhost.localdomain/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "nat" ] ] }, " ", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "nat" ] ] }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
 
                             "# Initialize CloudFormation\n",
                             "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r NATInstance ",
