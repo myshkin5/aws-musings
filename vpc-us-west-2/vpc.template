@@ -654,9 +654,9 @@
                     }
                 ],
                 "DomainName": { "Fn::Join": [ ".", [ { "Ref": "AWS::StackName" }, "compute.internal" ] ] },
-                "DomainNameServers": [ { "Fn::GetAtt" : [ "NATInstanceStack", "Outputs.PrivateIP" ] } ]
+                "DomainNameServers": [ { "Fn::GetAtt" : [ "DNSInstanceStack", "Outputs.PrivateIP" ] } ]
             },
-            "DependsOn": "NATInstanceStack"
+            "DependsOn": "DNSInstanceStack"
         },
 
         "VPCDHCPOptionsAssociation": {
@@ -771,6 +771,55 @@
                 ]
             }
         },
+        "DNSSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "DNS server security group",
+                "VpcId": { "Ref": "VPC" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "dns-sg" ] ] }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": { "Ref": "AWS::AccountId" }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": { "Ref": "ProjectName" }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": { "Ref": "ProjectPOC" }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": { "Ref": "ProjectWBSCode" }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": { "Ref": "ProjectPONumber" }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": { "Ref": "ExpirationDate" }
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "10.0.0.0/8"
+                    }
+                ],
+                "SecurityGroupEgress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
 
         "BastionInstanceStack": {
             "Type": "AWS::CloudFormation::Stack",
@@ -798,9 +847,27 @@
                     "VPCName": { "Ref": "AWS::StackName" },
                     "KeyName": { "Ref": "InternalKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
-                    "16CIDRBlock": { "Ref": "16CIDRBlock" },
                     "SubnetId": { "Ref": "PublicSubnetB" },
                     "SecurityGroupId": { "Ref": "NATSecurityGroup" },
+                    "ProjectName": { "Ref": "ProjectName" },
+                    "ProjectPOC": { "Ref": "ProjectPOC" },
+                    "ProjectWBSCode": { "Ref": "ProjectWBSCode" },
+                    "ProjectPONumber": { "Ref": "ProjectPONumber" },
+                    "ExpirationDate": { "Ref": "ExpirationDate" }
+                }
+            }
+        },
+        "DNSInstanceStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "Properties": {
+                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "vpc-us-west-2", "dns-instance.template" ] ] },
+                "Parameters": {
+                    "VPCName": { "Ref": "AWS::StackName" },
+                    "KeyName": { "Ref": "InternalKeyName" },
+                    "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
+                    "16CIDRBlock": { "Ref": "16CIDRBlock" },
+                    "SubnetId": { "Ref": "PublicSubnetC" },
+                    "SecurityGroupId": { "Ref": "DNSSecurityGroup" },
                     "ProjectName": { "Ref": "ProjectName" },
                     "ProjectPOC": { "Ref": "ProjectPOC" },
                     "ProjectWBSCode": { "Ref": "ProjectWBSCode" },

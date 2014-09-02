@@ -1,7 +1,7 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
 
-    "Description": "The VPC's bastion server.",
+    "Description": "The VPC's DNS server.",
 
     "Parameters": {
         "VPCName": {
@@ -10,8 +10,8 @@
         },
         "KeyName": {
             "Type": "String",
-            "Default": "default",
-            "Description": "SSH key name used to connect to the bastion server via the ec2-user account.",
+            "Default": "internal",
+            "Description": "SSH key name used to connect to the DNS server via the ec2-user account.",
             "MinLength": "1",
             "MaxLength": "255",
             "AllowedPattern": "[\\x20-\\x7E]*",
@@ -22,13 +22,20 @@
             "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
             "Description": "S3 path to aws-musings."
         },
+        "16CIDRBlock": {
+            "Type": "String",
+            "Default": "10.80",
+            "Description": "The first two octets of the CIDR block for the VPC.",
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})",
+            "ConstraintDescription": "must be the first two digits of a valid IP CIDR of the form x.x"
+        },
         "SubnetId": {
             "Type": "String",
             "Description": "The id of the subnet where the server will be added."
         },
         "SecurityGroupId": {
             "Type": "String",
-            "Description": "The id of the security group protecting the bastion server."
+            "Description": "The id of the security group protecting the DNS server."
         },
         "ProjectName": {
             "Type": "String",
@@ -58,12 +65,37 @@
     },
 
     "Resources": {
-        "BastionInstance": {
+        "DNSInstance": {
             "Type": "AWS::EC2::Instance",
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "config": {
+                        "packages": {
+                            "yum": { "bind": [] }
+                        },
+                        "services": {
+                            "named": {
+                                "enabled": "true",
+                                "ensureRunning": "true",
+                                "files": [ "/etc/named.conf" ]
+                            }
+                        },
                         "files": {
+                            "/etc/named.conf": {
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "vpc-us-west-2/named.conf" ] ] }
+                            },
+                            "/etc/sysconfig/network-scripts/ifcfg-eth0": {
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "vpc-us-west-2/ifcfg-eth0" ] ] }
+                            },
+                            "/etc/resolv.conf": {
+                                "content": {
+                                    "Fn::Join": [ "", [
+                                        "search ", { "Ref": "VPCName" }, ".compute.internal\n",
+                                        "nameserver ", { "Ref": "16CIDRBlock" }, ".0.2\n"
+                                    ] ]
+                                }
+                            },
+
                             "/etc/cfn/cfn-hup.conf": {
                                 "content": {
                                     "Fn::Join": [ "", [
@@ -82,9 +114,9 @@
                                     "Fn::Join": [ "", [
                                         "[cfn-auto-reloader-hook]\n",
                                         "triggers=post.update\n",
-                                        "path=Resources.BastionInstance.Metadata.AWS::CloudFormation::Init\n",
+                                        "path=Resources.DNSInstance.Metadata.AWS::CloudFormation::Init\n",
                                         "action=/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" },
-                                            " -r BastionInstance ", " --region ", { "Ref": "AWS::Region" }, "\n",
+                                            " -r DNSInstance ", " --region ", { "Ref": "AWS::Region" }, "\n",
                                         "runas=root\n"
                                     ] ]
                                 }
@@ -115,7 +147,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "dns" ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -160,24 +192,24 @@
                             "# Helper function\n",
                             "function error_exit\n",
                             "{\n",
-                            "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '", { "Ref": "BastionInstanceWaitHandle" }, "'\n",
+                            "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '", { "Ref": "DNSInstanceWaitHandle" }, "'\n",
                             "  exit 1\n",
                             "}\n",
 
                             "yum update -y || error_exit 'yum update failed'\n",
 
-                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }, "/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }, " ", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
+                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "dns" ] ] }, "/g\" /etc/sysconfig/network\n",
+                            "sed -i -e \"s/localhost localhost.localdomain/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "dns" ] ] }, " ", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "dns" ] ] }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
 
                             "# Initialize CloudFormation\n",
-                            "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r BastionInstance ",
+                            "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r DNSInstance ",
                                 "--region ", { "Ref": "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
 
                             "# Start up the cfn-hup daemon to listen for changes to the metadata\n",
                             "/opt/aws/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n",
 
                             "# All done so signal success\n",
-                            "/opt/aws/bin/cfn-signal -e 0 -r \"BastionInstance setup complete\" '", { "Ref": "BastionInstanceWaitHandle" }, "'\n",
+                            "/opt/aws/bin/cfn-signal -e 0 -r \"DNSInstance setup complete\" '", { "Ref": "DNSInstanceWaitHandle" }, "'\n",
                             "reboot\n"
                         ]]
                     }
@@ -185,19 +217,25 @@
             }
         },
 
-        "BastionInstanceWaitHandle": {
+        "DNSInstanceWaitHandle": {
             "Type": "AWS::CloudFormation::WaitConditionHandle"
         },
 
-        "BastionInstanceWaitCondition": {
+        "DNSInstanceWaitCondition": {
             "Type": "AWS::CloudFormation::WaitCondition",
-            "DependsOn": "BastionInstance",
+            "DependsOn": "DNSInstance",
             "Properties": {
-                "Handle": { "Ref": "BastionInstanceWaitHandle" },
+                "Handle": { "Ref": "DNSInstanceWaitHandle" },
                 "Timeout": "300"
             }
         }
 
+    },
+
+    "Outputs": {
+        "PrivateIP": {
+            "Value": { "Fn::GetAtt": [ "DNSInstance", "PrivateIp" ] }
+        }
     }
 
 }

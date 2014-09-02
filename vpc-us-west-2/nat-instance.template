@@ -22,13 +22,6 @@
             "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
             "Description": "S3 path to aws-musings."
         },
-        "16CIDRBlock": {
-            "Type": "String",
-            "Default": "10.80",
-            "Description": "The first two octets of the CIDR block for the VPC.",
-            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})",
-            "ConstraintDescription": "must be the first two digits of a valid IP CIDR of the form x.x"
-        },
         "SubnetId": {
             "Type": "String",
             "Description": "The id of the subnet where the server will be added."
@@ -70,32 +63,7 @@
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "config": {
-                        "packages": {
-                            "yum": { "bind": [] }
-                        },
-                        "services": {
-                            "named": {
-                                "enabled": "true",
-                                "ensureRunning": "true",
-                                "files": [ "/etc/named.conf" ]
-                            }
-                        },
                         "files": {
-                            "/etc/named.conf": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "vpc-us-west-2/named.conf" ] ] }
-                            },
-                            "/etc/sysconfig/network-scripts/ifcfg-eth0": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "vpc-us-west-2/ifcfg-eth0" ] ] }
-                            },
-                            "/etc/resolv.conf": {
-                                "content": {
-                                    "Fn::Join": [ "", [
-                                        "search ", { "Ref": "VPCName" }, ".compute.internal\n",
-                                        "nameserver ", { "Ref": "16CIDRBlock" }, ".0.2\n"
-                                    ] ]
-                                }
-                            },
-
                             "/etc/cfn/cfn-hup.conf": {
                                 "content": {
                                     "Fn::Join": [ "", [
@@ -236,9 +204,6 @@
     "Outputs": {
         "NATInstanceId": {
             "Value": { "Ref": "NATInstance" }
-        },
-        "PrivateIP": {
-            "Value": { "Fn::GetAtt": [ "NATInstance", "PrivateIp" ] }
         }
     }
 
