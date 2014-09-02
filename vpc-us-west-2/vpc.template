@@ -4,35 +4,10 @@
     "Description": "A VPC and several common resources.",
 
     "Parameters": {
-        "ProjectName": {
-            "Type": "String",
-            "Default": "Distributed Delivery",
-            "Description": "The name of the project."
-        },
-        "ProjectPOC": {
-            "Type": "String",
-            "Default": "Steve Parker",
-            "Description": "The point of contact for the project."
-        },
-        "ProjectWBSCode": {
-            "Type": "String",
-            "Default": "DISTDEL.EXP.14",
-            "Description": "The work breakdown structure code for the project."
-        },
-        "ProjectPONumber": {
-            "Type": "String",
-            "Default": "TBD",
-            "Description": "The purchase order number for the project."
-        },
-        "ExpirationDate": {
-            "Type": "String",
-            "Default": "20141120",
-            "Description": "The expiration date for the project."
-        },
         "16CIDRBlock": {
             "Type": "String",
             "Default": "10.80",
-            "Description": "The first 16 bits of the CIDR block for the VPC.",
+            "Description": "The first two octets of the CIDR block for the VPC.",
             "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})",
             "ConstraintDescription": "must be the first two digits of a valid IP CIDR of the form x.x"
         },
@@ -63,6 +38,31 @@
             "Type": "String",
             "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
             "Description": "S3 path to aws-musings."
+        },
+        "ProjectName": {
+            "Type": "String",
+            "Default": "Distributed Delivery",
+            "Description": "The name of the project."
+        },
+        "ProjectPOC": {
+            "Type": "String",
+            "Default": "Steve Parker",
+            "Description": "The point of contact for the project."
+        },
+        "ProjectWBSCode": {
+            "Type": "String",
+            "Default": "DISTDEL.EXP.14",
+            "Description": "The work breakdown structure code for the project."
+        },
+        "ProjectPONumber": {
+            "Type": "String",
+            "Default": "TBD",
+            "Description": "The purchase order number for the project."
+        },
+        "ExpirationDate": {
+            "Type": "String",
+            "Default": "20141120",
+            "Description": "The expiration date for the project."
         }
     },
 

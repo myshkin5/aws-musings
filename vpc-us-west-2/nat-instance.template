@@ -25,7 +25,7 @@
         "16CIDRBlock": {
             "Type": "String",
             "Default": "10.80",
-            "Description": "The first 16 bits of the CIDR block for the VPC.",
+            "Description": "The first two octets of the CIDR block for the VPC.",
             "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})",
             "ConstraintDescription": "must be the first two digits of a valid IP CIDR of the form x.x"
         },
@@ -76,6 +76,7 @@
                         "services": {
                             "named": {
                                 "enabled": "true",
+                                "ensureRunning": "true",
                                 "files": [ "/etc/named.conf" ]
                             }
                         },
@@ -115,7 +116,7 @@
                                         "triggers=post.update\n",
                                         "path=Resources.NATInstance.Metadata.AWS::CloudFormation::Init\n",
                                         "action=/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" },
-                                            " -r NATInstance ", " --region     ", { "Ref": "AWS::Region" }, "\n",
+                                            " -r NATInstance ", " --region ", { "Ref": "AWS::Region" }, "\n",
                                         "runas=root\n"
                                     ] ]
                                 }
@@ -203,7 +204,7 @@
 
                             "# Initialize CloudFormation\n",
                             "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r NATInstance ",
-                            "         --region ", { "Ref": "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
+                                "--region ", { "Ref": "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
 
                             "# Start up the cfn-hup daemon to listen for changes to the metadata\n",
                             "/opt/aws/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n",

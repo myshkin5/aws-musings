@@ -1,0 +1,356 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+
+    "Description": "A GlusterFS Proof of Concept.",
+
+    "Parameters": {
+        "InternalKeyName": {
+            "Type": "String",
+            "Default": "internal",
+            "Description": "SSH key name used to connect with internal servers via the ec2-user account.",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[\\x20-\\x7E]*",
+            "ConstraintDescription": "can contain only ASCII characters."
+        },
+        "VPCId": {
+            "Type": "String",
+            "Description": "The id of the VPC in which the resources will be created."
+        },
+        "NATInstanceId": {
+            "Type": "String",
+            "Description": "The id of the NAT server to which Internet traffic is routed to."
+        },
+        "24CIDRBlockA": {
+            "Type": "String",
+            "Default": "10.80.53",
+            "Description": "The first 24 bits of the first CIDR block for the project.",
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})",
+            "ConstraintDescription": "must be the first three digits of a valid IP CIDR of the form x.x.x"
+        },
+        "24CIDRBlockB": {
+            "Type": "String",
+            "Default": "10.80.54",
+            "Description": "The first 24 bits of the second CIDR block for the project.",
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})",
+            "ConstraintDescription": "must be the first three digits of a valid IP CIDR of the form x.x.x"
+        },
+        "AWSMusingsS3URL": {
+            "Type": "String",
+            "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
+            "Description": "S3 path to aws-musings."
+        },
+        "ProjectName": {
+            "Type": "String",
+            "Default": "GlusterFS Proof of Concept",
+            "Description": "The name of the project."
+        },
+        "ProjectPOC": {
+            "Type": "String",
+            "Default": "Dwayne Schultz",
+            "Description": "The point of contact for the project."
+        },
+        "ProjectWBSCode": {
+            "Type": "String",
+            "Default": "DISTDEL.EXP.14",
+            "Description": "The work breakdown structure code for the project."
+        },
+        "ProjectPONumber": {
+            "Type": "String",
+            "Default": "TBD",
+            "Description": "The purchase order number for the project."
+        },
+        "ExpirationDate": {
+            "Type": "String",
+            "Default": "20141120",
+            "Description": "The expiration date for the project."
+        }
+    },
+
+    "Resources": {
+        "PrivateSubnetA": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": { "Fn::Join": [ ".", [ { "Ref": "24CIDRBlockA" }, "0/24" ] ] },
+                "AvailabilityZone": "us-west-2a",
+                "VpcId": { "Ref": "VPCId" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2a-private-subnet" ] ] }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": { "Ref": "AWS::AccountId" }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": { "Ref": "ProjectName" }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": { "Ref": "ProjectPOC" }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": { "Ref": "ProjectWBSCode" }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": { "Ref": "ProjectPONumber" }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": { "Ref": "ExpirationDate" }
+                    }
+                ]
+            }
+        },
+        "PrivateSubnetB": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": { "Fn::Join": [ ".", [ { "Ref": "24CIDRBlockB" }, "0/24" ] ] },
+                "AvailabilityZone": "us-west-2b",
+                "VpcId": { "Ref": "VPCId" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2b-private-subnet" ] ] }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": { "Ref": "AWS::AccountId" }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": { "Ref": "ProjectName" }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": { "Ref": "ProjectPOC" }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": { "Ref": "ProjectWBSCode" }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": { "Ref": "ProjectPONumber" }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": { "Ref": "ExpirationDate" }
+                    }
+                ]
+            }
+        },
+
+        "PrivateRouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": { "Ref": "VPCId" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "private-rtb" ] ] }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": { "Ref": "AWS::AccountId" }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": { "Ref": "ProjectName" }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": { "Ref": "ProjectPOC" }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": { "Ref": "ProjectWBSCode" }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": { "Ref": "ProjectPONumber" }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": { "Ref": "ExpirationDate" }
+                    }
+                ]
+            }
+        },
+        "PrivateDefaultRoute": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "RouteTableId": { "Ref": "PrivateRouteTable" },
+                "InstanceId": { "Ref" : "NATInstanceId" }
+            }
+        },
+        "PrivateSubnetARouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": { "Ref": "PrivateRouteTable" },
+                "SubnetId": { "Ref": "PrivateSubnetA" }
+            }
+        },
+        "PrivateSubnetBRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": { "Ref": "PrivateRouteTable" },
+                "SubnetId": { "Ref": "PrivateSubnetB" }
+            }
+        },
+
+        "NetworkACL": {
+            "Type": "AWS::EC2::NetworkAcl",
+            "Properties": {
+                "VpcId": { "Ref": "VPCId" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "acl" ] ] }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": { "Ref": "AWS::AccountId" }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": { "Ref": "ProjectName" }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": { "Ref": "ProjectPOC" }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": { "Ref": "ProjectWBSCode" }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": { "Ref": "ProjectPONumber" }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": { "Ref": "ExpirationDate" }
+                    }
+                ]
+            }
+        },
+
+        "EgressACLEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "CidrBlock": "0.0.0.0/0",
+                "Egress": true,
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "RuleNumber": "100",
+                "NetworkAclId": {
+                    "Ref": "NetworkACL"
+                }
+            }
+        },
+        "IngressACLEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "CidrBlock": "0.0.0.0/0",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "RuleNumber": "100",
+                "NetworkAclId": {
+                    "Ref": "NetworkACL"
+                }
+            }
+        },
+
+        "PrivateSubnetANetworkACLAssociation": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": { "Ref": "NetworkACL" },
+                "SubnetId": { "Ref": "PrivateSubnetA" }
+            }
+        },
+        "PrivateSubnetBNetworkACLAssociation": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": { "Ref": "NetworkACL" },
+                "SubnetId": { "Ref": "PrivateSubnetB" }
+            }
+        },
+
+        "SecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Server security group",
+                "VpcId": { "Ref": "VPCId" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "server-sg" ] ] }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": { "Ref": "AWS::AccountId" }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": { "Ref": "ProjectName" }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": { "Ref": "ProjectPOC" }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": { "Ref": "ProjectWBSCode" }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": { "Ref": "ProjectPONumber" }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": { "Ref": "ExpirationDate" }
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "10.0.0.0/8"
+                    }
+                ],
+                "SecurityGroupEgress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
+
+        "Server1InstanceStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "Properties": {
+                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "gluster-poc-us-west-2", "server.template" ] ] },
+                "Parameters": {
+                    "ServerNumber": "1",
+                    "KeyName": { "Ref": "InternalKeyName" },
+                    "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
+                    "SubnetId": { "Ref": "PrivateSubnetB" },
+                    "SecurityGroupId": { "Ref": "SecurityGroup" },
+                    "ProjectName": { "Ref": "ProjectName" },
+                    "ProjectPOC": { "Ref": "ProjectPOC" },
+                    "ProjectWBSCode": { "Ref": "ProjectWBSCode" },
+                    "ProjectPONumber": { "Ref": "ProjectPONumber" },
+                    "ExpirationDate": { "Ref": "ExpirationDate" }
+                }
+            }
+        }
+
+    }
+
+}

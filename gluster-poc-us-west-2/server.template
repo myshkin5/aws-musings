@@ -1,17 +1,17 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
 
-    "Description": "The VPC's bastion server.",
+    "Description": "A GlusterFS peer server.",
 
     "Parameters": {
-        "VPCName": {
-            "Type": "String",
-            "Description": "The name of the VPC. Used in names of objects."
+        "ServerNumber": {
+            "Type": "Number",
+            "Description": "The server number (either 1 or 2)."
         },
         "KeyName": {
             "Type": "String",
-            "Default": "default",
-            "Description": "SSH key name used to connect to the bastion server via the ec2-user account.",
+            "Default": "internal",
+            "Description": "SSH key name used to connect to the server via the ec2-user account.",
             "MinLength": "1",
             "MaxLength": "255",
             "AllowedPattern": "[\\x20-\\x7E]*",
@@ -28,7 +28,7 @@
         },
         "SecurityGroupId": {
             "Type": "String",
-            "Description": "The id of the security group protecting the bastion server."
+            "Description": "The id of the security group protecting the server."
         },
         "ProjectName": {
             "Type": "String",
@@ -58,7 +58,7 @@
     },
 
     "Resources": {
-        "BastionInstance": {
+        "Instance": {
             "Type": "AWS::EC2::Instance",
             "Metadata": {
                 "AWS::CloudFormation::Init": {
@@ -66,10 +66,11 @@
                         "files": {
                             "/etc/cfn/cfn-hup.conf": {
                                 "content": {
-                                    "Fn::Join": ["", [ "[main]\n",
+                                    "Fn::Join": [ "", [
+                                        "[main]\n",
                                         "stack=", { "Ref": "AWS::StackId" }, "\n",
                                         "region=", { "Ref": "AWS::Region" }, "\n"
-                                    ]]
+                                    ] ]
                                 },
                                 "mode": "000400",
                                 "owner": "root",
@@ -78,14 +79,14 @@
 
                             "/etc/cfn/hooks.d/cfn-auto-reloader.conf": {
                                 "content": {
-                                    "Fn::Join": ["", [
+                                    "Fn::Join": [ "", [
                                         "[cfn-auto-reloader-hook]\n",
                                         "triggers=post.update\n",
-                                        "path=Resources.BastionInstance.Metadata.AWS::CloudFormation::Init\n",
+                                        "path=Resources.Instance.Metadata.AWS::CloudFormation::Init\n",
                                         "action=/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" },
-                                            " -r BastionInstance ", " --region ", { "Ref": "AWS::Region" }, "\n",
+                                            " -r Instance ", " --region ", { "Ref": "AWS::Region" }, "\n",
                                         "runas=root\n"
-                                    ]]
+                                    ] ]
                                 }
                             },
 
@@ -114,7 +115,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }
+                        "Value": { "Fn::Join": [ "", [ "server", { "Ref": "ServerNumber" } ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -143,7 +144,7 @@
                 ],
                 "NetworkInterfaces": [
                     {
-                        "AssociatePublicIpAddress": "true",
+                        "AssociatePublicIpAddress": "false",
                         "DeleteOnTermination": "true",
                         "Description": "Primary network interface",
                         "DeviceIndex": 0,
@@ -159,24 +160,24 @@
                             "# Helper function\n",
                             "function error_exit\n",
                             "{\n",
-                            "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '", { "Ref": "BastionInstanceWaitHandle" }, "'\n",
+                            "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '", { "Ref": "InstanceWaitHandle" }, "'\n",
                             "  exit 1\n",
                             "}\n",
 
                             "yum update -y || error_exit 'yum update failed'\n",
 
-                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }, "/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }, " ", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
+                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "", [ "server", { "Ref": "ServerNumber" } ] ] }, "/g\" /etc/sysconfig/network\n",
+                            "sed -i -e \"s/localhost localhost.localdomain/", { "Fn::Join": [ "", [ "server", { "Ref": "ServerNumber" } ] ] }, " ", { "Fn::Join": [ "", [ "server", { "Ref": "ServerNumber" } ] ] }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
 
                             "# Initialize CloudFormation\n",
-                            "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r BastionInstance ",
+                            "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r Instance ",
                                 "--region ", { "Ref": "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
 
                             "# Start up the cfn-hup daemon to listen for changes to the metadata\n",
                             "/opt/aws/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n",
 
                             "# All done so signal success\n",
-                            "/opt/aws/bin/cfn-signal -e 0 -r \"BastionInstance setup complete\" '", { "Ref": "BastionInstanceWaitHandle" }, "'\n",
+                            "/opt/aws/bin/cfn-signal -e 0 -r \"Instance setup complete\" '", { "Ref": "InstanceWaitHandle" }, "'\n",
                             "reboot\n"
                         ]]
                     }
@@ -184,15 +185,15 @@
             }
         },
 
-        "BastionInstanceWaitHandle": {
+        "InstanceWaitHandle": {
             "Type": "AWS::CloudFormation::WaitConditionHandle"
         },
 
-        "BastionInstanceWaitCondition": {
+        "InstanceWaitCondition": {
             "Type": "AWS::CloudFormation::WaitCondition",
-            "DependsOn": "BastionInstance",
+            "DependsOn": "Instance",
             "Properties": {
-                "Handle": { "Ref": "BastionInstanceWaitHandle" },
+                "Handle": { "Ref": "InstanceWaitHandle" },
                 "Timeout": "300"
             }
         }
