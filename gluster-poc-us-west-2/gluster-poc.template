@@ -17,10 +17,6 @@
             "Type": "String",
             "Description": "The id of the VPC in which the resources will be created."
         },
-        "NATInstanceId": {
-            "Type": "String",
-            "Description": "The id of the NAT server to which Internet traffic is routed to."
-        },
         "24CIDRBlockA": {
             "Type": "String",
             "Default": "10.80.53",
@@ -34,6 +30,14 @@
             "Description": "The first 24 bits of the second CIDR block for the project.",
             "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})",
             "ConstraintDescription": "must be the first three digits of a valid IP CIDR of the form x.x.x"
+        },
+        "PrivateRouteTableId": {
+            "Type": "String",
+            "Description": "The id of the private route table associated with the project's subnets."
+        },
+        "NetworkACLId": {
+            "Type": "String",
+            "Description": "The id of the network access control list used to protect instances in this project."
         },
         "AWSMusingsS3URL": {
             "Type": "String",
@@ -145,139 +149,32 @@
             }
         },
 
-        "PrivateRouteTable": {
-            "Type": "AWS::EC2::RouteTable",
-            "Properties": {
-                "VpcId": { "Ref": "VPCId" },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "private-rtb" ] ] }
-                    },
-                    {
-                        "Key": "AWSAccountID",
-                        "Value": { "Ref": "AWS::AccountId" }
-                    },
-                    {
-                        "Key": "ProjectName",
-                        "Value": { "Ref": "ProjectName" }
-                    },
-                    {
-                        "Key": "ProjectPOC",
-                        "Value": { "Ref": "ProjectPOC" }
-                    },
-                    {
-                        "Key": "ProjectWBSCode",
-                        "Value": { "Ref": "ProjectWBSCode" }
-                    },
-                    {
-                        "Key": "ProjectPONumber",
-                        "Value": { "Ref": "ProjectPONumber" }
-                    },
-                    {
-                        "Key": "ExpirationDate",
-                        "Value": { "Ref": "ExpirationDate" }
-                    }
-                ]
-            }
-        },
-        "PrivateDefaultRoute": {
-            "Type": "AWS::EC2::Route",
-            "Properties": {
-                "DestinationCidrBlock": "0.0.0.0/0",
-                "RouteTableId": { "Ref": "PrivateRouteTable" },
-                "InstanceId": { "Ref" : "NATInstanceId" }
-            }
-        },
         "PrivateSubnetARouteTableAssociation": {
             "Type": "AWS::EC2::SubnetRouteTableAssociation",
             "Properties": {
-                "RouteTableId": { "Ref": "PrivateRouteTable" },
+                "RouteTableId": { "Ref": "PrivateRouteTableId" },
                 "SubnetId": { "Ref": "PrivateSubnetA" }
             }
         },
         "PrivateSubnetBRouteTableAssociation": {
             "Type": "AWS::EC2::SubnetRouteTableAssociation",
             "Properties": {
-                "RouteTableId": { "Ref": "PrivateRouteTable" },
+                "RouteTableId": { "Ref": "PrivateRouteTableId" },
                 "SubnetId": { "Ref": "PrivateSubnetB" }
-            }
-        },
-
-        "NetworkACL": {
-            "Type": "AWS::EC2::NetworkAcl",
-            "Properties": {
-                "VpcId": { "Ref": "VPCId" },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "acl" ] ] }
-                    },
-                    {
-                        "Key": "AWSAccountID",
-                        "Value": { "Ref": "AWS::AccountId" }
-                    },
-                    {
-                        "Key": "ProjectName",
-                        "Value": { "Ref": "ProjectName" }
-                    },
-                    {
-                        "Key": "ProjectPOC",
-                        "Value": { "Ref": "ProjectPOC" }
-                    },
-                    {
-                        "Key": "ProjectWBSCode",
-                        "Value": { "Ref": "ProjectWBSCode" }
-                    },
-                    {
-                        "Key": "ProjectPONumber",
-                        "Value": { "Ref": "ProjectPONumber" }
-                    },
-                    {
-                        "Key": "ExpirationDate",
-                        "Value": { "Ref": "ExpirationDate" }
-                    }
-                ]
-            }
-        },
-
-        "EgressACLEntry": {
-            "Type": "AWS::EC2::NetworkAclEntry",
-            "Properties": {
-                "CidrBlock": "0.0.0.0/0",
-                "Egress": true,
-                "Protocol": "-1",
-                "RuleAction": "allow",
-                "RuleNumber": "100",
-                "NetworkAclId": {
-                    "Ref": "NetworkACL"
-                }
-            }
-        },
-        "IngressACLEntry": {
-            "Type": "AWS::EC2::NetworkAclEntry",
-            "Properties": {
-                "CidrBlock": "0.0.0.0/0",
-                "Protocol": "-1",
-                "RuleAction": "allow",
-                "RuleNumber": "100",
-                "NetworkAclId": {
-                    "Ref": "NetworkACL"
-                }
             }
         },
 
         "PrivateSubnetANetworkACLAssociation": {
             "Type": "AWS::EC2::SubnetNetworkAclAssociation",
             "Properties": {
-                "NetworkAclId": { "Ref": "NetworkACL" },
+                "NetworkAclId": { "Ref": "NetworkACLId" },
                 "SubnetId": { "Ref": "PrivateSubnetA" }
             }
         },
         "PrivateSubnetBNetworkACLAssociation": {
             "Type": "AWS::EC2::SubnetNetworkAclAssociation",
             "Properties": {
-                "NetworkAclId": { "Ref": "NetworkACL" },
+                "NetworkAclId": { "Ref": "NetworkACLId" },
                 "SubnetId": { "Ref": "PrivateSubnetB" }
             }
         },
