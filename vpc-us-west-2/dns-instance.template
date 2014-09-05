@@ -196,6 +196,9 @@
                             "  exit 1\n",
                             "}\n",
 
+                            "mkdir /var/log/named\n",
+                            "chown named:named /var/log/named\n",
+
                             "yum update -y || error_exit 'yum update failed'\n",
 
                             "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "dns" ] ] }, "/g\" /etc/sysconfig/network\n",
