@@ -84,6 +84,12 @@
                             "/etc/named.conf": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "vpc-us-west-2/named.conf" ] ] }
                             },
+                            "/var/named/dynamic/named.vpc": {
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "vpc-us-west-2/named.vpc" ] ] },
+                                "mode": "000644",
+                                "owner": "named",
+                                "group": "named"
+                            },
                             "/etc/sysconfig/network-scripts/ifcfg-eth0": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "vpc-us-west-2/ifcfg-eth0" ] ] }
                             },
@@ -186,7 +192,7 @@
                 ],
                 "UserData": {
                     "Fn::Base64": {
-                        "Fn::Join": ["", [
+                        "Fn::Join": [ "", [
                             "#!/bin/bash\n",
 
                             "# Helper function\n",
@@ -203,6 +209,10 @@
 
                             "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "dns" ] ] }, "/g\" /etc/sysconfig/network\n",
                             "sed -i -e \"s/localhost localhost.localdomain/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "dns" ] ] }, " ", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "dns" ] ] }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
+                            "sed -i -e \"s/VPC_NAME/", { "Ref": "VPCName" }, "/g\" /etc/named.conf\n",
+                            "echo sed -i -e \"s/VPC_NAME/", { "Ref": "VPCName" }, "/g\" /etc/named.conf >> /tmp/debug-cf\n",
+                            "sed -i -e \"s/VPC_NAME/", { "Ref": "VPCName" }, "/g\" /var/named/dynamic/named.vpc\n",
+                            "echo sed -i -e \"s/VPC_NAME/", { "Ref": "VPCName" }, "/g\" /var/named/dynamic/named.vpc >> /tmp/debug-cf\n",
 
                             "# Initialize CloudFormation\n",
                             "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r DNSInstance ",
@@ -214,7 +224,7 @@
                             "# All done so signal success\n",
                             "/opt/aws/bin/cfn-signal -e 0 -r \"DNSInstance setup complete\" '", { "Ref": "DNSInstanceWaitHandle" }, "'\n",
                             "reboot\n"
-                        ]]
+                        ] ]
                     }
                 }
             }

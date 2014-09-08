@@ -2,6 +2,6 @@ Accessible after upload from https://s3-us-west-2.amazonaws.com/aws-musings/glus
 
 Parameter scratch pad:
 
-Network ACL:         acl-bf1cdcda
-Private Route Table: rtb-d63cfeb3
-VPC instance:        vpc-36884953
+Network ACL:         acl-2cac6f49
+Private Route Table: rtb-8fd914ea
+VPC instance:        vpc-f41ddc91

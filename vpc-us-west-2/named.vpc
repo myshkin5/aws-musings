@@ -1,0 +1,8 @@
+$TTL 1d
+VPC_NAME.compute.internal.  SOA VPC_NAME-dns.compute.internal. root.VPC_NAME.compute.internal. (
+    0       ; serial
+    1h      ; refresh
+    1h      ; retry
+    1w      ; expire
+    3h )    ; minimum
+                            NS  VPC_NAME-dns.compute.internal.
