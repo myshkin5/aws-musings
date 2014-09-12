@@ -8,10 +8,5 @@ Post creation steps:
     $ vi ~/.ssh/id_rsa       # Paste in key to new file
     $ chmod go-wrx ~/.ssh/id_rsa
 3. Connect to DNS instance via ssh and execute the following:
-    $ sudo sed -i -e "s/VPC_NAME/dschultz/g" /etc/named.conf
-    $ sudo sed -i -e "s/VPC_NAME/dschultz/g" /var/named/dynamic/named.vpc
     $ sudo chown named:named /var/log/named
-    $ sudo chkconfig --levels 2345 named on
-    $ sudo /etc/init.d/named start
-    TODO: CF init should be able to resolve these issues eventually.
-    NOTE: Substitute VPC name for dschultz on the two sed lines.
+    TODO: CF init should be able to resolve this issue eventually.
