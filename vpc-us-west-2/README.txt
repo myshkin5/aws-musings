@@ -9,4 +9,10 @@ Post creation steps:
     $ chmod go-wrx ~/.ssh/id_rsa
 3. Connect to DNS instance via ssh and execute the following:
     $ sudo chown named:named /var/log/named
-    TODO: CF init should be able to resolve this issue eventually.
+    $ sudo /etc/init.d/named restart
+    TODO: CF init should be able to resolve the chown issue eventually.
+    Restarting is only necessary to make the chown take effect.
+4. Also on the DNS instance update the /var/named/dynamic files with the DNS instance's
+    IP address (see notes in the files for more details):
+    $ sudo vi /var/named/dynamic/named.vpc
+    $ sudo vi /var/named/dynamic/named.vpc-rev
