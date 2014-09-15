@@ -9,4 +9,4 @@ $TTL 86400  ; 1 day
 )
         NS  {{VPC_NAME}}-dns.{{VPC_NAME}}.compute.internal.
 ; TODO: The third and fourth octet of the DNS server's IP address needs to be updated here ***in reverse order***
-0.0     PTR {{VPC_NAME}}-dns.{{VPC_NAME}}.compute.internal.
+1.0     PTR {{VPC_NAME}}-dns.{{VPC_NAME}}.compute.internal.
