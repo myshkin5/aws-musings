@@ -4,9 +4,13 @@
     "Description": "A GlusterFS peer server.",
 
     "Parameters": {
-        "ServerNumber": {
-            "Type": "Number",
-            "Description": "The server number (either 1 or 2)."
+        "Name": {
+            "Type": "String",
+            "Description": "The name of the server."
+        },
+        "Domain": {
+            "Type": "String",
+            "Description": "The domain containing the server. The name plus the domain, separated by a dot, make up the server's fully qualified domain name."
         },
         "KeyName": {
             "Type": "String",
@@ -90,6 +94,13 @@
                                 }
                             },
 
+                            "/etc/dhcp/dhclient.conf": {
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "dhclient.conf" ] ] },
+                                "context": {
+                                    "FQDN": { "Fn::Join": [ "", [ { "Ref": "Name" }, ".", { "Ref": "Domain" } ] ] }
+                                }
+                            },
+
                             "/home/ec2-user/.bashrc": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
                                 "mode": "000644",
@@ -115,7 +126,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "", [ "server", { "Ref": "ServerNumber" } ] ] }
+                        "Value": { "Ref": "Name" }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -166,8 +177,8 @@
 
                             "yum update -y || error_exit 'yum update failed'\n",
 
-                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "", [ "server", { "Ref": "ServerNumber" } ] ] }, "/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/", { "Fn::Join": [ "", [ "server", { "Ref": "ServerNumber" } ] ] }, " ", { "Fn::Join": [ "", [ "server", { "Ref": "ServerNumber" } ] ] }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
+                            "sed -i -e \"s/localhost/", { "Ref": "Name" }, "/g\" /etc/sysconfig/network\n",
+                            "sed -i -e \"s/localhost localhost.localdomain/", { "Ref": "Name"  }, " ", { "Ref": "Name" } , ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
 
                             "# Initialize CloudFormation\n",
                             "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r Instance ",

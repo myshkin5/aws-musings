@@ -39,6 +39,11 @@
             "Type": "String",
             "Description": "The id of the network access control list used to protect instances in this project."
         },
+        "Domain": {
+            "Type": "String",
+            "Default": "dschultz.compute.local",
+            "Description": "The domain name of the VPC."
+        },
         "AWSMusingsS3URL": {
             "Type": "String",
             "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
@@ -234,7 +239,8 @@
             "Properties": {
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "gluster-poc-us-west-2", "server.template" ] ] },
                 "Parameters": {
-                    "ServerNumber": "1",
+                    "Name": "server1",
+                    "Domain": { "Ref": "Domain" },
                     "KeyName": { "Ref": "InternalKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
                     "SubnetId": { "Ref": "PrivateSubnetB" },

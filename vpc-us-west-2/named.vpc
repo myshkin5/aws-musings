@@ -1,4 +1,4 @@
-$ORIGIN {{VPC_NAME}}.compute.internal.
+$ORIGIN {{VPC_NAME}}.compute.local.
 $TTL 86400  ; 1 day
 @                   SOA {{VPC_NAME}}-dns root (
     0          ; serial

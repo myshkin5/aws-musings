@@ -653,7 +653,7 @@
                         "Value": { "Ref": "ExpirationDate" }
                     }
                 ],
-                "DomainName": { "Fn::Join": [ ".", [ { "Ref": "AWS::StackName" }, "compute.internal" ] ] },
+                "DomainName": { "Fn::Join": [ ".", [ { "Ref": "AWS::StackName" }, "compute.local" ] ] },
                 "DomainNameServers": [ { "Fn::GetAtt" : [ "DNSInstanceStack", "Outputs.PrivateIP" ] } ]
             },
             "DependsOn": "DNSInstanceStack"
