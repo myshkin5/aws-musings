@@ -1,4 +1,11 @@
-Accessible after upload from https://s3-us-west-2.amazonaws.com/aws-musings/vpc-us-west-2/vpc.template
+Accessible after upload from https://s3-us-west-2.amazonaws.com/aws-musings/vpc-us-west-2/vpc.template and
+https://s3-us-west-2.amazonaws.com/aws-musings/vpc-us-west-2/infrastructure.template
+
+Establish manual infrastructure (VPN, etc.) after vpc.template run but before infrastructure.template run.
+
+Parameter scratch pad:
+
+VPC instance:        vpc-ac8143c9
 
 Post creation steps:
 

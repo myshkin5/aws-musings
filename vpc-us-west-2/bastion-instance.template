@@ -4,9 +4,11 @@
     "Description": "The VPC's bastion server.",
 
     "Parameters": {
-        "VPCName": {
+        "VPCShortName": {
             "Type": "String",
-            "Description": "The name of the VPC. Used in names of objects."
+            "Description": "The short name of the VPC (should not end in 'vpc').",
+            "AllowedPattern": "[a-z0-9\\-]*",
+            "ConstraintDescription": "can contain only lowercase letters, numbers and dashes."
         },
         "KeyName": {
             "Type": "String",
@@ -115,7 +117,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "VPCShortName" }, "bastion" ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -166,8 +168,8 @@
 
                             "yum update -y || error_exit 'yum update failed'\n",
 
-                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }, "/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }, " ", { "Fn::Join": [ "-", [ { "Ref": "VPCName" }, "bastion" ] ] }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
+                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "VPCShortName" }, "bastion" ] ] }, "/g\" /etc/sysconfig/network\n",
+                            "sed -i -e \"s/localhost localhost.localdomain/", { "Fn::Join": [ "-", [ { "Ref": "VPCShortName" }, "bastion" ] ] }, " ", { "Fn::Join": [ "-", [ { "Ref": "VPCShortName" }, "bastion" ] ] }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
 
                             "# Initialize CloudFormation\n",
                             "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r BastionInstance ",

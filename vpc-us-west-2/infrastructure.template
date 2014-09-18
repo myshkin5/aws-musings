@@ -1,0 +1,1344 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+
+    "Description": "The common resources of a VPC.",
+
+    "Parameters": {
+        "VPCShortName": {
+            "Type": "String",
+            "Description": "The short name of the VPC (should not end in 'vpc').",
+            "AllowedPattern": "[a-z0-9\\-]*",
+            "ConstraintDescription": "can contain only lowercase letters, numbers and dashes."
+        },
+        "SecondOctet": {
+            "Type": "Number",
+            "Default": "80",
+            "MinValue": "0",
+            "MaxValue": "255",
+            "Description": "The second octet of the CIDR block for the VPC."
+        },
+        "VPCId": {
+            "Type": "String",
+            "Description": "The id of the VPC in which the resources will be created."
+        },
+        "BastionKeyName": {
+            "Type": "String",
+            "Default": "default",
+            "Description": "SSH key name used to connect with the bastion server via the ec2-user account.",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[\\x20-\\x7E]*",
+            "ConstraintDescription": "can contain only ASCII characters."
+        },
+        "BastionSSHCIDRIP": {
+            "Type": "String",
+            "Default": "24.9.253.190/32",
+            "Description": "Range of IP addresses that will be able to connect to the bastion server via SSH"
+        },
+        "InternalKeyName": {
+            "Type": "String",
+            "Default": "internal",
+            "Description": "SSH key name used to connect with internal servers via the ec2-user account.",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[\\x20-\\x7E]*",
+            "ConstraintDescription": "can contain only ASCII characters."
+        },
+        "AWSMusingsS3URL": {
+            "Type": "String",
+            "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
+            "Description": "S3 path to aws-musings."
+        },
+        "ProjectName": {
+            "Type": "String",
+            "Default": "Distributed Delivery",
+            "Description": "The name of the project."
+        },
+        "ProjectPOC": {
+            "Type": "String",
+            "Default": "Steve Parker",
+            "Description": "The point of contact for the project."
+        },
+        "ProjectWBSCode": {
+            "Type": "String",
+            "Default": "DISTDEL.EXP.14",
+            "Description": "The work breakdown structure code for the project."
+        },
+        "ProjectPONumber": {
+            "Type": "String",
+            "Default": "TBD",
+            "Description": "The purchase order number for the project."
+        },
+        "ExpirationDate": {
+            "Type": "String",
+            "Default": "20141120",
+            "Description": "The expiration date for the project."
+        }
+    },
+
+    "Resources": {
+        "PublicSubnetA": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": {
+                    "Fn::Join": [ ".", [ "10", {
+                        "Ref": "SecondOctet"
+                    }, "0.0/24" ] ]
+                },
+                "AvailabilityZone": "us-west-2a",
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [ "-", [
+                                {
+                                    "Ref": "VPCShortName"
+                                },
+                                "us-west-2a-public-subnet"
+                            ] ]
+                        }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": {
+                            "Ref": "ProjectPOC"
+                        }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": {
+                            "Ref": "ProjectWBSCode"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": {
+                            "Ref": "ProjectPONumber"
+                        }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": {
+                            "Ref": "ExpirationDate"
+                        }
+                    }
+                ]
+            }
+        },
+        "PublicSubnetB": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": {
+                    "Fn::Join": [ ".", [ "10", {
+                        "Ref": "SecondOctet"
+                    }, "1.0/24" ] ]
+                },
+                "AvailabilityZone": "us-west-2b",
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [ "-", [
+                                {
+                                    "Ref": "VPCShortName"
+                                },
+                                "us-west-2b-public-subnet"
+                            ] ]
+                        }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": {
+                            "Ref": "ProjectPOC"
+                        }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": {
+                            "Ref": "ProjectWBSCode"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": {
+                            "Ref": "ProjectPONumber"
+                        }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": {
+                            "Ref": "ExpirationDate"
+                        }
+                    }
+                ]
+            }
+        },
+        "PublicSubnetC": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": {
+                    "Fn::Join": [ ".", [ "10", {
+                        "Ref": "SecondOctet"
+                    }, "2.0/24" ] ]
+                },
+                "AvailabilityZone": "us-west-2c",
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [ "-", [
+                                {
+                                    "Ref": "VPCShortName"
+                                },
+                                "us-west-2c-public-subnet"
+                            ] ]
+                        }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": {
+                            "Ref": "ProjectPOC"
+                        }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": {
+                            "Ref": "ProjectWBSCode"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": {
+                            "Ref": "ProjectPONumber"
+                        }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": {
+                            "Ref": "ExpirationDate"
+                        }
+                    }
+                ]
+            }
+        },
+        "PrivateSubnetA": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": {
+                    "Fn::Join": [ ".", [ "10", {
+                        "Ref": "SecondOctet"
+                    }, "50.0/24" ] ]
+                },
+                "AvailabilityZone": "us-west-2a",
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [ "-", [
+                                {
+                                    "Ref": "VPCShortName"
+                                },
+                                "us-west-2a-private-subnet"
+                            ] ]
+                        }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": {
+                            "Ref": "ProjectPOC"
+                        }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": {
+                            "Ref": "ProjectWBSCode"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": {
+                            "Ref": "ProjectPONumber"
+                        }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": {
+                            "Ref": "ExpirationDate"
+                        }
+                    }
+                ]
+            }
+        },
+        "PrivateSubnetB": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": {
+                    "Fn::Join": [ ".", [ "10", {
+                        "Ref": "SecondOctet"
+                    }, "51.0/24" ] ]
+                },
+                "AvailabilityZone": "us-west-2b",
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [ "-", [
+                                {
+                                    "Ref": "VPCShortName"
+                                },
+                                "us-west-2b-private-subnet"
+                            ] ]
+                        }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": {
+                            "Ref": "ProjectPOC"
+                        }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": {
+                            "Ref": "ProjectWBSCode"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": {
+                            "Ref": "ProjectPONumber"
+                        }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": {
+                            "Ref": "ExpirationDate"
+                        }
+                    }
+                ]
+            }
+        },
+        "PrivateSubnetC": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": {
+                    "Fn::Join": [ ".", [ "10", {
+                        "Ref": "SecondOctet"
+                    }, "52.0/24" ] ]
+                },
+                "AvailabilityZone": "us-west-2c",
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [ "-", [
+                                {
+                                    "Ref": "VPCShortName"
+                                },
+                                "us-west-2c-private-subnet"
+                            ] ]
+                        }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": {
+                            "Ref": "ProjectPOC"
+                        }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": {
+                            "Ref": "ProjectWBSCode"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": {
+                            "Ref": "ProjectPONumber"
+                        }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": {
+                            "Ref": "ExpirationDate"
+                        }
+                    }
+                ]
+            }
+        },
+
+        "InternetGateway": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [ "-", [
+                                {
+                                    "Ref": "VPCShortName"
+                                },
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "igw"
+                            ] ]
+                        }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": {
+                            "Ref": "ProjectPOC"
+                        }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": {
+                            "Ref": "ProjectWBSCode"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": {
+                            "Ref": "ProjectPONumber"
+                        }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": {
+                            "Ref": "ExpirationDate"
+                        }
+                    }
+                ]
+            }
+        },
+
+        "GatewayAttachment": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "InternetGatewayId": {
+                    "Ref": "InternetGateway"
+                }
+            }
+        },
+
+        "PublicRouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [ "-", [
+                                {
+                                    "Ref": "VPCShortName"
+                                },
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "public-rtb"
+                            ] ]
+                        }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": {
+                            "Ref": "ProjectPOC"
+                        }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": {
+                            "Ref": "ProjectWBSCode"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": {
+                            "Ref": "ProjectPONumber"
+                        }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": {
+                            "Ref": "ExpirationDate"
+                        }
+                    }
+                ]
+            }
+        },
+        "PublicDefaultRoute": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
+                },
+                "GatewayId": {
+                    "Ref": "InternetGateway"
+                }
+            },
+            "DependsOn": "GatewayAttachment"
+        },
+        "PublicSubnetARouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PublicSubnetA"
+                }
+            }
+        },
+        "PublicSubnetBRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PublicSubnetB"
+                }
+            }
+        },
+        "PublicSubnetCRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PublicSubnetC"
+                }
+            }
+        },
+
+        "PrivateRouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [ "-", [
+                                {
+                                    "Ref": "VPCShortName"
+                                },
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "private-rtb"
+                            ] ]
+                        }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": {
+                            "Ref": "ProjectPOC"
+                        }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": {
+                            "Ref": "ProjectWBSCode"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": {
+                            "Ref": "ProjectPONumber"
+                        }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": {
+                            "Ref": "ExpirationDate"
+                        }
+                    }
+                ]
+            }
+        },
+        "PrivateDefaultRoute": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable"
+                },
+                "InstanceId": {
+                    "Fn::GetAtt": [ "NATInstanceStack", "Outputs.NATInstanceId" ]
+                }
+            },
+            "DependsOn": [ "GatewayAttachment", "NATInstanceStack" ]
+        },
+        "PrivateSubnetARouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PrivateSubnetA"
+                }
+            }
+        },
+        "PrivateSubnetBRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PrivateSubnetB"
+                }
+            }
+        },
+        "PrivateSubnetCRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PrivateSubnetC"
+                }
+            }
+        },
+
+        "NetworkACL": {
+            "Type": "AWS::EC2::NetworkAcl",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [ "-", [
+                                {
+                                    "Ref": "VPCShortName"
+                                },
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "acl"
+                            ] ]
+                        }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": {
+                            "Ref": "ProjectPOC"
+                        }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": {
+                            "Ref": "ProjectWBSCode"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": {
+                            "Ref": "ProjectPONumber"
+                        }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": {
+                            "Ref": "ExpirationDate"
+                        }
+                    }
+                ]
+            }
+        },
+
+        "EgressACLEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "CidrBlock": "0.0.0.0/0",
+                "Egress": true,
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "RuleNumber": "100",
+                "NetworkAclId": {
+                    "Ref": "NetworkACL"
+                }
+            }
+        },
+        "IngressACLEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "CidrBlock": "0.0.0.0/0",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "RuleNumber": "100",
+                "NetworkAclId": {
+                    "Ref": "NetworkACL"
+                }
+            }
+        },
+
+        "PublicSubnetANetworkACLAssociation": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "NetworkACL"
+                },
+                "SubnetId": {
+                    "Ref": "PublicSubnetA"
+                }
+            }
+        },
+        "PublicSubnetBNetworkACLAssociation": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "NetworkACL"
+                },
+                "SubnetId": {
+                    "Ref": "PublicSubnetB"
+                }
+            }
+        },
+        "PublicSubnetCNetworkACLAssociation": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "NetworkACL"
+                },
+                "SubnetId": {
+                    "Ref": "PublicSubnetC"
+                }
+            }
+        },
+        "PrivateSubnetANetworkACLAssociation": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "NetworkACL"
+                },
+                "SubnetId": {
+                    "Ref": "PrivateSubnetA"
+                }
+            }
+        },
+        "PrivateSubnetBNetworkACLAssociation": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "NetworkACL"
+                },
+                "SubnetId": {
+                    "Ref": "PrivateSubnetB"
+                }
+            }
+        },
+        "PrivateSubnetCNetworkACLAssociation": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "NetworkACL"
+                },
+                "SubnetId": {
+                    "Ref": "PrivateSubnetC"
+                }
+            }
+        },
+
+        "DHCPOptions": {
+            "Type": "AWS::EC2::DHCPOptions",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [ "-", [
+                                {
+                                    "Ref": "VPCShortName"
+                                },
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "dopt"
+                            ] ]
+                        }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": {
+                            "Ref": "ProjectPOC"
+                        }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": {
+                            "Ref": "ProjectWBSCode"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": {
+                            "Ref": "ProjectPONumber"
+                        }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": {
+                            "Ref": "ExpirationDate"
+                        }
+                    }
+                ],
+                "DomainName": {
+                    "Fn::Join": [ ".", [
+                        {
+                            "Ref": "VPCShortName"
+                        },
+                        "compute.local"
+                    ] ]
+                },
+                "DomainNameServers": [
+                    {
+                        "Fn::GetAtt": [ "DNSInstanceStack", "Outputs.PrivateIP" ]
+                    }
+                ]
+            },
+            "DependsOn": "DNSInstanceStack"
+        },
+
+        "VPCDHCPOptionsAssociation": {
+            "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "DhcpOptionsId": {
+                    "Ref": "DHCPOptions"
+                }
+            }
+        },
+
+        "BastionSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "bastion server security group",
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [ "-", [
+                                {
+                                    "Ref": "VPCShortName"
+                                },
+                                "bastion-sg"
+                            ] ]
+                        }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": {
+                            "Ref": "ProjectPOC"
+                        }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": {
+                            "Ref": "ProjectWBSCode"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": {
+                            "Ref": "ProjectPONumber"
+                        }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": {
+                            "Ref": "ExpirationDate"
+                        }
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "BastionSSHCIDRIP"
+                        }
+                    },
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "10.0.0.0/8"
+                    }
+                ],
+                "SecurityGroupEgress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
+        "NATSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "NAT server security group",
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [ "-", [
+                                {
+                                    "Ref": "VPCShortName"
+                                },
+                                "nat-sg"
+                            ] ]
+                        }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": {
+                            "Ref": "ProjectPOC"
+                        }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": {
+                            "Ref": "ProjectWBSCode"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": {
+                            "Ref": "ProjectPONumber"
+                        }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": {
+                            "Ref": "ExpirationDate"
+                        }
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "10.0.0.0/8"
+                    }
+                ],
+                "SecurityGroupEgress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
+        "DNSSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "DNS server security group",
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [ "-", [
+                                {
+                                    "Ref": "VPCShortName"
+                                },
+                                "dns-sg"
+                            ] ]
+                        }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": {
+                            "Ref": "ProjectPOC"
+                        }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": {
+                            "Ref": "ProjectWBSCode"
+                        }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": {
+                            "Ref": "ProjectPONumber"
+                        }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": {
+                            "Ref": "ExpirationDate"
+                        }
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "10.0.0.0/8"
+                    }
+                ],
+                "SecurityGroupEgress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
+
+        "BastionInstanceStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [ "/", [
+                        {
+                            "Ref": "AWSMusingsS3URL"
+                        },
+                        "vpc-us-west-2",
+                        "bastion-instance.template"
+                    ] ]
+                },
+                "Parameters": {
+                    "VPCShortName": {
+                        "Ref": "VPCShortName"
+                    },
+                    "KeyName": {
+                        "Ref": "BastionKeyName"
+                    },
+                    "AWSMusingsS3URL": {
+                        "Ref": "AWSMusingsS3URL"
+                    },
+                    "SubnetId": {
+                        "Ref": "PublicSubnetA"
+                    },
+                    "SecurityGroupId": {
+                        "Ref": "BastionSecurityGroup"
+                    },
+                    "ProjectName": {
+                        "Ref": "ProjectName"
+                    },
+                    "ProjectPOC": {
+                        "Ref": "ProjectPOC"
+                    },
+                    "ProjectWBSCode": {
+                        "Ref": "ProjectWBSCode"
+                    },
+                    "ProjectPONumber": {
+                        "Ref": "ProjectPONumber"
+                    },
+                    "ExpirationDate": {
+                        "Ref": "ExpirationDate"
+                    }
+                }
+            }
+        },
+        "NATInstanceStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [ "/", [
+                        {
+                            "Ref": "AWSMusingsS3URL"
+                        },
+                        "vpc-us-west-2",
+                        "nat-instance.template"
+                    ] ]
+                },
+                "Parameters": {
+                    "VPCShortName": {
+                        "Ref": "VPCShortName"
+                    },
+                    "KeyName": {
+                        "Ref": "InternalKeyName"
+                    },
+                    "AWSMusingsS3URL": {
+                        "Ref": "AWSMusingsS3URL"
+                    },
+                    "SubnetId": {
+                        "Ref": "PublicSubnetB"
+                    },
+                    "SecurityGroupId": {
+                        "Ref": "NATSecurityGroup"
+                    },
+                    "ProjectName": {
+                        "Ref": "ProjectName"
+                    },
+                    "ProjectPOC": {
+                        "Ref": "ProjectPOC"
+                    },
+                    "ProjectWBSCode": {
+                        "Ref": "ProjectWBSCode"
+                    },
+                    "ProjectPONumber": {
+                        "Ref": "ProjectPONumber"
+                    },
+                    "ExpirationDate": {
+                        "Ref": "ExpirationDate"
+                    }
+                }
+            }
+        },
+        "DNSInstanceStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [ "/", [
+                        {
+                            "Ref": "AWSMusingsS3URL"
+                        },
+                        "vpc-us-west-2",
+                        "dns-instance.template"
+                    ] ]
+                },
+                "Parameters": {
+                    "VPCShortName": {
+                        "Ref": "VPCShortName"
+                    },
+                    "KeyName": {
+                        "Ref": "InternalKeyName"
+                    },
+                    "AWSMusingsS3URL": {
+                        "Ref": "AWSMusingsS3URL"
+                    },
+                    "SecondOctet": {
+                        "Ref": "SecondOctet"
+                    },
+                    "SubnetId": {
+                        "Ref": "PublicSubnetC"
+                    },
+                    "SecurityGroupId": {
+                        "Ref": "DNSSecurityGroup"
+                    },
+                    "ProjectName": {
+                        "Ref": "ProjectName"
+                    },
+                    "ProjectPOC": {
+                        "Ref": "ProjectPOC"
+                    },
+                    "ProjectWBSCode": {
+                        "Ref": "ProjectWBSCode"
+                    },
+                    "ProjectPONumber": {
+                        "Ref": "ProjectPONumber"
+                    },
+                    "ExpirationDate": {
+                        "Ref": "ExpirationDate"
+                    }
+                }
+            }
+        }
+
+    }
+
+}
