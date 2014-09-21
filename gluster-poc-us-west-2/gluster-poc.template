@@ -243,6 +243,25 @@
                     "Domain": { "Ref": "Domain" },
                     "KeyName": { "Ref": "InternalKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
+                    "SubnetId": { "Ref": "PrivateSubnetA" },
+                    "SecurityGroupId": { "Ref": "SecurityGroup" },
+                    "ProjectName": { "Ref": "ProjectName" },
+                    "ProjectPOC": { "Ref": "ProjectPOC" },
+                    "ProjectWBSCode": { "Ref": "ProjectWBSCode" },
+                    "ProjectPONumber": { "Ref": "ProjectPONumber" },
+                    "ExpirationDate": { "Ref": "ExpirationDate" }
+                }
+            }
+        },
+        "Server2InstanceStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "Properties": {
+                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "gluster-poc-us-west-2", "server.template" ] ] },
+                "Parameters": {
+                    "Name": "server2",
+                    "Domain": { "Ref": "Domain" },
+                    "KeyName": { "Ref": "InternalKeyName" },
+                    "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
                     "SubnetId": { "Ref": "PrivateSubnetB" },
                     "SecurityGroupId": { "Ref": "SecurityGroup" },
                     "ProjectName": { "Ref": "ProjectName" },

@@ -4,12 +4,6 @@
     "Description": "A VPC and several common resources.",
 
     "Parameters": {
-        "VPCShortName": {
-            "Type": "String",
-            "Description": "The short name of the VPC (should not end in 'vpc').",
-            "AllowedPattern": "[a-z0-9\\-]*",
-            "ConstraintDescription": "can contain only lowercase letters, numbers and dashes."
-        },
         "SecondOctet": {
             "Type": "Number",
             "Default": "80",
@@ -55,7 +49,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "VPCShortName" }, { "Ref": "AWS::Region" }, "vpc" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "vpc" ] ] }
                     },
                     {
                         "Key": "AWSAccountID",

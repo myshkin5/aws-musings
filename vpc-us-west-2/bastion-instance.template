@@ -4,9 +4,9 @@
     "Description": "The VPC's bastion server.",
 
     "Parameters": {
-        "VPCShortName": {
+        "DNSZone": {
             "Type": "String",
-            "Description": "The short name of the VPC (should not end in 'vpc').",
+            "Description": "The DNS zone name of the VPC (should not end in 'vpc', .compute.local will be appended).",
             "AllowedPattern": "[a-z0-9\\-]*",
             "ConstraintDescription": "can contain only lowercase letters, numbers and dashes."
         },
@@ -117,7 +117,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "VPCShortName" }, "bastion" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "bastion" ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -168,8 +168,8 @@
 
                             "yum update -y || error_exit 'yum update failed'\n",
 
-                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "VPCShortName" }, "bastion" ] ] }, "/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/", { "Fn::Join": [ "-", [ { "Ref": "VPCShortName" }, "bastion" ] ] }, " ", { "Fn::Join": [ "-", [ { "Ref": "VPCShortName" }, "bastion" ] ] }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
+                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "bastion" ] ] }, "/g\" /etc/sysconfig/network\n",
+                            "sed -i -e \"s/localhost localhost.localdomain/", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "bastion" ] ] }, " ", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "bastion" ] ] }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
 
                             "# Initialize CloudFormation\n",
                             "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r BastionInstance ",
