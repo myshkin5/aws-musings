@@ -833,9 +833,9 @@
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "infrastructure-us-west-2", "dns-instance.template" ] ] },
                 "Parameters": {
                     "DNSZone": { "Ref": "DNSZone" },
+                    "SecondOctet": { "Ref": "SecondOctet" },
                     "KeyName": { "Ref": "InternalKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
-                    "SecondOctet": { "Ref": "SecondOctet" },
                     "SubnetId": { "Ref": "PublicSubnetC" },
                     "SecurityGroupId": { "Ref": "DNSSecurityGroup" },
                     "ProjectName": { "Ref": "ProjectName" },

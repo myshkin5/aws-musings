@@ -10,6 +10,13 @@
             "AllowedPattern": "[a-z0-9\\-]*",
             "ConstraintDescription": "can contain only lowercase letters, numbers and dashes."
         },
+        "SecondOctet": {
+            "Type": "Number",
+            "Default": "80",
+            "MinValue": "0",
+            "MaxValue": "255",
+            "Description": "The second octet of the CIDR block for the VPC."
+        },
         "KeyName": {
             "Type": "String",
             "Default": "internal",
@@ -23,13 +30,6 @@
             "Type": "String",
             "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
             "Description": "S3 path to aws-musings."
-        },
-        "SecondOctet": {
-            "Type": "Number",
-            "Default": "80",
-            "MinValue": "0",
-            "MaxValue": "255",
-            "Description": "The second octet of the CIDR block for the VPC."
         },
         "SubnetId": {
             "Type": "String",
@@ -208,6 +208,12 @@
                         "Description": "Primary network interface",
                         "DeviceIndex": 0,
                         "SubnetId": { "Ref": "SubnetId" },
+                        "PrivateIpAddresses": [
+                            {
+                                "PrivateIpAddress": { "Fn::Join": [ ".", [ "10", { "Ref": "SecondOctet" }, "2.10" ] ] },
+                                "Primary": "true"
+                            }
+                        ],
                         "GroupSet": [ { "Ref": "SecurityGroupId" } ]
                     }
                 ],

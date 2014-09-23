@@ -1,6 +1,6 @@
 Parameter scratch pad:
 
-VPC instance:        vpc-b6c301d3
+VPC instance:        vpc-5f874a3a
 
 Steps to create:
 
@@ -15,9 +15,8 @@ Steps to create:
 6. Connect to DNS instance and execute the following:
     $ sudo chown named:named /var/log/named
     TODO: CF init should be able to resolve the chown issue eventually.
-7. Also on the DNS instance update the /var/named/dynamic files with the DNS instance's
-    IP address (see notes in the files for more details):
-    $ sudo vi /var/named/dynamic/named.vpc
-    $ sudo vi /var/named/dynamic/named.vpc-rev
-8. Restarting is only necessary to make the previous changes take effect.
+7. Restarting is only necessary to make the previous change take effect.
     $ sudo /etc/init.d/named restart
+
+NOTE: IF THE STACK IN STEP 3 IS BURNED DOWN, THE STACK IN STEP 1 WILL BE IN A BAD STATE.
+RESET THE VPC'S DHCP OPTIONS BEFORE ATTEMPTING TO REBUILD THE STACK IN STEP 3!!!!!!!!!!!
