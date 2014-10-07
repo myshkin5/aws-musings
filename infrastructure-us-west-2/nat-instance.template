@@ -109,7 +109,7 @@
                 }
             },
             "Properties": {
-                "DisableApiTermination": "FALSE",
+                "DisableApiTermination": "false",
                 "ImageId": "ami-f032acc0",
                 "InstanceType": "t1.micro",
                 "KernelId": "aki-fc37bacc",

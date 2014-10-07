@@ -1,6 +1,6 @@
 #!/bin/bash
 
-aws s3 cp --recursive --acl public-read \
+aws s3 sync --delete --acl public-read \
     --exclude .git/\* \
     --exclude .idea/\* \
     --exclude .gitignore \

@@ -118,7 +118,7 @@
                 }
             },
             "Properties": {
-                "DisableApiTermination": "FALSE",
+                "DisableApiTermination": "false",
                 "ImageId": "ami-d13845e1",
                 "InstanceType": "t2.micro",
                 "KeyName": { "Ref": "KeyName" },
