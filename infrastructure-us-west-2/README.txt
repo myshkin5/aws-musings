@@ -1,6 +1,6 @@
 Parameter scratch pad:
 
-VPC instance:        vpc-f1a46b94
+VPC instance:        vpc-d224edb7
 
 Steps to create:
 

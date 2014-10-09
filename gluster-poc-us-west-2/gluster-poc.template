@@ -237,9 +237,10 @@
         "Server1InstanceStack": {
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
-                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "gluster-poc-us-west-2", "server.template" ] ] },
+                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
+                    "gluster-poc-us-west-2/server1.template" ] ] },
                 "Parameters": {
-                    "Name": "server1",
+                    "NamePrefix": "gluster",
                     "Domain": { "Ref": "Domain" },
                     "KeyName": { "Ref": "InternalKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
@@ -256,9 +257,10 @@
         "Server2InstanceStack": {
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
-                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "gluster-poc-us-west-2", "server.template" ] ] },
+                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
+                    "gluster-poc-us-west-2/server2.template" ] ] },
                 "Parameters": {
-                    "Name": "server2",
+                    "NamePrefix": "gluster",
                     "Domain": { "Ref": "Domain" },
                     "KeyName": { "Ref": "InternalKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },

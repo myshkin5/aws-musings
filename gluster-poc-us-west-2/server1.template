@@ -4,7 +4,7 @@
     "Description": "A GlusterFS peer server.",
 
     "Parameters": {
-        "Name": {
+        "NamePrefix": {
             "Type": "String",
             "Description": "The name of the server."
         },
@@ -62,7 +62,7 @@
     },
 
     "Resources": {
-        "Instance": {
+        "Instance1": {
             "Type": "AWS::EC2::Instance",
             "Metadata": {
                 "AWS::CloudFormation::Init": {
@@ -86,9 +86,9 @@
                                     "Fn::Join": [ "", [
                                         "[cfn-auto-reloader-hook]\n",
                                         "triggers=post.update\n",
-                                        "path=Resources.Instance.Metadata.AWS::CloudFormation::Init\n",
+                                        "path=Resources.Instance1.Metadata.AWS::CloudFormation::Init\n",
                                         "action=/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" },
-                                            " -r Instance ", " --region ", { "Ref": "AWS::Region" }, "\n",
+                                            " -r Instance1 ", " --region ", { "Ref": "AWS::Region" }, "\n",
                                         "runas=root\n"
                                     ] ]
                                 }
@@ -97,7 +97,8 @@
                             "/etc/dhcp/dhclient.conf": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "dhclient.conf" ] ] },
                                 "context": {
-                                    "FQDN": { "Fn::Join": [ "", [ { "Ref": "Name" }, ".", { "Ref": "Domain" } ] ] }
+                                    "FQDN": { "Fn::Join": [ "", [ { "Ref": "NamePrefix" }, "1.",
+                                        { "Ref": "Domain" } ] ] }
                                 }
                             },
 
@@ -126,7 +127,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "Name" }
+                        "Value": { "Fn::Join": [ "", [ { "Ref": "NamePrefix" }, "1" ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -165,46 +166,49 @@
                 ],
                 "UserData": {
                     "Fn::Base64": {
-                        "Fn::Join": ["", [
+                        "Fn::Join": [ "", [
                             "#!/bin/bash\n",
 
                             "# Helper function\n",
                             "function error_exit\n",
                             "{\n",
-                            "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '", { "Ref": "InstanceWaitHandle" }, "'\n",
+                            "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '", { "Ref": "Instance1WaitHandle" }, "'\n",
                             "  exit 1\n",
                             "}\n",
 
                             "yum update -y || error_exit 'yum update failed'\n",
 
-                            "sed -i -e \"s/localhost/", { "Ref": "Name" }, "/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/", { "Ref": "Name"  }, " ", { "Ref": "Name" } , ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
+                            "sed -i -e \"s/localhost/", { "Ref": "NamePrefix" }, "1/g\" /etc/sysconfig/network\n",
+                            "sed -i -e \"s/localhost localhost.localdomain/", { "Ref": "NamePrefix"  }, "1 ",
+                                { "Ref": "NamePrefix" },
+                                "1.localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
 
                             "# Initialize CloudFormation\n",
-                            "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r Instance ",
+                            "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r Instance1 ",
                                 "--region ", { "Ref": "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
 
                             "# Start up the cfn-hup daemon to listen for changes to the metadata\n",
                             "/opt/aws/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n",
 
                             "# All done so signal success\n",
-                            "/opt/aws/bin/cfn-signal -e 0 -r \"Instance setup complete\" '", { "Ref": "InstanceWaitHandle" }, "'\n",
+                            "/opt/aws/bin/cfn-signal -e 0 -r \"Instance1 setup complete\" '",
+                                { "Ref": "Instance1WaitHandle" }, "'\n",
                             "reboot\n"
-                        ]]
+                        ] ]
                     }
                 }
             }
         },
 
-        "InstanceWaitHandle": {
+        "Instance1WaitHandle": {
             "Type": "AWS::CloudFormation::WaitConditionHandle"
         },
 
-        "InstanceWaitCondition": {
+        "Instance1WaitCondition": {
             "Type": "AWS::CloudFormation::WaitCondition",
-            "DependsOn": "Instance",
+            "DependsOn": "Instance1",
             "Properties": {
-                "Handle": { "Ref": "InstanceWaitHandle" },
+                "Handle": { "Ref": "Instance1WaitHandle" },
                 "Timeout": "300"
             }
         }

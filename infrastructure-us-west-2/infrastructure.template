@@ -312,7 +312,8 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "igw" ] ] }
+                        "Value": { "Fn::Join": [ "-",
+                            [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "igw" ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -357,7 +358,8 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "public-rtb" ] ] }
+                        "Value": { "Fn::Join": [ "-",
+                            [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "public-rtb" ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -424,7 +426,8 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "private-rtb" ] ] }
+                        "Value": { "Fn::Join": [ "-",
+                            [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "private-rtb" ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -491,7 +494,8 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "acl" ] ] }
+                        "Value": { "Fn::Join": [ "-",
+                            [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "acl" ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -596,7 +600,8 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "dopt" ] ] }
+                        "Value": { "Fn::Join": [ "-",
+                            [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "dopt" ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -794,7 +799,8 @@
         "BastionInstanceStack": {
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
-                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "infrastructure-us-west-2", "bastion-instance.template" ] ] },
+                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
+                    "infrastructure-us-west-2/bastion-instance.template" ] ] },
                 "Parameters": {
                     "DNSZone": { "Ref": "DNSZone" },
                     "KeyName": { "Ref": "BastionKeyName" },
@@ -812,7 +818,8 @@
         "NATInstanceStack": {
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
-                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "infrastructure-us-west-2", "nat-instance.template" ] ] },
+                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
+                    "infrastructure-us-west-2/nat-instance.template" ] ] },
                 "Parameters": {
                     "DNSZone": { "Ref": "DNSZone" },
                     "KeyName": { "Ref": "InternalKeyName" },
@@ -830,7 +837,8 @@
         "DNSInstanceStack": {
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
-                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "infrastructure-us-west-2", "dns-instance.template" ] ] },
+                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
+                    "infrastructure-us-west-2/dns-instance.template" ] ] },
                 "Parameters": {
                     "DNSZone": { "Ref": "DNSZone" },
                     "SecondOctet": { "Ref": "SecondOctet" },

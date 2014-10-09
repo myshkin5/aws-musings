@@ -169,8 +169,12 @@
 
                             "yum update -y || error_exit 'yum update failed'\n",
 
-                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "nat" ] ] }, "/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "nat" ] ] }, " ", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "nat" ] ] }, ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
+                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "nat" ] ] },
+                                "/g\" /etc/sysconfig/network\n",
+                            "sed -i -e \"s/localhost localhost.localdomain/",
+                                { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "nat" ] ] }, " ",
+                                { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "nat" ] ] },
+                                ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
 
                             "# Initialize CloudFormation\n",
                             "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r NATInstance ",
@@ -180,7 +184,8 @@
                             "/opt/aws/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n",
 
                             "# All done so signal success\n",
-                            "/opt/aws/bin/cfn-signal -e 0 -r \"NATInstance setup complete\" '", { "Ref": "NATInstanceWaitHandle" }, "'\n",
+                            "/opt/aws/bin/cfn-signal -e 0 -r \"NATInstance setup complete\" '",
+                                { "Ref": "NATInstanceWaitHandle" }, "'\n",
                             "reboot\n"
                         ] ]
                     }
