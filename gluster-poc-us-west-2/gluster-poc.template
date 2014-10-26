@@ -4,6 +4,10 @@
     "Description": "A GlusterFS Proof of Concept.",
 
     "Parameters": {
+        "NamePrefix": {
+            "Type": "String",
+            "Description": "The name prefix of the server."
+        },
         "InternalKeyName": {
             "Type": "String",
             "Default": "internal",
@@ -240,10 +244,11 @@
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                     "gluster-poc-us-west-2/server1.template" ] ] },
                 "Parameters": {
-                    "NamePrefix": "gluster",
+                    "NamePrefix": { "Ref": "NamePrefix" },
                     "Domain": { "Ref": "Domain" },
                     "KeyName": { "Ref": "InternalKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
+                    "AvailabilityZone": "us-west-2a",
                     "SubnetId": { "Ref": "PrivateSubnetA" },
                     "SecurityGroupId": { "Ref": "SecurityGroup" },
                     "ProjectName": { "Ref": "ProjectName" },
@@ -260,10 +265,11 @@
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                     "gluster-poc-us-west-2/server2.template" ] ] },
                 "Parameters": {
-                    "NamePrefix": "gluster",
+                    "NamePrefix": { "Ref": "NamePrefix" },
                     "Domain": { "Ref": "Domain" },
                     "KeyName": { "Ref": "InternalKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
+                    "AvailabilityZone": "us-west-2b",
                     "SubnetId": { "Ref": "PrivateSubnetB" },
                     "SecurityGroupId": { "Ref": "SecurityGroup" },
                     "ProjectName": { "Ref": "ProjectName" },

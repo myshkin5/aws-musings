@@ -6,7 +6,7 @@
     "Parameters": {
         "NamePrefix": {
             "Type": "String",
-            "Description": "The name of the server."
+            "Description": "The name prefix of the server."
         },
         "Domain": {
             "Type": "String",
@@ -25,6 +25,10 @@
             "Type": "String",
             "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
             "Description": "S3 path to aws-musings."
+        },
+        "AvailabilityZone":{
+            "Type": "String",
+            "Description": "The availability zone where the server will be created."
         },
         "SubnetId": {
             "Type": "String",
@@ -154,6 +158,9 @@
                         "Value": { "Ref": "ExpirationDate" }
                     }
                 ],
+                "Volumes": [
+                    { "VolumeId": { "Ref": "Volume" }, "Device": "/dev/sdb" }
+                ],
                 "NetworkInterfaces": [
                     {
                         "AssociatePublicIpAddress": "false",
@@ -210,6 +217,45 @@
             "Properties": {
                 "Handle": { "Ref": "Instance1WaitHandle" },
                 "Timeout": "300"
+            }
+        },
+
+        "Volume": {
+            "Type": "AWS::EC2::Volume",
+            "Properties": {
+                "AvailabilityZone": { "Ref": "AvailabilityZone" },
+                "Size": "10",
+                "VolumeType": "gp2",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "", [ { "Ref": "NamePrefix" }, "1-volume" ] ] }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": { "Ref": "AWS::AccountId" }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": { "Ref": "ProjectName" }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": { "Ref": "ProjectPOC" }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": { "Ref": "ProjectWBSCode" }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": { "Ref": "ProjectPONumber" }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": { "Ref": "ExpirationDate" }
+                    }
+                ]
             }
         }
 
