@@ -197,6 +197,18 @@
                             "# Start up the cfn-hup daemon to listen for changes to the metadata\n",
                             "/opt/aws/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n",
 
+                            "# Gluster configuration common to both servers",
+                            "echo -e \"n\n\n\n\n\nw\" | fdisk /dev/xvdb || error_exit 'Failed fdisk'\n",
+                            "mkfs.ext4 /dev/xvdb1 || error_exit 'Failed mkfs'\n",
+                            "mkdir /mnt/brick1 || error_exit 'Failed mkdir'\n",
+                            "echo \"/dev/xvdb1 /mnt/brick1 ext4 defaults 1 2\" >> /etc/fstab\n",
+                            "wget -P /etc/yum.repos.d ",
+                                "http://download.gluster.org/pub/gluster/glusterfs/LATEST/EPEL.repo/",
+                                    "glusterfs-epel.repo || error_exit 'Failed gluster repo wget'\n",
+                            "sed -i 's/$releasever/6/g' /etc/yum.repos.d/glusterfs-epel.repo\n",
+                            "yum install -y glusterfs{-fuse,-server}\n",
+                            "chkconfig glusterd on\n",
+
                             "# All done so signal success\n",
                             "/opt/aws/bin/cfn-signal -e 0 -r \"Instance2 setup complete\" '",
                                 { "Ref": "Instance2WaitHandle" }, "'\n",
