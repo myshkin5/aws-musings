@@ -258,7 +258,8 @@
                     "ProjectPONumber": { "Ref": "ProjectPONumber" },
                     "ExpirationDate": { "Ref": "ExpirationDate" }
                 }
-            }
+            },
+            "DependsOn": "Server2InstanceStack"
         },
         "Server2InstanceStack": {
             "Type": "AWS::CloudFormation::Stack",

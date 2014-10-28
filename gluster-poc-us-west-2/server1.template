@@ -197,7 +197,7 @@
                             "# Start up the cfn-hup daemon to listen for changes to the metadata\n",
                             "/opt/aws/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n",
 
-                            "# Gluster configuration common to both servers",
+                            "# Gluster configuration common to both servers\n",
                             "echo -e \"n\n\n\n\n\nw\" | fdisk /dev/xvdb || error_exit 'Failed fdisk'\n",
                             "mkfs.ext4 /dev/xvdb1 || error_exit 'Failed mkfs'\n",
                             "mkdir /mnt/brick1 || error_exit 'Failed mkdir'\n",
@@ -208,6 +208,14 @@
                             "sed -i 's/$releasever/6/g' /etc/yum.repos.d/glusterfs-epel.repo\n",
                             "yum install -y glusterfs{-fuse,-server}\n",
                             "chkconfig glusterd on\n",
+
+                            "# Gluster configuration for server1 only\n",
+                            "gluster peer probe ", { "Ref": "NamePrefix" },
+                                "2 || error_exit 'gluster peer probe failed'\n",
+                            "gluster volume create gluster replica 2 transport tcp ",
+                                { "Ref": "NamePrefix" }, "1:/mnt/brick1/brick1 ",
+                                { "Ref": "NamePrefix" }, "2:/mnt/brick1/brick1 ",
+                                    "|| error_exit 'gluster volume create failed'\n",
 
                             "# All done so signal success\n",
                             "/opt/aws/bin/cfn-signal -e 0 -r \"Instance1 setup complete\" '",

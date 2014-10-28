@@ -197,7 +197,7 @@
                             "# Start up the cfn-hup daemon to listen for changes to the metadata\n",
                             "/opt/aws/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n",
 
-                            "# Gluster configuration common to both servers",
+                            "# Gluster configuration common to both servers\n",
                             "echo -e \"n\n\n\n\n\nw\" | fdisk /dev/xvdb || error_exit 'Failed fdisk'\n",
                             "mkfs.ext4 /dev/xvdb1 || error_exit 'Failed mkfs'\n",
                             "mkdir /mnt/brick1 || error_exit 'Failed mkdir'\n",
