@@ -1,7 +1,7 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
 
-    "Description": "A VPC and several common resources.",
+    "Description": "A VPC.",
 
     "Parameters": {
         "SecondOctet": {
@@ -18,7 +18,7 @@
         },
         "ProjectPOC": {
             "Type": "String",
-            "Default": "Steve Parker",
+            "Default": "Dwayne Schultz",
             "Description": "The point of contact for the project."
         },
         "ProjectWBSCode": {

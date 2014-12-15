@@ -45,7 +45,7 @@
         },
         "ProjectPOC": {
             "Type": "String",
-            "Default": "Steve Parker",
+            "Default": "Dwayne Schultz",
             "Description": "The point of contact for the project."
         },
         "ProjectWBSCode": {

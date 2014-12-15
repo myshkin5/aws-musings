@@ -1,12 +1,13 @@
 Parameter scratch pad:
 
-VPC instance:        vpc-d224edb7
-
 Steps to create:
 
-1. Create stack https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/vpc.template
-2. Manually create resources such as the VPN.
-3. Create stack https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/infrastructure.template
+1. Create VPC stack:
+    https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/vpc.template
+2. Create VPN stack:
+    https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/vpn.template
+3. Create Infrastructure stack:
+    https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/infrastructure.template
 4. On the EC2 console select the NAT instance -> Actions -> Change Source/Dest. Check -> Yes, Disable.
     NOTE: No known fix for CF scripts. May be other scripting solutions.
 5. On the bastion server install the internal ssh key:
