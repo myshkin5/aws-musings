@@ -6,9 +6,16 @@
     "Parameters": {
         "DNSZone": {
             "Type": "String",
-            "Description": "The DNS zone name of the VPC (should not end in 'vpc', .compute.local will be appended).",
+            "Description": "The DNS zone name of the VPC (should not end in 'vpc', .FullyQualifiedParentDNSZone will be appended).",
             "AllowedPattern": "[a-z0-9\\-]*",
             "ConstraintDescription": "can contain only lowercase letters, numbers and dashes."
+        },
+        "FullyQualifiedParentDNSZone": {
+            "Type": "String",
+            "Default": "compute.local",
+            "Description": "The parent DNS zone (should not start or end with .).",
+            "AllowedPattern": "[a-z][a-z0-9\\-.]*[a-z0-9]",
+            "ConstraintDescription": "can contain only lowercase letters, numbers, dashes and dots."
         },
         "SecondOctet": {
             "Type": "Number",
@@ -618,7 +625,8 @@
                         "Value": { "Ref": "ExpirationDate" }
                     }
                 ],
-                "DomainName": { "Fn::Join": [ ".", [ { "Ref": "DNSZone" }, "compute.local" ] ] },
+                "DomainName": { "Fn::Join": [ ".",
+                    [ { "Ref": "DNSZone" }, { "Ref": "FullyQualifiedParentDNSZone" } ] ] },
                 "DomainNameServers": [ { "Fn::GetAtt": [ "DNSInstanceStack", "Outputs.PrivateIP" ] } ]
             },
             "DependsOn": "DNSInstanceStack"

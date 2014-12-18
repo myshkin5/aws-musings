@@ -6,7 +6,7 @@
     "Parameters": {
         "DNSZone": {
             "Type": "String",
-            "Description": "The DNS zone name of the VPC (should not end in 'vpc', .compute.local will be appended).",
+            "Description": "The DNS zone name of the VPC (should not end in 'vpc', used in naming the instance).",
             "AllowedPattern": "[a-z0-9\\-]*",
             "ConstraintDescription": "can contain only lowercase letters, numbers and dashes."
         },

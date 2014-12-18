@@ -1,4 +1,4 @@
-$ORIGIN {{DNS_ZONE}}.compute.local.
+$ORIGIN {{DNS_ZONE}}.{{FULLY_QUALIFIED_PARENT_DNS_ZONE}}.
 $TTL 86400  ; 1 day
 @                   SOA {{DNS_ZONE}}-dns root (
     0          ; serial

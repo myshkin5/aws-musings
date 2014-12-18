@@ -7,5 +7,5 @@ $TTL 86400  ; 1 day
     604800     ; expire (1 week)
     10800      ; minimum (3 hours)
 )
-        NS  {{DNS_ZONE}}-dns.{{DNS_ZONE}}.compute.local.
-10.2    PTR {{DNS_ZONE}}-dns.{{DNS_ZONE}}.compute.local.
+        NS  {{DNS_ZONE}}-dns.{{DNS_ZONE}}.{{FULLY_QUALIFIED_PARENT_DNS_ZONE}}.
+10.2    PTR {{DNS_ZONE}}-dns.{{DNS_ZONE}}.{{FULLY_QUALIFIED_PARENT_DNS_ZONE}}.
