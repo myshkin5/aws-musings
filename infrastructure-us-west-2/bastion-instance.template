@@ -10,6 +10,13 @@
             "AllowedPattern": "[a-z0-9\\-]*",
             "ConstraintDescription": "can contain only lowercase letters, numbers and dashes."
         },
+        "FullyQualifiedParentDNSZone": {
+            "Type": "String",
+            "Default": "compute.local",
+            "Description": "The parent DNS zone (should not start or end with .).",
+            "AllowedPattern": "[a-z][a-z0-9\\-.]*[a-z0-9]",
+            "ConstraintDescription": "can contain only lowercase letters, numbers, dashes and dots."
+        },
         "KeyName": {
             "Type": "String",
             "Default": "default",
@@ -67,28 +74,30 @@
                     "config": {
                         "files": {
                             "/etc/cfn/cfn-hup.conf": {
-                                "content": {
-                                    "Fn::Join": [ "", [
-                                        "[main]\n",
-                                        "stack=", { "Ref": "AWS::StackId" }, "\n",
-                                        "region=", { "Ref": "AWS::Region" }, "\n"
-                                    ] ]
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "cfn-hup.conf" ] ] },
+                                "context": {
+                                    "STACK_ID": { "Ref": "AWS::StackId" },
+                                    "REGION": { "Ref": "AWS::Region" }
                                 },
                                 "mode": "000400",
                                 "owner": "root",
                                 "group": "root"
                             },
-
                             "/etc/cfn/hooks.d/cfn-auto-reloader.conf": {
-                                "content": {
-                                    "Fn::Join": [ "", [
-                                        "[cfn-auto-reloader-hook]\n",
-                                        "triggers=post.update\n",
-                                        "path=Resources.BastionInstance.Metadata.AWS::CloudFormation::Init\n",
-                                        "action=/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" },
-                                            " -r BastionInstance ", " --region ", { "Ref": "AWS::Region" }, "\n",
-                                        "runas=root\n"
-                                    ] ]
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
+                                    "cfn-auto-reloader.conf" ] ] },
+                                "context": {
+                                    "STACK_ID": { "Ref": "AWS::StackId" },
+                                    "REGION": { "Ref": "AWS::Region" },
+                                    "INSTANCE_NAME": "BastionInstance"
+                                }
+                            },
+
+                            "/etc/dhcp/dhclient.conf": {
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "dhclient.conf" ] ] },
+                                "context": {
+                                    "FQDN": { "Fn::Join": [ "", [ { "Ref": "DNSZone" }, "-bastion.",
+                                        { "Ref": "DNSZone" }, ".", { "Ref": "FullyQualifiedParentDNSZone" } ] ] }
                                 }
                             },
 
@@ -201,7 +210,7 @@
             "DependsOn": "BastionInstance",
             "Properties": {
                 "Handle": { "Ref": "BastionInstanceWaitHandle" },
-                "Timeout": "300"
+                "Timeout": "600"
             }
         }
 

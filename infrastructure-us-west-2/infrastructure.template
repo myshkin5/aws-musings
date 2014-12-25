@@ -793,6 +793,55 @@
                 ]
             }
         },
+        "ConfigSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Configuration server security group",
+                "VpcId": { "Ref": "VPCId" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "config-sg" ] ] }
+                    },
+                    {
+                        "Key": "AWSAccountID",
+                        "Value": { "Ref": "AWS::AccountId" }
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": { "Ref": "ProjectName" }
+                    },
+                    {
+                        "Key": "ProjectPOC",
+                        "Value": { "Ref": "ProjectPOC" }
+                    },
+                    {
+                        "Key": "ProjectWBSCode",
+                        "Value": { "Ref": "ProjectWBSCode" }
+                    },
+                    {
+                        "Key": "ProjectPONumber",
+                        "Value": { "Ref": "ProjectPONumber" }
+                    },
+                    {
+                        "Key": "ExpirationDate",
+                        "Value": { "Ref": "ExpirationDate" }
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "10.0.0.0/8"
+                    }
+                ],
+                "SecurityGroupEgress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
 
         "BastionInstanceStack": {
             "Type": "AWS::CloudFormation::Stack",
@@ -801,6 +850,7 @@
                     "infrastructure-us-west-2/bastion-instance.template" ] ] },
                 "Parameters": {
                     "DNSZone": { "Ref": "DNSZone" },
+                    "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },
                     "KeyName": { "Ref": "BastionKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
                     "SubnetId": { "Ref": "PublicSubnetA" },
@@ -820,6 +870,7 @@
                     "infrastructure-us-west-2/nat-instance.template" ] ] },
                 "Parameters": {
                     "DNSZone": { "Ref": "DNSZone" },
+                    "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },
                     "KeyName": { "Ref": "InternalKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
                     "SubnetId": { "Ref": "PublicSubnetB" },
@@ -839,11 +890,33 @@
                     "infrastructure-us-west-2/dns-instance.template" ] ] },
                 "Parameters": {
                     "DNSZone": { "Ref": "DNSZone" },
+                    "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },
                     "SecondOctet": { "Ref": "SecondOctet" },
                     "KeyName": { "Ref": "InternalKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
                     "SubnetId": { "Ref": "PublicSubnetC" },
                     "SecurityGroupId": { "Ref": "DNSSecurityGroup" },
+                    "ProjectName": { "Ref": "ProjectName" },
+                    "ProjectPOC": { "Ref": "ProjectPOC" },
+                    "ProjectWBSCode": { "Ref": "ProjectWBSCode" },
+                    "ProjectPONumber": { "Ref": "ProjectPONumber" },
+                    "ExpirationDate": { "Ref": "ExpirationDate" }
+                }
+            }
+        },
+        "ConfigInstanceStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "Properties": {
+                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
+                    "infrastructure-us-west-2/config-instance.template" ] ] },
+                "Parameters": {
+                    "DNSZone": { "Ref": "DNSZone" },
+                    "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },
+                    "SecondOctet": { "Ref": "SecondOctet" },
+                    "KeyName": { "Ref": "InternalKeyName" },
+                    "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
+                    "SubnetId": { "Ref": "PublicSubnetA" },
+                    "SecurityGroupId": { "Ref": "ConfigSecurityGroup" },
                     "ProjectName": { "Ref": "ProjectName" },
                     "ProjectPOC": { "Ref": "ProjectPOC" },
                     "ProjectWBSCode": { "Ref": "ProjectWBSCode" },

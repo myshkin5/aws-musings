@@ -73,28 +73,22 @@
                     "config": {
                         "files": {
                             "/etc/cfn/cfn-hup.conf": {
-                                "content": {
-                                    "Fn::Join": [ "", [
-                                        "[main]\n",
-                                        "stack=", { "Ref": "AWS::StackId" }, "\n",
-                                        "region=", { "Ref": "AWS::Region" }, "\n"
-                                    ] ]
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "cfn-hup.conf" ] ] },
+                                "context": {
+                                    "STACK_ID": { "Ref": "AWS::StackId" },
+                                    "REGION": { "Ref": "AWS::Region" }
                                 },
                                 "mode": "000400",
                                 "owner": "root",
                                 "group": "root"
                             },
-
                             "/etc/cfn/hooks.d/cfn-auto-reloader.conf": {
-                                "content": {
-                                    "Fn::Join": [ "", [
-                                        "[cfn-auto-reloader-hook]\n",
-                                        "triggers=post.update\n",
-                                        "path=Resources.Instance1.Metadata.AWS::CloudFormation::Init\n",
-                                        "action=/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" },
-                                            " -r Instance1 ", " --region ", { "Ref": "AWS::Region" }, "\n",
-                                        "runas=root\n"
-                                    ] ]
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
+                                    "cfn-auto-reloader.conf" ] ] },
+                                "context": {
+                                    "STACK_ID": { "Ref": "AWS::StackId" },
+                                    "REGION": { "Ref": "AWS::Region" },
+                                    "INSTANCE_NAME": "Instance1"
                                 }
                             },
 
@@ -236,7 +230,7 @@
             "DependsOn": "Instance1",
             "Properties": {
                 "Handle": { "Ref": "Instance1WaitHandle" },
-                "Timeout": "300"
+                "Timeout": "600"
             }
         },
 

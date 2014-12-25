@@ -21,3 +21,7 @@ Steps to create:
 
 NOTE: IF THE STACK IN STEP 3 IS BURNED DOWN, THE STACK IN STEP 1 WILL BE IN A BAD STATE.
 RESET THE VPC'S DHCP OPTIONS BEFORE ATTEMPTING TO REBUILD THE STACK IN STEP 3!!!!!!!!!!!
+
+Burning down the step 3 stack sets the DHCP options to 'default' which probably doesn't
+really exist. Set the DHCP options back to the DHCP options created by AWS (one with
+domain-name-servers = AmazonProvidedDNS).
