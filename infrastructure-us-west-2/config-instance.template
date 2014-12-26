@@ -189,9 +189,9 @@
                                     " || error_exit 'wget puppet repo filed'\n",
                             "rpm --import http://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs",
                                 " || error_exit 'rpm import failed'\n",
-                            "yum --enablerepo=puppetlabs install puppet-server -y || error_exit 'yum install failed'\n",
+                            "yum install puppet-server-3.7.3 -y || error_exit 'yum install failed'\n",
+                            "gem install puppet || error_exit 'gem install failed'\n",
                             "chkconfig puppetmaster on || error_exit 'chkconfig failed'\n",
-                            "service puppetmaster start || error_exit 'starting puppetmaster failed'\n",
 
                             "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "config" ] ] },
                                 "/g\" /etc/sysconfig/network\n",

@@ -3,4 +3,4 @@ name=Puppet Labs - $basearch
 baseurl=http://yum.puppetlabs.com/el/6Server/products/$basearch
 failovermethod=priority
 priority=0
-enabled=0
+enabled=1
