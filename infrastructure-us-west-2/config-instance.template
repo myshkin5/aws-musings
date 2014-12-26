@@ -17,13 +17,6 @@
             "AllowedPattern": "[a-z][a-z0-9\\-.]*[a-z0-9]",
             "ConstraintDescription": "can contain only lowercase letters, numbers, dashes and dots."
         },
-        "SecondOctet": {
-            "Type": "Number",
-            "Default": "80",
-            "MinValue": "0",
-            "MaxValue": "255",
-            "Description": "The second octet of the CIDR block for the VPC."
-        },
         "KeyName": {
             "Type": "String",
             "Default": "internal",
@@ -162,7 +155,7 @@
                 ],
                 "NetworkInterfaces": [
                     {
-                        "AssociatePublicIpAddress": "true",
+                        "AssociatePublicIpAddress": "false",
                         "DeleteOnTermination": "true",
                         "Description": "Primary network interface",
                         "DeviceIndex": 0,
