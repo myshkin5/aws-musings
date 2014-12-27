@@ -93,7 +93,7 @@
                         "files": {
                             "/etc/named.conf": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                                    "infrastructure-us-west-2/named.conf" ] ] },
+                                    "infrastructure-us-west-2/dns/named.conf" ] ] },
                                 "context" : {
                                     "DNS_ZONE" : { "Ref": "DNSZone" },
                                     "FULLY_QUALIFIED_PARENT_DNS_ZONE" : { "Ref": "FullyQualifiedParentDNSZone" },
@@ -102,7 +102,7 @@
                             },
                             "/var/named/dynamic/named.vpc": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                                    "infrastructure-us-west-2/named.vpc" ] ] },
+                                    "infrastructure-us-west-2/dns/named.vpc" ] ] },
                                 "context" : {
                                     "DNS_ZONE" : { "Ref": "DNSZone" },
                                     "FULLY_QUALIFIED_PARENT_DNS_ZONE" : { "Ref": "FullyQualifiedParentDNSZone" },
@@ -114,7 +114,7 @@
                             },
                             "/var/named/dynamic/named.vpc-rev": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                                    "infrastructure-us-west-2/named.vpc-rev" ] ] },
+                                    "infrastructure-us-west-2/dns/named.vpc-rev" ] ] },
                                 "context" : {
                                     "DNS_ZONE" : { "Ref": "DNSZone" },
                                     "FULLY_QUALIFIED_PARENT_DNS_ZONE" : { "Ref": "FullyQualifiedParentDNSZone" },
@@ -126,7 +126,7 @@
                             },
                             "/etc/sysconfig/network-scripts/ifcfg-eth0": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                                    "infrastructure-us-west-2/ifcfg-eth0" ] ] }
+                                    "infrastructure-us-west-2/dns/ifcfg-eth0" ] ] }
                             },
                             "/etc/resolv.conf": {
                                 "content": {
@@ -139,7 +139,8 @@
                             },
 
                             "/etc/cfn/cfn-hup.conf": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "cfn-hup.conf" ] ] },
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
+                                    "common/cfn-hup.conf" ] ] },
                                 "context": {
                                     "STACK_ID": { "Ref": "AWS::StackId" },
                                     "REGION": { "Ref": "AWS::Region" }
@@ -150,7 +151,7 @@
                             },
                             "/etc/cfn/hooks.d/cfn-auto-reloader.conf": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                                    "cfn-auto-reloader.conf" ] ] },
+                                    "common/cfn-auto-reloader.conf" ] ] },
                                 "context": {
                                     "STACK_ID": { "Ref": "AWS::StackId" },
                                     "REGION": { "Ref": "AWS::Region" },
@@ -159,7 +160,8 @@
                             },
 
                             "/etc/dhcp/dhclient.conf": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "dhclient.conf" ] ] },
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
+                                    "common/dhclient.conf" ] ] },
                                 "context": {
                                     "FQDN": { "Fn::Join": [ "", [ { "Ref": "DNSZone" }, "-dns.",
                                         { "Ref": "DNSZone" }, ".", { "Ref": "FullyQualifiedParentDNSZone" } ] ] }
@@ -167,13 +169,13 @@
                             },
 
                             "/home/ec2-user/.bashrc": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "common/bashrc.sh" ] ] },
                                 "mode": "000644",
                                 "owner": "ec2-user",
                                 "group": "ec2-user"
                             },
                             "/root/.bashrc": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "common/bashrc.sh" ] ] },
                                 "mode": "000644",
                                 "owner": "root",
                                 "group": "root"

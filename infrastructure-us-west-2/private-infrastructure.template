@@ -331,7 +331,7 @@
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                    "infrastructure-us-west-2/config-instance.template" ] ] },
+                    "infrastructure-us-west-2/config/config-instance.template" ] ] },
                 "Parameters": {
                     "DNSZone": { "Ref": "DNSZone" },
                     "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },

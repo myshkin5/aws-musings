@@ -74,7 +74,8 @@
                     "config": {
                         "files": {
                             "/etc/cfn/cfn-hup.conf": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "cfn-hup.conf" ] ] },
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
+                                    "common/cfn-hup.conf" ] ] },
                                 "context": {
                                     "STACK_ID": { "Ref": "AWS::StackId" },
                                     "REGION": { "Ref": "AWS::Region" }
@@ -85,7 +86,7 @@
                             },
                             "/etc/cfn/hooks.d/cfn-auto-reloader.conf": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                                    "cfn-auto-reloader.conf" ] ] },
+                                    "common/cfn-auto-reloader.conf" ] ] },
                                 "context": {
                                     "STACK_ID": { "Ref": "AWS::StackId" },
                                     "REGION": { "Ref": "AWS::Region" },
@@ -94,7 +95,8 @@
                             },
 
                             "/etc/dhcp/dhclient.conf": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "dhclient.conf" ] ] },
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
+                                    "common/dhclient.conf" ] ] },
                                 "context": {
                                     "FQDN": { "Fn::Join": [ "", [ { "Ref": "DNSZone" }, "-config.",
                                         { "Ref": "DNSZone" }, ".", { "Ref": "FullyQualifiedParentDNSZone" } ] ] }
@@ -102,13 +104,13 @@
                             },
 
                             "/home/ec2-user/.bashrc": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "common/bashrc.sh" ] ] },
                                 "mode": "000644",
                                 "owner": "ec2-user",
                                 "group": "ec2-user"
                             },
                             "/root/.bashrc": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "bashrc.sh" ] ] },
+                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "common/bashrc.sh" ] ] },
                                 "mode": "000644",
                                 "owner": "root",
                                 "group": "root"
@@ -177,16 +179,16 @@
 
                             "yum update -y || error_exit 'yum update failed'\n",
 
-                            "wget -P /etc/puppet ",
-                                { "Ref": "AWSMusingsS3URL" }, "/infrastructure-us-west-2/puppet.conf",
-                                    " || error_exit 'wget puppet.conf failed'\n",
+                            "wget -O /etc/puppet/puppet.conf ",
+                                { "Ref": "AWSMusingsS3URL" }, "/infrastructure-us-west-2/config/master-puppet.conf",
+                                    " || error_exit 'wget master-puppet.conf failed'\n",
                             "sed -i -e \"s/{{DNS_ZONE}}/", { "Ref": "DNSZone" }, "/g\" /etc/puppet/puppet.conf\n",
                             "sed -i -e \"s/{{FULLY_QUALIFIED_PARENT_DNS_ZONE}}/",
                                 { "Ref": "FullyQualifiedParentDNSZone" }, "/g\" /etc/puppet/puppet.conf\n",
                             "touch /etc/puppet/manifests/site.pp\n",
 
                             "wget -P /etc/yum.repos.d ",
-                                { "Ref": "AWSMusingsS3URL" }, "/infrastructure-us-west-2/puppetlabs.repo",
+                                { "Ref": "AWSMusingsS3URL" }, "/infrastructure-us-west-2/config/puppetlabs.repo",
                                     " || error_exit 'wget puppetlabs.repo failed'\n",
                             "rpm --import http://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs",
                                 " || error_exit 'rpm import failed'\n",
