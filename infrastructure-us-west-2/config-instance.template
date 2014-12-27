@@ -177,9 +177,17 @@
 
                             "yum update -y || error_exit 'yum update failed'\n",
 
+                            "wget -P /etc/puppet ",
+                                { "Ref": "AWSMusingsS3URL" }, "/infrastructure-us-west-2/puppet.conf",
+                                    " || error_exit 'wget puppet.conf failed'\n",
+                            "sed -i -e \"s/{{DNS_ZONE}}/", { "Ref": "DNSZone" }, "/g\" /etc/puppet/puppet.conf\n",
+                            "sed -i -e \"s/{{FULLY_QUALIFIED_PARENT_DNS_ZONE}}/",
+                                { "Ref": "FullyQualifiedParentDNSZone" }, "/g\" /etc/puppet/puppet.conf\n",
+                            "touch /etc/puppet/manifests/site.pp\n",
+
                             "wget -P /etc/yum.repos.d ",
                                 { "Ref": "AWSMusingsS3URL" }, "/infrastructure-us-west-2/puppetlabs.repo",
-                                    " || error_exit 'wget puppet repo filed'\n",
+                                    " || error_exit 'wget puppetlabs.repo failed'\n",
                             "rpm --import http://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs",
                                 " || error_exit 'rpm import failed'\n",
                             "yum install puppet-server-3.7.3 -y || error_exit 'yum install failed'\n",
