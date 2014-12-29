@@ -133,7 +133,7 @@
                                     "Fn::Join": [ "", [
                                         "search ",
                                             { "Ref": "DNSZone" }, ".", { "Ref": "FullyQualifiedParentDNSZone" }, "\n",
-                                        "nameserver 10.", { "Ref": "SecondOctet" }, ".0.2\n"
+                                        "nameserver 127.0.0.1,10.", { "Ref": "SecondOctet" }, ".0.2\n"
                                     ] ]
                                 }
                             },
@@ -252,6 +252,18 @@
                             "chown named:named /var/log/named\n",
 
                             "yum update -y || error_exit 'yum update failed'\n",
+
+                            "wget -P /etc/yum.repos.d ", { "Ref": "AWSMusingsS3URL" }, "/common/puppetlabs.repo",
+                                " || error_exit 'wget puppetlabs.repo failed'\n",
+                            "rpm --import http://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs",
+                                " || error_exit 'rpm import failed'\n",
+                            "yum install puppet-3.7.3 -y || error_exit 'yum install failed'\n",
+                            "gem install puppet || error_exit 'gem install failed'\n",
+                            "wget -O /etc/puppet/puppet.conf ", { "Ref": "AWSMusingsS3URL" }, "/common/puppet.conf",
+                                " || error_exit 'wget puppet.conf failed'\n",
+                            "sed -i -e \"s/{{CONFIG_SERVER}}/", { "Ref": "DNSZone" }, "-config.", { "Ref": "DNSZone" },
+                                ".", { "Ref": "FullyQualifiedParentDNSZone" }, "/g\" /etc/puppet/puppet.conf\n",
+                            "chkconfig puppet on || error_exit 'chkconfig failed'\n",
 
                             "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "dns" ] ] },
                                 "/g\" /etc/sysconfig/network\n",

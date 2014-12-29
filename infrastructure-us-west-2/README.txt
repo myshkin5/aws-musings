@@ -8,7 +8,7 @@ Steps to create:
 2. Create VPN stack:
     https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/vpn.template
 
-3. Create Infrastructure stack:
+3. Create Public Infrastructure stack:
     https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/public-infrastructure.template
 
     NOTE: IF THE STACK IN STEP 3 IS BURNED DOWN, THE STACK IN STEP 1 WILL BE IN A BAD STATE.
@@ -32,8 +32,8 @@ Steps to create:
 7. Restarting is only necessary to make the previous change take effect.
     $ sudo /etc/init.d/named restart
 
-8. Create Infrastructure stack:
+8. Create Private Infrastructure stack:
     https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/private-infrastructure.template
 
-    NAT instance id: i-ac78eda0
-    Network ACL id:  acl-246cc941
+    NAT instance id: i-29c15025
+    Network ACL id:  acl-9c0eabf9

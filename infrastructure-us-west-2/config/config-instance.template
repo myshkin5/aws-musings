@@ -179,6 +179,12 @@
 
                             "yum update -y || error_exit 'yum update failed'\n",
 
+                            "wget -P /etc/yum.repos.d ", { "Ref": "AWSMusingsS3URL" }, "/common/puppetlabs.repo",
+                                " || error_exit 'wget puppetlabs.repo failed'\n",
+                            "rpm --import http://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs",
+                                " || error_exit 'rpm import failed'\n",
+                            "yum install puppet-server-3.7.3 -y || error_exit 'yum install failed'\n",
+                            "gem install puppet || error_exit 'gem install failed'\n",
                             "wget -O /etc/puppet/puppet.conf ",
                                 { "Ref": "AWSMusingsS3URL" }, "/infrastructure-us-west-2/config/master-puppet.conf",
                                     " || error_exit 'wget master-puppet.conf failed'\n",
@@ -186,15 +192,8 @@
                             "sed -i -e \"s/{{FULLY_QUALIFIED_PARENT_DNS_ZONE}}/",
                                 { "Ref": "FullyQualifiedParentDNSZone" }, "/g\" /etc/puppet/puppet.conf\n",
                             "touch /etc/puppet/manifests/site.pp\n",
-
-                            "wget -P /etc/yum.repos.d ",
-                                { "Ref": "AWSMusingsS3URL" }, "/infrastructure-us-west-2/config/puppetlabs.repo",
-                                    " || error_exit 'wget puppetlabs.repo failed'\n",
-                            "rpm --import http://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs",
-                                " || error_exit 'rpm import failed'\n",
-                            "yum install puppet-server-3.7.3 -y || error_exit 'yum install failed'\n",
-                            "gem install puppet || error_exit 'gem install failed'\n",
-                            "chkconfig puppetmaster on || error_exit 'chkconfig failed'\n",
+                            "chkconfig puppet on || error_exit 'chkconfig puppet failed'\n",
+                            "chkconfig puppetmaster on || error_exit 'chkconfig puppetmaster failed'\n",
 
                             "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "config" ] ] },
                                 "/g\" /etc/sysconfig/network\n",
