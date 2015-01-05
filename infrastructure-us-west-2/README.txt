@@ -35,5 +35,5 @@ Steps to create:
 8. Create Private Infrastructure stack:
     https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/private-infrastructure.template
 
-    NAT instance id: i-29c15025
-    Network ACL id:  acl-9c0eabf9
+    NAT instance id: i-8259c68e
+    Network ACL id:  acl-d6fb5cb3

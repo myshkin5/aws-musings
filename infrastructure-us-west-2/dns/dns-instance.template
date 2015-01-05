@@ -186,7 +186,7 @@
             },
             "Properties": {
                 "DisableApiTermination": "false",
-                "ImageId": "ami-d13845e1",
+                "ImageId": "ami-b5a7ea85",
                 "InstanceType": "t2.micro",
                 "KeyName": { "Ref": "KeyName" },
                 "Monitoring": "false",
@@ -251,13 +251,13 @@
                             "mkdir /var/log/named\n",
                             "chown named:named /var/log/named\n",
 
-                            "yum update -y || error_exit 'yum update failed'\n",
+                            "yum -y update || error_exit 'yum update failed'\n",
 
                             "wget -P /etc/yum.repos.d ", { "Ref": "AWSMusingsS3URL" }, "/common/puppetlabs.repo",
                                 " || error_exit 'wget puppetlabs.repo failed'\n",
                             "rpm --import http://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs",
                                 " || error_exit 'rpm import failed'\n",
-                            "yum install puppet-3.7.3 -y || error_exit 'yum install failed'\n",
+                            "yum -y install puppet-3.7.3 || error_exit 'yum install failed'\n",
                             "gem install puppet || error_exit 'gem install failed'\n",
                             "wget -O /etc/puppet/puppet.conf ", { "Ref": "AWSMusingsS3URL" }, "/common/puppet.conf",
                                 " || error_exit 'wget puppet.conf failed'\n",
