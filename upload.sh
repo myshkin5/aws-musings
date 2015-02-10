@@ -7,7 +7,6 @@ aws s3 sync --delete --acl public-read \
     --exclude LICENSE \
     --exclude README.md \
     --exclude upload.sh \
-    --exclude \*/\*.iml \
+    --exclude \*.iml \
     --exclude \*/README \
-    --exclude initial.template \
     . s3://aws-musings/

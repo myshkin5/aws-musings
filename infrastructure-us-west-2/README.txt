@@ -1,5 +1,3 @@
-Parameter scratch pad:
-
 Steps to create:
 
 1. Create VPC stack:
@@ -10,6 +8,10 @@ Steps to create:
 
 3. Create Public Infrastructure stack:
     https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/public-infrastructure.template
+
+    Parameter scratch pad:
+
+        Virtual Private Gateway: vgw-c83ce0d6
 
     NOTE: IF THE STACK IN STEP 3 IS BURNED DOWN, THE STACK IN STEP 1 WILL BE IN A BAD STATE.
     RESET THE VPC'S DHCP OPTIONS BEFORE ATTEMPTING TO REBUILD THE STACK IN STEP 3!!!!!!!!!!!
@@ -35,5 +37,8 @@ Steps to create:
 8. Create Private Infrastructure stack:
     https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/private-infrastructure.template
 
-    NAT instance id: i-8259c68e
-    Network ACL id:  acl-d6fb5cb3
+    Parameter scratch pad:
+
+        NAT instance id:         i-8259c68e
+        Network ACL id:          acl-d6fb5cb3
+        Virtual Private Gateway: vgw-c83ce0d6

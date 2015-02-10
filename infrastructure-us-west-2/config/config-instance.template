@@ -13,18 +13,13 @@
         "FullyQualifiedParentDNSZone": {
             "Type": "String",
             "Default": "compute.local",
-            "Description": "The parent DNS zone (should not start with .).",
+            "Description": "The parent DNS zone (should not start or end with .).",
             "AllowedPattern": "[a-z][a-z0-9\\-.]*[a-z0-9]",
             "ConstraintDescription": "can contain only lowercase letters, numbers, dashes and dots."
         },
         "KeyName": {
-            "Type": "String",
-            "Default": "internal",
-            "Description": "SSH key name used to connect to the config server via the ec2-user account.",
-            "MinLength": "1",
-            "MaxLength": "255",
-            "AllowedPattern": "[\\x20-\\x7E]*",
-            "ConstraintDescription": "can contain only ASCII characters."
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "Description": "SSH key name used to connect to the config server via the ec2-user account."
         },
         "AWSMusingsS3URL": {
             "Type": "String",
@@ -122,7 +117,7 @@
             "Properties": {
                 "DisableApiTermination": "false",
                 "ImageId": "ami-b5a7ea85",
-                "InstanceType": "t2.micro",
+                "InstanceType": "m3.large",
                 "KeyName": { "Ref": "KeyName" },
                 "Monitoring": "false",
                 "Tags": [
@@ -189,6 +184,7 @@
 
                             "yum -y update || error_exit 'yum update failed'\n",
 
+                            "yum -y install ruby19 || error_exit 'yum install ruby19 failed'\n",
                             "wget -P /etc/yum.repos.d ", { "Ref": "AWSMusingsS3URL" }, "/common/puppetlabs.repo",
                                 " || error_exit 'wget puppetlabs.repo failed'\n",
                             "rpm --import http://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs",
@@ -200,6 +196,7 @@
                             "yum -y --enablerepo=epel install foreman-installer",
                                 " || error_exit 'yum install foreman-installer failed'\n",
                             "gem install kafo || error_exit 'gem install kafo failed'\n",
+                            "#foreman-installer --foreman-db-type sqlite\n",
 
                             "# Initialize CloudFormation\n",
                             "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r ConfigInstance ",
@@ -224,11 +221,11 @@
 
         "ConfigInstanceWaitCondition": {
             "Type": "AWS::CloudFormation::WaitCondition",
-            "DependsOn": "ConfigInstance",
             "Properties": {
                 "Handle": { "Ref": "ConfigInstanceWaitHandle" },
                 "Timeout": "600"
-            }
+            },
+            "DependsOn": "ConfigInstance"
         }
 
     },

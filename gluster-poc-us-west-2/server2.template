@@ -13,13 +13,8 @@
             "Description": "The domain containing the server. The name plus the domain, separated by a dot, make up the server's fully qualified domain name."
         },
         "KeyName": {
-            "Type": "String",
-            "Default": "internal",
-            "Description": "SSH key name used to connect to the server via the ec2-user account.",
-            "MinLength": "1",
-            "MaxLength": "255",
-            "AllowedPattern": "[\\x20-\\x7E]*",
-            "ConstraintDescription": "can contain only ASCII characters."
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "Description": "SSH key name used to connect to the server via the ec2-user account."
         },
         "AWSMusingsS3URL": {
             "Type": "String",
@@ -233,11 +228,11 @@
 
         "Instance2WaitCondition": {
             "Type": "AWS::CloudFormation::WaitCondition",
-            "DependsOn": "Instance2",
             "Properties": {
                 "Handle": { "Ref": "Instance2WaitHandle" },
                 "Timeout": "600"
-            }
+            },
+            "DependsOn": "Instance2"
         },
 
         "Volume": {

@@ -40,6 +40,10 @@
             "Type": "String",
             "Description": "This id of the NAT instance to be added to private route tables."
         },
+        "VPNGatewayId": {
+            "Type": "String",
+            "Description": "The VPN gateway to which route tables will be connected via route propagation. Optional, no propagation occurs if not specified."
+        },
         "AWSMusingsS3URL": {
             "Type": "String",
             "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
@@ -70,6 +74,10 @@
             "Default": "20141120",
             "Description": "The expiration date for the project."
         }
+    },
+
+    "Conditions": {
+        "VPNGatewayIdDefined": { "Fn::Equals": [ { "Ref": "VPNGatewayId" }, "" ] }
     },
 
     "Resources": {
@@ -252,6 +260,15 @@
             "Properties": {
                 "RouteTableId": { "Ref": "PrivateRouteTable" },
                 "SubnetId": { "Ref": "PrivateSubnetC" }
+            }
+        },
+
+        "VPNGatewayRoutePropagation": {
+            "Type": "AWS::EC2::VPNGatewayRoutePropagation",
+            "Condition": "VPNGatewayIdDefined",
+            "Properties": {
+                "RouteTableIds": [ { "Ref": "PrivateRouteTable" } ],
+                "VpnGatewayId": { "Ref": "VPNGatewayId" }
             }
         },
 

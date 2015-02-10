@@ -18,13 +18,8 @@
             "ConstraintDescription": "can contain only lowercase letters, numbers, dashes and dots."
         },
         "KeyName": {
-            "Type": "String",
-            "Default": "default",
-            "Description": "SSH key name used to connect to the bastion server via the ec2-user account.",
-            "MinLength": "1",
-            "MaxLength": "255",
-            "AllowedPattern": "[\\x20-\\x7E]*",
-            "ConstraintDescription": "can contain only ASCII characters."
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "Description": "SSH key name used to connect to the bastion server via the ec2-user account."
         },
         "AWSMusingsS3URL": {
             "Type": "String",
@@ -179,18 +174,6 @@
 
                             "yum -y update || error_exit 'yum update failed'\n",
 
-                            "wget -P /etc/yum.repos.d ", { "Ref": "AWSMusingsS3URL" }, "/common/puppetlabs.repo",
-                                " || error_exit 'wget puppetlabs.repo failed'\n",
-                            "rpm --import http://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs",
-                                " || error_exit 'rpm import failed'\n",
-                            "yum -y install puppet-3.7.3 || error_exit 'yum install failed'\n",
-                            "gem install puppet || error_exit 'gem install failed'\n",
-                            "wget -O /etc/puppet/puppet.conf ", { "Ref": "AWSMusingsS3URL" }, "/common/puppet.conf",
-                                " || error_exit 'wget puppet.conf failed'\n",
-                            "sed -i -e \"s/{{CONFIG_SERVER}}/", { "Ref": "DNSZone" }, "-config.", { "Ref": "DNSZone" },
-                                ".", { "Ref": "FullyQualifiedParentDNSZone" }, "/g\" /etc/puppet/puppet.conf\n",
-                            "chkconfig puppet on || error_exit 'chkconfig failed'\n",
-
                             "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "bastion" ] ] },
                                 "/g\" /etc/sysconfig/network\n",
                             "sed -i -e \"s/localhost localhost.localdomain/",
@@ -221,11 +204,11 @@
 
         "BastionInstanceWaitCondition": {
             "Type": "AWS::CloudFormation::WaitCondition",
-            "DependsOn": "BastionInstance",
             "Properties": {
                 "Handle": { "Ref": "BastionInstanceWaitHandle" },
                 "Timeout": "600"
-            }
+            },
+            "DependsOn": "BastionInstance"
         }
 
     }
