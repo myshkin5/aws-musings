@@ -1,13 +1,13 @@
 Steps to create:
 
 1. Create VPC stack:
-    https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/vpc.template
+    https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure/vpc.template
 
 2. Create VPN stack:
-    https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/vpn.template
+    https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure/vpn.template
 
 3. Create Public Infrastructure stack:
-    https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/public-infrastructure.template
+    https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure/public-infrastructure.template
 
     Parameter scratch pad:
 
@@ -35,7 +35,7 @@ Steps to create:
     $ sudo /etc/init.d/named restart
 
 8. Create Private Infrastructure stack:
-    https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure-us-west-2/private-infrastructure.template
+    https://s3-us-west-2.amazonaws.com/aws-musings/infrastructure/private-infrastructure.template
 
     Parameter scratch pad:
 

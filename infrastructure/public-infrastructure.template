@@ -619,7 +619,7 @@
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                    "infrastructure-us-west-2/bastion-instance.template" ] ] },
+                    "infrastructure/bastion-instance.template" ] ] },
                 "Parameters": {
                     "ImageId": { "Fn::FindInMap": [ "RegionMap", { "Ref": "AWS::Region" }, "standard" ] },
                     "DNSZone": { "Ref": "DNSZone" },
@@ -640,7 +640,7 @@
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                    "infrastructure-us-west-2/nat-instance.template" ] ] },
+                    "infrastructure/nat-instance.template" ] ] },
                 "Parameters": {
                     "ImageId": { "Fn::FindInMap": [ "RegionMap", { "Ref": "AWS::Region" }, "nat" ] },
                     "DNSZone": { "Ref": "DNSZone" },
@@ -661,7 +661,7 @@
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                    "infrastructure-us-west-2/dns/dns-instance.template" ] ] },
+                    "infrastructure/dns/dns-instance.template" ] ] },
                 "Parameters": {
                     "ImageId": { "Fn::FindInMap": [ "RegionMap", { "Ref": "AWS::Region" }, "standard" ] },
                     "DNSZone": { "Ref": "DNSZone" },

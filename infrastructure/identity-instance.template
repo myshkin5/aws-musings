@@ -1,13 +1,9 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
 
-    "Description": "The VPC's DNS server.",
+    "Description": "The VPC's identity server.",
 
     "Parameters": {
-        "ImageId": {
-            "Type": "String",
-            "Description": "The AMI used to create the instance."
-        },
         "DNSZone": {
             "Type": "String",
             "Description": "The DNS zone name of the VPC (should not end in 'vpc', .FullyQualifiedParentDNSZone will be appended).",
@@ -21,16 +17,9 @@
             "AllowedPattern": "[a-z][a-z0-9\\-.]*[a-z0-9]",
             "ConstraintDescription": "can contain only lowercase letters, numbers, dashes and dots."
         },
-        "SecondOctet": {
-            "Type": "Number",
-            "Default": "80",
-            "MinValue": "0",
-            "MaxValue": "255",
-            "Description": "The second octet of the CIDR block for the VPC."
-        },
         "KeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName",
-            "Description": "SSH key name used to connect to the DNS server via the ec2-user account."
+            "Description": "SSH key name used to connect to the identity server via the ec2-user account."
         },
         "AWSMusingsS3URL": {
             "Type": "String",
@@ -43,7 +32,7 @@
         },
         "SecurityGroupId": {
             "Type": "String",
-            "Description": "The id of the security group protecting the DNS server."
+            "Description": "The id of the security group protecting the identity server."
         },
         "ProjectName": {
             "Type": "String",
@@ -73,70 +62,25 @@
     },
 
     "Resources": {
-        "DNSInstance": {
+        "IdentityInstance": {
             "Type": "AWS::EC2::Instance",
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "config": {
                         "packages": {
-                            "yum": { "bind": [] }
+                            "yum": {
+                                "openldap-servers": [],
+                                "openldap-clients": []
+                            }
                         },
                         "services": {
                             "sysvinit": {
-                                "named": {
-                                    "enabled": "true",
-                                    "files": [ "/etc/named.conf" ]
+                                "slapd": {
+                                    "enabled": "true"
                                 }
                             }
                         },
                         "files": {
-                            "/etc/named.conf": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                                    "infrastructure-us-west-2/dns/named.conf" ] ] },
-                                "context" : {
-                                    "DNS_ZONE" : { "Ref": "DNSZone" },
-                                    "FULLY_QUALIFIED_PARENT_DNS_ZONE" : { "Ref": "FullyQualifiedParentDNSZone" },
-                                    "SECOND_OCTET" : { "Ref": "SecondOctet" }
-                                }
-                            },
-                            "/var/named/dynamic/named.vpc": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                                    "infrastructure-us-west-2/dns/named.vpc" ] ] },
-                                "context" : {
-                                    "DNS_ZONE" : { "Ref": "DNSZone" },
-                                    "FULLY_QUALIFIED_PARENT_DNS_ZONE" : { "Ref": "FullyQualifiedParentDNSZone" },
-                                    "SECOND_OCTET" : { "Ref": "SecondOctet" }
-                                },
-                                "mode": "000644",
-                                "owner": "named",
-                                "group": "named"
-                            },
-                            "/var/named/dynamic/named.vpc-rev": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                                    "infrastructure-us-west-2/dns/named.vpc-rev" ] ] },
-                                "context" : {
-                                    "DNS_ZONE" : { "Ref": "DNSZone" },
-                                    "FULLY_QUALIFIED_PARENT_DNS_ZONE" : { "Ref": "FullyQualifiedParentDNSZone" },
-                                    "SECOND_OCTET" : { "Ref": "SecondOctet" }
-                                },
-                                "mode": "000644",
-                                "owner": "named",
-                                "group": "named"
-                            },
-                            "/etc/sysconfig/network-scripts/ifcfg-eth0": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                                    "infrastructure-us-west-2/dns/ifcfg-eth0" ] ] }
-                            },
-                            "/etc/resolv.conf": {
-                                "content": {
-                                    "Fn::Join": [ "", [
-                                        "search ",
-                                            { "Ref": "DNSZone" }, ".", { "Ref": "FullyQualifiedParentDNSZone" }, "\n",
-                                        "nameserver 127.0.0.1,10.", { "Ref": "SecondOctet" }, ".0.2\n"
-                                    ] ]
-                                }
-                            },
-
                             "/etc/cfn/cfn-hup.conf": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                                     "common/cfn-hup.conf" ] ] },
@@ -154,7 +98,7 @@
                                 "context": {
                                     "STACK_ID": { "Ref": "AWS::StackId" },
                                     "REGION": { "Ref": "AWS::Region" },
-                                    "INSTANCE_NAME": "DNSInstance"
+                                    "INSTANCE_NAME": "IdentityInstance"
                                 }
                             },
 
@@ -162,7 +106,7 @@
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                                     "common/dhclient.conf" ] ] },
                                 "context": {
-                                    "FQDN": { "Fn::Join": [ "", [ { "Ref": "DNSZone" }, "-dns.",
+                                    "FQDN": { "Fn::Join": [ "", [ { "Ref": "DNSZone" }, "-identity.",
                                         { "Ref": "DNSZone" }, ".", { "Ref": "FullyQualifiedParentDNSZone" } ] ] }
                                 }
                             },
@@ -185,14 +129,14 @@
             },
             "Properties": {
                 "DisableApiTermination": "false",
-                "ImageId": { "Ref": "ImageId" },
+                "ImageId": "ami-b5a7ea85",
                 "InstanceType": "t2.micro",
                 "KeyName": { "Ref": "KeyName" },
                 "Monitoring": "false",
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "dns" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "identity" ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -221,17 +165,11 @@
                 ],
                 "NetworkInterfaces": [
                     {
-                        "AssociatePublicIpAddress": "true",
+                        "AssociatePublicIpAddress": "false",
                         "DeleteOnTermination": "true",
                         "Description": "Primary network interface",
                         "DeviceIndex": 0,
                         "SubnetId": { "Ref": "SubnetId" },
-                        "PrivateIpAddresses": [
-                            {
-                                "PrivateIpAddress": { "Fn::Join": [ ".", [ "10", { "Ref": "SecondOctet" }, "2.10" ] ] },
-                                "Primary": "true"
-                            }
-                        ],
                         "GroupSet": [ { "Ref": "SecurityGroupId" } ]
                     }
                 ],
@@ -243,32 +181,29 @@
                             "# Helper function\n",
                             "function error_exit\n",
                             "{\n",
-                            "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '", { "Ref": "DNSInstanceWaitHandle" }, "'\n",
+                            "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '", { "Ref": "IdentityInstanceWaitHandle" }, "'\n",
                             "  exit 1\n",
                             "}\n",
 
-                            "mkdir /var/log/named\n",
-                            "chown named:named /var/log/named\n",
-
                             "yum -y update || error_exit 'yum update failed'\n",
 
-                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "dns" ] ] },
+                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "identity" ] ] },
                                 "/g\" /etc/sysconfig/network\n",
                             "sed -i -e \"s/localhost localhost.localdomain/",
-                                { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "dns" ] ] }, " ",
-                                { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "dns" ] ] },
+                                { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "identity" ] ] }, " ",
+                                { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "identity" ] ] },
                                 ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
 
                             "# Initialize CloudFormation\n",
-                            "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r DNSInstance ",
+                            "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r IdentityInstance ",
                                 "--region ", { "Ref": "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
 
                             "# Start up the cfn-hup daemon to listen for changes to the metadata\n",
                             "/opt/aws/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n",
 
                             "# All done so signal success\n",
-                            "/opt/aws/bin/cfn-signal -e 0 -r \"DNSInstance setup complete\" '",
-                                { "Ref": "DNSInstanceWaitHandle" }, "'\n",
+                            "/opt/aws/bin/cfn-signal -e 0 -r \"IdentityInstance setup complete\" '",
+                                { "Ref": "IdentityInstanceWaitHandle" }, "'\n",
                             "reboot\n"
                         ] ]
                     }
@@ -276,24 +211,24 @@
             }
         },
 
-        "DNSInstanceWaitHandle": {
+        "IdentityInstanceWaitHandle": {
             "Type": "AWS::CloudFormation::WaitConditionHandle"
         },
 
-        "DNSInstanceWaitCondition": {
+        "IdentityInstanceWaitCondition": {
             "Type": "AWS::CloudFormation::WaitCondition",
             "Properties": {
-                "Handle": { "Ref": "DNSInstanceWaitHandle" },
+                "Handle": { "Ref": "IdentityInstanceWaitHandle" },
                 "Timeout": "600"
             },
-            "DependsOn": "DNSInstance"
+            "DependsOn": "IdentityInstance"
         }
 
     },
 
     "Outputs": {
         "PrivateIP": {
-            "Value": { "Fn::GetAtt": [ "DNSInstance", "PrivateIp" ] }
+            "Value": { "Fn::GetAtt": [ "IdentityInstance", "PrivateIp" ] }
         }
     }
 
