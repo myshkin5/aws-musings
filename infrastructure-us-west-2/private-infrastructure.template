@@ -77,7 +77,7 @@
     },
 
     "Conditions": {
-        "VPNGatewayIdDefined": { "Fn::Equals": [ { "Ref": "VPNGatewayId" }, "" ] }
+        "VPNGatewayIdDefined": { "Fn::Not": [ { "Fn::Equals": [ { "Ref": "VPNGatewayId" }, "" ] } ] }
     },
 
     "Resources": {
@@ -85,12 +85,13 @@
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "CidrBlock": { "Fn::Join": [ ".", [ "10", { "Ref": "SecondOctet" }, "50.0/24" ] ] },
-                "AvailabilityZone": "us-west-2a",
+                "AvailabilityZone": { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "a" ] ] },
                 "VpcId": { "Ref": "VPCId" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2a-private-subnet" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" },
+                            { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "a-private-subnet" ] ] } ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -123,12 +124,13 @@
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "CidrBlock": { "Fn::Join": [ ".", [ "10", { "Ref": "SecondOctet" }, "51.0/24" ] ] },
-                "AvailabilityZone": "us-west-2b",
+                "AvailabilityZone": { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "a" ] ] },
                 "VpcId": { "Ref": "VPCId" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2b-private-subnet" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" },
+                            { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "b-private-subnet" ] ] } ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -161,12 +163,13 @@
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "CidrBlock": { "Fn::Join": [ ".", [ "10", { "Ref": "SecondOctet" }, "52.0/24" ] ] },
-                "AvailabilityZone": "us-west-2c",
+                "AvailabilityZone": { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "a" ] ] },
                 "VpcId": { "Ref": "VPCId" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2c-private-subnet" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" },
+                            { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "c-private-subnet" ] ] } ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -291,77 +294,6 @@
             "Properties": {
                 "NetworkAclId": { "Ref": "NetworkACLId" },
                 "SubnetId": { "Ref": "PrivateSubnetC" }
-            }
-        },
-
-        "ConfigSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "Configuration server security group",
-                "VpcId": { "Ref": "VPCId" },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "config-sg" ] ] }
-                    },
-                    {
-                        "Key": "AWSAccountID",
-                        "Value": { "Ref": "AWS::AccountId" }
-                    },
-                    {
-                        "Key": "ProjectName",
-                        "Value": { "Ref": "ProjectName" }
-                    },
-                    {
-                        "Key": "ProjectPOC",
-                        "Value": { "Ref": "ProjectPOC" }
-                    },
-                    {
-                        "Key": "ProjectWBSCode",
-                        "Value": { "Ref": "ProjectWBSCode" }
-                    },
-                    {
-                        "Key": "ProjectPONumber",
-                        "Value": { "Ref": "ProjectPONumber" }
-                    },
-                    {
-                        "Key": "ExpirationDate",
-                        "Value": { "Ref": "ExpirationDate" }
-                    }
-                ],
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "10.0.0.0/8"
-                    }
-                ],
-                "SecurityGroupEgress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "0.0.0.0/0"
-                    }
-                ]
-            }
-        },
-
-        "ConfigInstanceStack": {
-            "Type": "AWS::CloudFormation::Stack",
-            "Properties": {
-                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                    "infrastructure-us-west-2/config/config-instance.template" ] ] },
-                "Parameters": {
-                    "DNSZone": { "Ref": "DNSZone" },
-                    "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },
-                    "KeyName": { "Ref": "InternalKeyName" },
-                    "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
-                    "SubnetId": { "Ref": "PrivateSubnetA" },
-                    "SecurityGroupId": { "Ref": "ConfigSecurityGroup" },
-                    "ProjectName": { "Ref": "ProjectName" },
-                    "ProjectPOC": { "Ref": "ProjectPOC" },
-                    "ProjectWBSCode": { "Ref": "ProjectWBSCode" },
-                    "ProjectPONumber": { "Ref": "ProjectPONumber" },
-                    "ExpirationDate": { "Ref": "ExpirationDate" }
-                }
             }
         }
 

@@ -4,6 +4,10 @@
     "Description": "The VPC's NAT server.",
 
     "Parameters": {
+        "ImageId": {
+            "Type": "String",
+            "Description": "The AMI used to create the instance."
+        },
         "DNSZone": {
             "Type": "String",
             "Description": "The DNS zone name of the VPC (should not end in 'vpc', used in naming the instance).",
@@ -116,7 +120,7 @@
             },
             "Properties": {
                 "DisableApiTermination": "false",
-                "ImageId": "ami-290f4119",
+                "ImageId": { "Ref": "ImageId" },
                 "InstanceType": "t2.micro",
                 "KeyName": { "Ref": "KeyName" },
                 "Monitoring": "false",

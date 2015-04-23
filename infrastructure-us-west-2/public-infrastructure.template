@@ -77,8 +77,15 @@
         }
     },
 
+    "Mappings": {
+        "RegionMap" : {
+            "us-east-1": { "standard": "ami-1ecae776", "nat": "ami-303b1458" },
+            "us-west-2": { "standard": "ami-e7527ed7", "nat": "ami-69ae8259" }
+        }
+    },
+
     "Conditions": {
-        "VPNGatewayIdDefined": { "Fn::Equals": [ { "Ref": "VPNGatewayId" }, "" ] }
+        "VPNGatewayIdDefined": { "Fn::Not": [ { "Fn::Equals": [ { "Ref": "VPNGatewayId" }, "" ] } ] }
     },
 
     "Resources": {
@@ -86,12 +93,13 @@
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "CidrBlock": { "Fn::Join": [ ".", [ "10", { "Ref": "SecondOctet" }, "0.0/24" ] ] },
-                "AvailabilityZone": "us-west-2a",
+                "AvailabilityZone": { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "a" ] ] },
                 "VpcId": { "Ref": "VPCId" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2a-public-subnet" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" },
+                            { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "a-public-subnet" ] ] } ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -124,12 +132,13 @@
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "CidrBlock": { "Fn::Join": [ ".", [ "10", { "Ref": "SecondOctet" }, "1.0/24" ] ] },
-                "AvailabilityZone": "us-west-2b",
+                "AvailabilityZone": { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "b" ] ] },
                 "VpcId": { "Ref": "VPCId" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2b-public-subnet" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" },
+                            { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "b-public-subnet" ] ] } ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -162,12 +171,13 @@
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "CidrBlock": { "Fn::Join": [ ".", [ "10", { "Ref": "SecondOctet" }, "2.0/24" ] ] },
-                "AvailabilityZone": "us-west-2c",
+                "AvailabilityZone": { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "c" ] ] },
                 "VpcId": { "Ref": "VPCId" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2c-public-subnet" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" },
+                            { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "c-public-subnet" ] ] } ] ] }
                     },
                     {
                         "Key": "AWSAccountID",
@@ -611,6 +621,7 @@
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                     "infrastructure-us-west-2/bastion-instance.template" ] ] },
                 "Parameters": {
+                    "ImageId": { "Fn::FindInMap": [ "RegionMap", { "Ref": "AWS::Region" }, "standard" ] },
                     "DNSZone": { "Ref": "DNSZone" },
                     "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },
                     "KeyName": { "Ref": "BastionKeyName" },
@@ -631,6 +642,7 @@
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                     "infrastructure-us-west-2/nat-instance.template" ] ] },
                 "Parameters": {
+                    "ImageId": { "Fn::FindInMap": [ "RegionMap", { "Ref": "AWS::Region" }, "nat" ] },
                     "DNSZone": { "Ref": "DNSZone" },
                     "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },
                     "KeyName": { "Ref": "InternalKeyName" },
@@ -651,6 +663,7 @@
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                     "infrastructure-us-west-2/dns/dns-instance.template" ] ] },
                 "Parameters": {
+                    "ImageId": { "Fn::FindInMap": [ "RegionMap", { "Ref": "AWS::Region" }, "standard" ] },
                     "DNSZone": { "Ref": "DNSZone" },
                     "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },
                     "SecondOctet": { "Ref": "SecondOctet" },

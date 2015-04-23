@@ -11,7 +11,7 @@ Steps to create:
 
     Parameter scratch pad:
 
-        Virtual Private Gateway: vgw-c83ce0d6
+        Virtual Private Gateway: vgw-7c3be762
 
     NOTE: IF THE STACK IN STEP 3 IS BURNED DOWN, THE STACK IN STEP 1 WILL BE IN A BAD STATE.
     RESET THE VPC'S DHCP OPTIONS BEFORE ATTEMPTING TO REBUILD THE STACK IN STEP 3!!!!!!!!!!!
@@ -39,6 +39,6 @@ Steps to create:
 
     Parameter scratch pad:
 
-        NAT instance id:         i-8259c68e
-        Network ACL id:          acl-d6fb5cb3
-        Virtual Private Gateway: vgw-c83ce0d6
+        NAT instance id:         i-5d7f4c51
+        Network ACL id:          acl-da8336bf
+        Virtual Private Gateway: vgw-7c3be762
