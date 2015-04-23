@@ -53,9 +53,13 @@
     },
 
     "Mappings": {
-        "RegionMap" : {
+        "AMIRegionMap": {
             "us-east-1": { "standard": "ami-1ecae776", "nat": "ami-303b1458" },
             "us-west-2": { "standard": "ami-e7527ed7", "nat": "ami-69ae8259" }
+        },
+        "AZRegionMap": {
+            "us-east-1": { "a": "us-east-1a", "b": "us-east-1d", "c": "us-east-1c" },
+            "us-west-2": { "a": "us-west-2a", "b": "us-west-2b", "c": "us-west-2c" }
         }
     },
 
@@ -68,7 +72,7 @@
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "CidrBlock": { "Fn::Join": [ ".", [ "10", { "Ref": "SecondOctet" }, "0.0/24" ] ] },
-                "AvailabilityZone": { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "a" ] ] },
+                "AvailabilityZone": { "Fn::FindInMap": [ "AZRegionMap", { "Ref": "AWS::Region" }, "a" ] },
                 "VpcId": { "Ref": "VPCId" },
                 "Tags": [
                     {
@@ -83,7 +87,7 @@
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "CidrBlock": { "Fn::Join": [ ".", [ "10", { "Ref": "SecondOctet" }, "1.0/24" ] ] },
-                "AvailabilityZone": { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "b" ] ] },
+                "AvailabilityZone": { "Fn::FindInMap": [ "AZRegionMap", { "Ref": "AWS::Region" }, "b" ] },
                 "VpcId": { "Ref": "VPCId" },
                 "Tags": [
                     {
@@ -98,7 +102,7 @@
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "CidrBlock": { "Fn::Join": [ ".", [ "10", { "Ref": "SecondOctet" }, "2.0/24" ] ] },
-                "AvailabilityZone": { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, "c" ] ] },
+                "AvailabilityZone": { "Fn::FindInMap": [ "AZRegionMap", { "Ref": "AWS::Region" }, "c" ] },
                 "VpcId": { "Ref": "VPCId" },
                 "Tags": [
                     {
@@ -356,7 +360,7 @@
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                     "infrastructure/bastion-instance.template" ] ] },
                 "Parameters": {
-                    "ImageId": { "Fn::FindInMap": [ "RegionMap", { "Ref": "AWS::Region" }, "standard" ] },
+                    "ImageId": { "Fn::FindInMap": [ "AMIRegionMap", { "Ref": "AWS::Region" }, "standard" ] },
                     "DNSZone": { "Ref": "DNSZone" },
                     "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },
                     "KeyName": { "Ref": "BastionKeyName" },
@@ -372,7 +376,7 @@
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                     "infrastructure/nat-instance.template" ] ] },
                 "Parameters": {
-                    "ImageId": { "Fn::FindInMap": [ "RegionMap", { "Ref": "AWS::Region" }, "nat" ] },
+                    "ImageId": { "Fn::FindInMap": [ "AMIRegionMap", { "Ref": "AWS::Region" }, "nat" ] },
                     "DNSZone": { "Ref": "DNSZone" },
                     "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },
                     "KeyName": { "Ref": "InternalKeyName" },
@@ -388,7 +392,7 @@
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                     "infrastructure/dns/dns-instance.template" ] ] },
                 "Parameters": {
-                    "ImageId": { "Fn::FindInMap": [ "RegionMap", { "Ref": "AWS::Region" }, "standard" ] },
+                    "ImageId": { "Fn::FindInMap": [ "AMIRegionMap", { "Ref": "AWS::Region" }, "standard" ] },
                     "DNSZone": { "Ref": "DNSZone" },
                     "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },
                     "SecondOctet": { "Ref": "SecondOctet" },
