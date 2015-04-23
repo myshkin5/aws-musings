@@ -48,31 +48,6 @@
             "Type": "String",
             "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
             "Description": "S3 path to aws-musings."
-        },
-        "ProjectName": {
-            "Type": "String",
-            "Default": "GlusterFS Proof of Concept",
-            "Description": "The name of the project."
-        },
-        "ProjectPOC": {
-            "Type": "String",
-            "Default": "Dwayne Schultz",
-            "Description": "The point of contact for the project."
-        },
-        "ProjectWBSCode": {
-            "Type": "String",
-            "Default": "DISTDEL.EXP.14",
-            "Description": "The work breakdown structure code for the project."
-        },
-        "ProjectPONumber": {
-            "Type": "String",
-            "Default": "TBD",
-            "Description": "The purchase order number for the project."
-        },
-        "ExpirationDate": {
-            "Type": "String",
-            "Default": "20141120",
-            "Description": "The expiration date for the project."
         }
     },
 
@@ -87,30 +62,6 @@
                     {
                         "Key": "Name",
                         "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2a-private-subnet" ] ] }
-                    },
-                    {
-                        "Key": "AWSAccountID",
-                        "Value": { "Ref": "AWS::AccountId" }
-                    },
-                    {
-                        "Key": "ProjectName",
-                        "Value": { "Ref": "ProjectName" }
-                    },
-                    {
-                        "Key": "ProjectPOC",
-                        "Value": { "Ref": "ProjectPOC" }
-                    },
-                    {
-                        "Key": "ProjectWBSCode",
-                        "Value": { "Ref": "ProjectWBSCode" }
-                    },
-                    {
-                        "Key": "ProjectPONumber",
-                        "Value": { "Ref": "ProjectPONumber" }
-                    },
-                    {
-                        "Key": "ExpirationDate",
-                        "Value": { "Ref": "ExpirationDate" }
                     }
                 ]
             }
@@ -125,30 +76,6 @@
                     {
                         "Key": "Name",
                         "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "us-west-2b-private-subnet" ] ] }
-                    },
-                    {
-                        "Key": "AWSAccountID",
-                        "Value": { "Ref": "AWS::AccountId" }
-                    },
-                    {
-                        "Key": "ProjectName",
-                        "Value": { "Ref": "ProjectName" }
-                    },
-                    {
-                        "Key": "ProjectPOC",
-                        "Value": { "Ref": "ProjectPOC" }
-                    },
-                    {
-                        "Key": "ProjectWBSCode",
-                        "Value": { "Ref": "ProjectWBSCode" }
-                    },
-                    {
-                        "Key": "ProjectPONumber",
-                        "Value": { "Ref": "ProjectPONumber" }
-                    },
-                    {
-                        "Key": "ExpirationDate",
-                        "Value": { "Ref": "ExpirationDate" }
                     }
                 ]
             }
@@ -193,30 +120,6 @@
                     {
                         "Key": "Name",
                         "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "server-sg" ] ] }
-                    },
-                    {
-                        "Key": "AWSAccountID",
-                        "Value": { "Ref": "AWS::AccountId" }
-                    },
-                    {
-                        "Key": "ProjectName",
-                        "Value": { "Ref": "ProjectName" }
-                    },
-                    {
-                        "Key": "ProjectPOC",
-                        "Value": { "Ref": "ProjectPOC" }
-                    },
-                    {
-                        "Key": "ProjectWBSCode",
-                        "Value": { "Ref": "ProjectWBSCode" }
-                    },
-                    {
-                        "Key": "ProjectPONumber",
-                        "Value": { "Ref": "ProjectPONumber" }
-                    },
-                    {
-                        "Key": "ExpirationDate",
-                        "Value": { "Ref": "ExpirationDate" }
                     }
                 ],
                 "SecurityGroupIngress": [
@@ -246,12 +149,7 @@
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
                     "AvailabilityZone": "us-west-2a",
                     "SubnetId": { "Ref": "PrivateSubnetA" },
-                    "SecurityGroupId": { "Ref": "SecurityGroup" },
-                    "ProjectName": { "Ref": "ProjectName" },
-                    "ProjectPOC": { "Ref": "ProjectPOC" },
-                    "ProjectWBSCode": { "Ref": "ProjectWBSCode" },
-                    "ProjectPONumber": { "Ref": "ProjectPONumber" },
-                    "ExpirationDate": { "Ref": "ExpirationDate" }
+                    "SecurityGroupId": { "Ref": "SecurityGroup" }
                 }
             },
             "DependsOn": "Server2InstanceStack"
@@ -268,12 +166,7 @@
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
                     "AvailabilityZone": "us-west-2b",
                     "SubnetId": { "Ref": "PrivateSubnetB" },
-                    "SecurityGroupId": { "Ref": "SecurityGroup" },
-                    "ProjectName": { "Ref": "ProjectName" },
-                    "ProjectPOC": { "Ref": "ProjectPOC" },
-                    "ProjectWBSCode": { "Ref": "ProjectWBSCode" },
-                    "ProjectPONumber": { "Ref": "ProjectPONumber" },
-                    "ExpirationDate": { "Ref": "ExpirationDate" }
+                    "SecurityGroupId": { "Ref": "SecurityGroup" }
                 }
             }
         }
