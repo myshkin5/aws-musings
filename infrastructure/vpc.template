@@ -6,7 +6,7 @@
     "Parameters": {
         "SecondOctet": {
             "Type": "Number",
-            "Default": "80",
+            "Default": "0",
             "MinValue": "0",
             "MaxValue": "255",
             "Description": "The second octet of the CIDR block for the VPC."

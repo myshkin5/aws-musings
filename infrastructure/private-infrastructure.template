@@ -6,20 +6,20 @@
     "Parameters": {
         "DNSZone": {
             "Type": "String",
-            "Description": "The DNS zone name of the VPC (should not end in 'vpc', .FullyQualifiedParentDNSZone will be appended).",
+            "Description": "The DNS zone name of the VPC (should not end in 'vpc', .FullyQualifiedInternalParentDNSZone will be appended).",
             "AllowedPattern": "[a-z0-9\\-]*",
-            "ConstraintDescription": "can contain only lowercase letters, numbers and dashes."
+            "ConstraintDescription": " must contain only lowercase letters, numbers and dashes"
         },
-        "FullyQualifiedParentDNSZone": {
+        "FullyQualifiedInternalParentDNSZone": {
             "Type": "String",
             "Default": "compute.local",
-            "Description": "The parent DNS zone (should not start or end with .).",
+            "Description": "The internal parent DNS zone (should not start or end with .).",
             "AllowedPattern": "[a-z][a-z0-9\\-.]*[a-z0-9]",
-            "ConstraintDescription": "can contain only lowercase letters, numbers, dashes and dots."
+            "ConstraintDescription": " must contain only lowercase letters, numbers, dashes and dots"
         },
         "SecondOctet": {
             "Type": "Number",
-            "Default": "80",
+            "Default": "0",
             "MinValue": "0",
             "MaxValue": "255",
             "Description": "The second octet of the CIDR block for the VPC."
@@ -46,7 +46,7 @@
         },
         "AWSMusingsS3URL": {
             "Type": "String",
-            "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
+            "Default": "https://s3.amazonaws.com/aws-musings-us-east-1",
             "Description": "S3 path to aws-musings."
         }
     },

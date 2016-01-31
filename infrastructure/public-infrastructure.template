@@ -6,20 +6,26 @@
     "Parameters": {
         "DNSZone": {
             "Type": "String",
-            "Description": "The DNS zone name of the VPC (should not end in 'vpc', .FullyQualifiedParentDNSZone will be appended).",
+            "Description": "The DNS zone name of the VPC (should not end in 'vpc', .FullyQualifiedInternalParentDNSZone will be appended).",
             "AllowedPattern": "[a-z0-9\\-]*",
-            "ConstraintDescription": "can contain only lowercase letters, numbers and dashes."
+            "ConstraintDescription": "must contain only lowercase letters, numbers and dashes"
         },
-        "FullyQualifiedParentDNSZone": {
+        "FullyQualifiedInternalParentDNSZone": {
             "Type": "String",
             "Default": "compute.local",
-            "Description": "The parent DNS zone (should not start or end with .).",
+            "Description": "The internal parent DNS zone (should not start or end with .).",
             "AllowedPattern": "[a-z][a-z0-9\\-.]*[a-z0-9]",
-            "ConstraintDescription": "can contain only lowercase letters, numbers, dashes and dots."
+            "ConstraintDescription": "must contain only lowercase letters, numbers, dashes and dots"
+        },
+        "FullyQualifiedExternalParentDNSZone": {
+            "Type": "String",
+            "Description": "The external parent DNS zone (should not start or end with .). Optional, Route 53 resources will be created if specified.",
+            "AllowedPattern": "([a-z][a-z0-9\\-.]*[a-z0-9])|(^$)",
+            "ConstraintDescription": "must contain only lowercase letters, numbers, dashes and dots, optional"
         },
         "SecondOctet": {
             "Type": "Number",
-            "Default": "80",
+            "Default": "0",
             "MinValue": "0",
             "MaxValue": "255",
             "Description": "The second octet of the CIDR block for the VPC."
@@ -28,18 +34,20 @@
             "Type": "AWS::EC2::VPC::Id",
             "Description": "The id of the VPC in which the resources will be created."
         },
-        "BastionKeyName": {
-            "Type": "AWS::EC2::KeyPair::KeyName",
-            "Description": "SSH key name used to connect with the bastion server via the ec2-user account."
-        },
-        "BastionSSHCIDRIP": {
+        "JumpBoxEIPAddress": {
             "Type": "String",
-            "Default": "24.9.253.190/32",
-            "Description": "Range of IP addresses that will be able to connect to the bastion server via SSH."
+            "Description": "An EIP reserved for the jump box. Optional, a public IP address is reserved if not specified.",
+            "AllowedPattern": "((\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3}))|(^$)",
+            "ConstraintDescription": "must contain four dot-separated octets, optional"
         },
-        "InternalKeyName": {
+        "JumpBoxKeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName",
-            "Description": "SSH key name used to connect with internal servers via the ec2-user account."
+            "Description": "SSH key name used to connect with the jump box via the ec2-user account."
+        },
+        "JumpBoxSSHCIDRIP": {
+            "Type": "String",
+            "Default": "50.183.202.137/32",
+            "Description": "Range of IP addresses that will be able to connect to the jump box via SSH."
         },
         "VPNGatewayId": {
             "Type": "String",
@@ -47,18 +55,18 @@
         },
         "AWSMusingsS3URL": {
             "Type": "String",
-            "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
+            "Default": "https://s3.amazonaws.com/aws-musings-us-east-1",
             "Description": "S3 path to aws-musings."
         }
     },
 
     "Mappings": {
         "AMIRegionMap": {
-            "us-east-1": { "standard": "ami-1ecae776", "nat": "ami-303b1458" },
-            "us-west-2": { "standard": "ami-e7527ed7", "nat": "ami-69ae8259" }
+            "us-east-1": { "standard": "ami-fce3c696" },
+            "us-west-2": { "standard": "ami-9abea4fb" }
         },
         "AZRegionMap": {
-            "us-east-1": { "a": "us-east-1a", "b": "us-east-1d", "c": "us-east-1c" },
+            "us-east-1": { "a": "us-east-1a", "b": "us-east-1b", "c": "us-east-1c" },
             "us-west-2": { "a": "us-west-2a", "b": "us-west-2b", "c": "us-west-2c" }
         }
     },
@@ -247,40 +255,15 @@
             }
         },
 
-        "DHCPOptions": {
-            "Type": "AWS::EC2::DHCPOptions",
-            "Properties": {
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": { "Fn::Join": [ "-",
-                            [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "dopt" ] ] }
-                    }
-                ],
-                "DomainName": { "Fn::Join": [ ".",
-                    [ { "Ref": "DNSZone" }, { "Ref": "FullyQualifiedParentDNSZone" } ] ] },
-                "DomainNameServers": [ { "Fn::GetAtt": [ "DNSInstanceStack", "Outputs.PrivateIP" ] } ]
-            },
-            "DependsOn": "DNSInstanceStack"
-        },
-
-        "VPCDHCPOptionsAssociation": {
-            "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
-            "Properties": {
-                "VpcId": { "Ref": "VPCId" },
-                "DhcpOptionsId": { "Ref": "DHCPOptions" }
-            }
-        },
-
-        "BastionSecurityGroup": {
+        "JumpBoxSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "GroupDescription": "bastion server security group",
+                "GroupDescription": "jump box security group",
                 "VpcId": { "Ref": "VPCId" },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "bastion-sg" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "jump-box-sg" ] ] }
                     }
                 ],
                 "SecurityGroupIngress": [
@@ -288,7 +271,7 @@
                         "IpProtocol": "tcp",
                         "FromPort": "22",
                         "ToPort": "22",
-                        "CidrIp": { "Ref": "BastionSSHCIDRIP" }
+                        "CidrIp": { "Ref": "JumpBoxSSHCIDRIP" }
                     },
                     {
                         "IpProtocol": "-1",
@@ -303,107 +286,32 @@
                 ]
             }
         },
-        "NATSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "NAT server security group",
-                "VpcId": { "Ref": "VPCId" },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "nat-sg" ] ] }
-                    }
-                ],
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "10.0.0.0/8"
-                    }
-                ],
-                "SecurityGroupEgress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "0.0.0.0/0"
-                    }
-                ]
-            }
-        },
-        "DNSSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "DNS server security group",
-                "VpcId": { "Ref": "VPCId" },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "dns-sg" ] ] }
-                    }
-                ],
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "10.0.0.0/8"
-                    }
-                ],
-                "SecurityGroupEgress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "0.0.0.0/0"
-                    }
-                ]
-            }
-        },
 
-        "BastionInstanceStack": {
+        "JumpBoxInstanceStack": {
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                    "infrastructure/bastion-instance.template" ] ] },
+                    "infrastructure/jump-box-instance.template" ] ] },
                 "Parameters": {
                     "ImageId": { "Fn::FindInMap": [ "AMIRegionMap", { "Ref": "AWS::Region" }, "standard" ] },
                     "DNSZone": { "Ref": "DNSZone" },
-                    "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },
-                    "KeyName": { "Ref": "BastionKeyName" },
+                    "FullyQualifiedExternalParentDNSZone": { "Ref": "FullyQualifiedExternalParentDNSZone" },
+                    "EIPAddress": { "Ref": "JumpBoxEIPAddress" },
+                    "KeyName": { "Ref": "JumpBoxKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
                     "SubnetId": { "Ref": "PublicSubnetA" },
-                    "SecurityGroupId": { "Ref": "BastionSecurityGroup" }
-                }
-            }
-        },
-        "NATInstanceStack": {
-            "Type": "AWS::CloudFormation::Stack",
-            "Properties": {
-                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                    "infrastructure/nat-instance.template" ] ] },
-                "Parameters": {
-                    "ImageId": { "Fn::FindInMap": [ "AMIRegionMap", { "Ref": "AWS::Region" }, "nat" ] },
-                    "DNSZone": { "Ref": "DNSZone" },
-                    "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },
-                    "KeyName": { "Ref": "InternalKeyName" },
-                    "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
-                    "SubnetId": { "Ref": "PublicSubnetB" },
-                    "SecurityGroupId": { "Ref": "NATSecurityGroup" }
-                }
-            }
-        },
-        "DNSInstanceStack": {
-            "Type": "AWS::CloudFormation::Stack",
-            "Properties": {
-                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
-                    "infrastructure/dns/dns-instance.template" ] ] },
-                "Parameters": {
-                    "ImageId": { "Fn::FindInMap": [ "AMIRegionMap", { "Ref": "AWS::Region" }, "standard" ] },
-                    "DNSZone": { "Ref": "DNSZone" },
-                    "FullyQualifiedParentDNSZone": { "Ref": "FullyQualifiedParentDNSZone" },
-                    "SecondOctet": { "Ref": "SecondOctet" },
-                    "KeyName": { "Ref": "InternalKeyName" },
-                    "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
-                    "SubnetId": { "Ref": "PublicSubnetC" },
-                    "SecurityGroupId": { "Ref": "DNSSecurityGroup" }
+                    "SecurityGroupId": { "Ref": "JumpBoxSecurityGroup" }
                 }
             }
         }
 
+    },
+
+    "Outputs": {
+        "JumpBoxPublicIPAddress": {
+            "Description": "The public IP address of the newly created jump box.",
+            "Value": { "Fn::GetAtt" : [ "JumpBoxInstanceStack", "Outputs.JumpBoxPublicIPAddress" ] }
+        }
     }
 
 }

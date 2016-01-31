@@ -1,7 +1,7 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
 
-    "Description": "The VPC's NAT server.",
+    "Description": "A jump box for a specific availability zone.",
 
     "Parameters": {
         "ImageId": {
@@ -21,9 +21,21 @@
             "AllowedPattern": "[a-z][a-z0-9\\-.]*[a-z0-9]",
             "ConstraintDescription": "must contain only lowercase letters, numbers, dashes and dots"
         },
+        "FullyQualifiedExternalParentDNSZone": {
+            "Type": "String",
+            "Description": "The external parent DNS zone (should not start or end with .). Optional, Route 53 resources will be created if specified.",
+            "AllowedPattern": "([a-z][a-z0-9\\-.]*[a-z0-9])|(^$)",
+            "ConstraintDescription": "must contain only lowercase letters, numbers, dashes and dots, optional"
+        },
+        "EIPAddress": {
+            "Type": "String",
+            "Description": "An EIP reserved for the jump box. Optional, a public IP address is reserved if not specified.",
+            "AllowedPattern": "((\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3}))|(^$)",
+            "ConstraintDescription": "must contain four dot-separated octets, optional"
+        },
         "KeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName",
-            "Description": "SSH key name used to connect to the NAT server via the ec2-user account."
+            "Description": "SSH key name used to connect to the jump box via the ec2-user account."
         },
         "AWSMusingsS3URL": {
             "Type": "String",
@@ -36,12 +48,18 @@
         },
         "SecurityGroupId": {
             "Type": "String",
-            "Description": "The id of the security group protecting the NAT server."
+            "Description": "The id of the security group protecting the jump box."
         }
     },
 
+    "Conditions": {
+        "EIPAddressDefined": { "Fn::Not": [ { "Fn::Equals": [ { "Ref": "EIPAddress" }, "" ] } ] },
+        "FullyQualifiedExternalParentDNSZoneDefined": { "Fn::Not": [ { "Fn::Equals": [
+            { "Ref": "FullyQualifiedExternalParentDNSZone" }, "" ] } ] }
+    },
+
     "Resources": {
-        "NATInstance": {
+        "JumpBoxInstance": {
             "Type": "AWS::EC2::Instance",
             "Metadata": {
                 "AWS::CloudFormation::Init": {
@@ -64,7 +82,7 @@
                                 "context": {
                                     "STACK_ID": { "Ref": "AWS::StackId" },
                                     "REGION": { "Ref": "AWS::Region" },
-                                    "INSTANCE_NAME": "NATInstance"
+                                    "INSTANCE_NAME": "JumpBoxInstance"
                                 }
                             },
 
@@ -72,22 +90,9 @@
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                                     "common/dhclient.conf" ] ] },
                                 "context": {
-                                    "FQDN": { "Fn::Join": [ "", [ { "Ref": "DNSZone" }, "-nat.",
-                                        { "Ref": "DNSZone" }, ".", { "Ref": "FullyQualifiedInternalParentDNSZone" } ] ] }
+                                    "FQDN": { "Fn::Join": [ "", [ "jump-box.", { "Ref": "DNSZone" }, ".",
+                                        { "Ref": "FullyQualifiedInternalParentDNSZone" } ] ] }
                                 }
-                            },
-
-                            "/home/ec2-user/.bashrc": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "common/bashrc.sh" ] ] },
-                                "mode": "000644",
-                                "owner": "ec2-user",
-                                "group": "ec2-user"
-                            },
-                            "/root/.bashrc": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "common/bashrc.sh" ] ] },
-                                "mode": "000644",
-                                "owner": "root",
-                                "group": "root"
                             }
                         }
                     }
@@ -96,13 +101,13 @@
             "Properties": {
                 "DisableApiTermination": "false",
                 "ImageId": { "Ref": "ImageId" },
-                "InstanceType": "t2.micro",
+                "InstanceType": "t2.nano",
                 "KeyName": { "Ref": "KeyName" },
                 "Monitoring": "false",
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "nat" ] ] }
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "jump-box" ] ] }
                     }
                 ],
                 "NetworkInterfaces": [
@@ -120,32 +125,21 @@
                         "Fn::Join": [ "", [
                             "#!/bin/bash\n",
 
-                            "# Helper function\n",
-                            "function error_exit\n",
-                            "{\n",
-                            "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '", { "Ref": "NATInstanceWaitHandle" }, "'\n",
-                            "  exit 1\n",
-                            "}\n",
+                            "set -e -x\n",
 
-                            "yum -y update || error_exit 'yum update failed'\n",
+                            "export RESOURCE=JumpBoxInstance\n",
+                            "export REGION=\"", { "Ref": "AWS::Region" }, "\"\n",
+                            "export STACK_NAME=\"", { "Ref": "AWS::StackName" }, "\"\n",
+                            "export HANDLE=\"", { "Ref": "JumpBoxInstanceWaitHandle" }, "\"\n",
+                            "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
+                            "export HOSTNAME=jump-box\n",
 
-                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "nat" ] ] },
-                                "/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/",
-                                { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "nat" ] ] }, " ",
-                                { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "nat" ] ] },
-                                ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
-
-                            "# Initialize CloudFormation\n",
-                            "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r NATInstance ",
-                                "--region ", { "Ref": "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
-
-                            "# Start up the cfn-hup daemon to listen for changes to the metadata\n",
-                            "/opt/aws/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n",
+                            "curl --output /tmp/bootstrap.sh --silent $S3_URL/common/bootstrap.sh\n",
+                            "chmod +x /tmp/bootstrap.sh\n",
+                            "/tmp/bootstrap.sh\n",
 
                             "# All done so signal success\n",
-                            "/opt/aws/bin/cfn-signal -e 0 -r \"NATInstance setup complete\" '",
-                                { "Ref": "NATInstanceWaitHandle" }, "'\n",
+                            "cfn-signal --exit-code 0 --reason \"$RESOURCE setup complete\" \"$HANDLE\"\n",
                             "reboot\n"
                         ] ]
                     }
@@ -153,19 +147,51 @@
             }
         },
 
-        "NATInstanceWaitHandle": {
+        "JumpBoxInstanceWaitHandle": {
             "Type": "AWS::CloudFormation::WaitConditionHandle"
         },
 
-        "NATInstanceWaitCondition": {
+        "JumpBoxInstanceWaitCondition": {
             "Type": "AWS::CloudFormation::WaitCondition",
             "Properties": {
-                "Handle": { "Ref": "NATInstanceWaitHandle" },
+                "Handle": { "Ref": "JumpBoxInstanceWaitHandle" },
                 "Timeout": "600"
             },
-            "DependsOn": "NATInstance"
+            "DependsOn": "JumpBoxInstance"
+        },
+
+        "JumpBoxEIPAssociation": {
+            "Type": "AWS::EC2::EIPAssociation",
+            "Condition": "EIPAddressDefined",
+            "Properties": {
+                "EIP": { "Ref": "EIPAddress" },
+                "InstanceId": { "Ref": "JumpBoxInstance" }
+            },
+            "DependsOn": "JumpBoxInstance"
+        },
+
+        "JumpBoxRecordSet": {
+            "Type" : "AWS::Route53::RecordSet",
+            "Condition": "FullyQualifiedExternalParentDNSZoneDefined",
+            "Properties" : {
+                "HostedZoneName" : { "Fn::Join": [ "", [ { "Ref": "FullyQualifiedExternalParentDNSZone" }, "." ] ] },
+                "Name" : { "Fn::Join": [ "", [ "jump-box.", { "Ref": "FullyQualifiedExternalParentDNSZone" }, "." ] ] },
+                "ResourceRecords" : [
+                    { "Fn::GetAtt" : [ "JumpBoxInstance", "PublicIp" ] }
+                ],
+                "TTL" : "900",
+                "Type" : "A"
+            },
+            "DependsOn": "JumpBoxInstance"
         }
 
+    },
+
+    "Outputs": {
+        "JumpBoxPublicIPAddress": {
+            "Description": "The public IP address of the newly created jump box.",
+            "Value": { "Fn::GetAtt" : [ "JumpBoxInstance", "PublicIp" ] }
+        }
     }
 
 }

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-PROFILE=default
-BUCKET=aws-musings
+PROFILE=myshkin5
+BUCKET=aws-musings-us-east-1
 ACL=public-read
 
 usage()

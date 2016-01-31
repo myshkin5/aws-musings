@@ -18,7 +18,7 @@
         },
         "AWSMusingsS3URL": {
             "Type": "String",
-            "Default": "https://s3-us-west-2.amazonaws.com/aws-musings",
+            "Default": "https://s3.amazonaws.com/aws-musings-us-east-1",
             "Description": "S3 path to aws-musings."
         },
         "AvailabilityZone":{
@@ -126,18 +126,6 @@
                             "}\n",
 
                             "yum -y update || error_exit 'yum update failed'\n",
-
-                            "wget -P /etc/yum.repos.d ", { "Ref": "AWSMusingsS3URL" }, "/common/puppetlabs.repo",
-                                " || error_exit 'wget puppetlabs.repo failed'\n",
-                            "rpm --import http://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs",
-                                " || error_exit 'rpm import failed'\n",
-                            "yum -y install puppet-3.7.3 || error_exit 'yum install failed'\n",
-                            "gem install puppet || error_exit 'gem install failed'\n",
-                            "wget -O /etc/puppet/puppet.conf ", { "Ref": "AWSMusingsS3URL" }, "/common/puppet.conf",
-                                " || error_exit 'wget puppet.conf failed'\n",
-                            "sed -i -e \"s/{{CONFIG_SERVER}}/", { "Ref": "DNSZone" }, "-config.", { "Ref": "DNSZone" },
-                                ".", { "Ref": "FullyQualifiedParentDNSZone" }, "/g\" /etc/puppet/puppet.conf\n",
-                            "chkconfig puppet on || error_exit 'chkconfig failed'\n",
 
                             "sed -i -e \"s/localhost/", { "Ref": "NamePrefix" }, "1/g\" /etc/sysconfig/network\n",
                             "sed -i -e \"s/localhost localhost.localdomain/", { "Ref": "NamePrefix"  }, "1 ",
