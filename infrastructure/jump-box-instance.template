@@ -171,16 +171,17 @@
         },
 
         "JumpBoxRecordSet": {
-            "Type" : "AWS::Route53::RecordSet",
+            "Type": "AWS::Route53::RecordSet",
             "Condition": "FullyQualifiedExternalParentDNSZoneDefined",
-            "Properties" : {
-                "HostedZoneName" : { "Fn::Join": [ "", [ { "Ref": "FullyQualifiedExternalParentDNSZone" }, "." ] ] },
-                "Name" : { "Fn::Join": [ "", [ "jump-box.", { "Ref": "FullyQualifiedExternalParentDNSZone" }, "." ] ] },
-                "ResourceRecords" : [
-                    { "Fn::GetAtt" : [ "JumpBoxInstance", "PublicIp" ] }
+            "Properties": {
+                "HostedZoneName": { "Fn::Join": [ "", [ { "Ref": "FullyQualifiedExternalParentDNSZone" }, "." ] ] },
+                "Name": { "Fn::Join": [ ".", [ "jump-box", { "Ref": "DNSZone"},
+                    { "Ref": "FullyQualifiedExternalParentDNSZone" }, "" ] ] },
+                "ResourceRecords": [
+                    { "Fn::GetAtt": [ "JumpBoxInstance", "PublicIp" ] }
                 ],
-                "TTL" : "900",
-                "Type" : "A"
+                "TTL": "300",
+                "Type": "A"
             },
             "DependsOn": "JumpBoxInstance"
         }

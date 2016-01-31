@@ -295,6 +295,7 @@
                 "Parameters": {
                     "ImageId": { "Fn::FindInMap": [ "AMIRegionMap", { "Ref": "AWS::Region" }, "standard" ] },
                     "DNSZone": { "Ref": "DNSZone" },
+                    "FullyQualifiedInternalParentDNSZone": { "Ref": "FullyQualifiedInternalParentDNSZone" },
                     "FullyQualifiedExternalParentDNSZone": { "Ref": "FullyQualifiedExternalParentDNSZone" },
                     "EIPAddress": { "Ref": "JumpBoxEIPAddress" },
                     "KeyName": { "Ref": "JumpBoxKeyName" },
