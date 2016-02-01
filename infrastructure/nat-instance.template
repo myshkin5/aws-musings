@@ -23,7 +23,7 @@
         },
         "KeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName",
-            "Description": "SSH key name used to connect to the NAT server via the ec2-user account."
+            "Description": "SSH key name used to connect to the NAT server."
         },
         "AWSMusingsS3URL": {
             "Type": "String",
@@ -72,22 +72,9 @@
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                                     "common/dhclient.conf" ] ] },
                                 "context": {
-                                    "FQDN": { "Fn::Join": [ "", [ { "Ref": "DNSZone" }, "-nat.",
-                                        { "Ref": "DNSZone" }, ".", { "Ref": "FullyQualifiedInternalParentDNSZone" } ] ] }
+                                    "FQDN": { "Fn::Join": [ "", [ "nat.", { "Ref": "DNSZone" }, ".",
+                                        { "Ref": "FullyQualifiedInternalParentDNSZone" } ] ] }
                                 }
-                            },
-
-                            "/home/ec2-user/.bashrc": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "common/bashrc.sh" ] ] },
-                                "mode": "000644",
-                                "owner": "ec2-user",
-                                "group": "ec2-user"
-                            },
-                            "/root/.bashrc": {
-                                "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" }, "common/bashrc.sh" ] ] },
-                                "mode": "000644",
-                                "owner": "root",
-                                "group": "root"
                             }
                         }
                     }
@@ -95,8 +82,9 @@
             },
             "Properties": {
                 "DisableApiTermination": "false",
+                "SourceDestCheck": "false",
                 "ImageId": { "Ref": "ImageId" },
-                "InstanceType": "t2.micro",
+                "InstanceType": "t2.nano",
                 "KeyName": { "Ref": "KeyName" },
                 "Monitoring": "false",
                 "Tags": [
@@ -120,32 +108,21 @@
                         "Fn::Join": [ "", [
                             "#!/bin/bash\n",
 
-                            "# Helper function\n",
-                            "function error_exit\n",
-                            "{\n",
-                            "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '", { "Ref": "NATInstanceWaitHandle" }, "'\n",
-                            "  exit 1\n",
-                            "}\n",
+                            "set -e -x\n",
 
-                            "yum -y update || error_exit 'yum update failed'\n",
+                            "export RESOURCE=NATInstance\n",
+                            "export REGION=\"", { "Ref": "AWS::Region" }, "\"\n",
+                            "export STACK_NAME=\"", { "Ref": "AWS::StackName" }, "\"\n",
+                            "export HANDLE=\"", { "Ref": "NATInstanceWaitHandle" }, "\"\n",
+                            "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
+                            "export HOSTNAME=nat\n",
 
-                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "nat" ] ] },
-                                "/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/",
-                                { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "nat" ] ] }, " ",
-                                { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "nat" ] ] },
-                                ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
-
-                            "# Initialize CloudFormation\n",
-                            "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r NATInstance ",
-                                "--region ", { "Ref": "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
-
-                            "# Start up the cfn-hup daemon to listen for changes to the metadata\n",
-                            "/opt/aws/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n",
+                            "curl --output /tmp/bootstrap.sh --silent $S3_URL/common/bootstrap.sh\n",
+                            "source /tmp/bootstrap.sh\n",
+                            "aws-bootstrap\n",
 
                             "# All done so signal success\n",
-                            "/opt/aws/bin/cfn-signal -e 0 -r \"NATInstance setup complete\" '",
-                                { "Ref": "NATInstanceWaitHandle" }, "'\n",
+                            "aws-signal-success\n",
                             "reboot\n"
                         ] ]
                     }

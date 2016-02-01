@@ -35,7 +35,7 @@
         },
         "KeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName",
-            "Description": "SSH key name used to connect to the jump box via the ec2-user account."
+            "Description": "SSH key name used to connect to the jump box."
         },
         "AWSMusingsS3URL": {
             "Type": "String",
@@ -135,11 +135,11 @@
                             "export HOSTNAME=jump-box\n",
 
                             "curl --output /tmp/bootstrap.sh --silent $S3_URL/common/bootstrap.sh\n",
-                            "chmod +x /tmp/bootstrap.sh\n",
-                            "/tmp/bootstrap.sh\n",
+                            "source /tmp/bootstrap.sh\n",
+                            "aws-bootstrap\n",
 
                             "# All done so signal success\n",
-                            "cfn-signal --exit-code 0 --reason \"$RESOURCE setup complete\" \"$HANDLE\"\n",
+                            "aws-signal-success\n",
                             "reboot\n"
                         ] ]
                     }

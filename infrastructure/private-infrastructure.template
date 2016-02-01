@@ -30,7 +30,7 @@
         },
         "InternalKeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName",
-            "Description": "SSH key name used to connect with internal servers via the ec2-user account."
+            "Description": "SSH key name used to connect with internal servers."
         },
         "NetworkACLId": {
             "Type": "String",

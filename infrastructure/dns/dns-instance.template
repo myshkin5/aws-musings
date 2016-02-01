@@ -30,7 +30,7 @@
         },
         "KeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName",
-            "Description": "SSH key name used to connect to the DNS server via the ec2-user account."
+            "Description": "SSH key name used to connect to the DNS server."
         },
         "AWSMusingsS3URL": {
             "Type": "String",

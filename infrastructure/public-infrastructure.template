@@ -42,12 +42,16 @@
         },
         "JumpBoxKeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName",
-            "Description": "SSH key name used to connect with the jump box via the ec2-user account."
+            "Description": "SSH key name used to connect with the jump box."
         },
         "JumpBoxSSHCIDRIP": {
             "Type": "String",
             "Default": "50.183.202.137/32",
             "Description": "Range of IP addresses that will be able to connect to the jump box via SSH."
+        },
+        "InternalKeyName": {
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "Description": "SSH key name used to connect with internal servers."
         },
         "VPNGatewayId": {
             "Type": "String",
@@ -62,8 +66,8 @@
 
     "Mappings": {
         "AMIRegionMap": {
-            "us-east-1": { "standard": "ami-fce3c696" },
-            "us-west-2": { "standard": "ami-9abea4fb" }
+            "us-east-1": { "standard": "ami-fce3c696", "nat": "ami-68115b02" },
+            "us-west-2": { "standard": "ami-9abea4fb", "nat": "ami-77a4b816" }
         },
         "AZRegionMap": {
             "us-east-1": { "a": "us-east-1a", "b": "us-east-1b", "c": "us-east-1c" },
@@ -286,6 +290,31 @@
                 ]
             }
         },
+        "NATSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "NAT server security group",
+                "VpcId": { "Ref": "VPCId" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "nat-sg" ] ] }
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "10.0.0.0/8"
+                    }
+                ],
+                "SecurityGroupEgress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
 
         "JumpBoxInstanceStack": {
             "Type": "AWS::CloudFormation::Stack",
@@ -302,6 +331,22 @@
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
                     "SubnetId": { "Ref": "PublicSubnetA" },
                     "SecurityGroupId": { "Ref": "JumpBoxSecurityGroup" }
+                }
+            }
+        },
+        "NATInstanceStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "Properties": {
+                "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
+                    "infrastructure/nat-instance.template" ] ] },
+                "Parameters": {
+                    "ImageId": { "Fn::FindInMap": [ "AMIRegionMap", { "Ref": "AWS::Region" }, "nat" ] },
+                    "DNSZone": { "Ref": "DNSZone" },
+                    "FullyQualifiedInternalParentDNSZone": { "Ref": "FullyQualifiedInternalParentDNSZone" },
+                    "KeyName": { "Ref": "InternalKeyName" },
+                    "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
+                    "SubnetId": { "Ref": "PublicSubnetB" },
+                    "SecurityGroupId": { "Ref": "NATSecurityGroup" }
                 }
             }
         }
