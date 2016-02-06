@@ -52,12 +52,8 @@
     },
 
     "Mappings": {
-        "AMIRegionMap": {
-            "us-east-1": { "standard": "ami-1ecae776" },
-            "us-west-2": { "standard": "ami-e7527ed7" }
-        },
         "AZRegionMap": {
-            "us-east-1": { "a": "us-east-1a", "b": "us-east-1d", "c": "us-east-1c" },
+            "us-east-1": { "a": "us-east-1a", "b": "us-east-1b", "c": "us-east-1c" },
             "us-west-2": { "a": "us-west-2a", "b": "us-west-2b", "c": "us-west-2c" }
         }
     },

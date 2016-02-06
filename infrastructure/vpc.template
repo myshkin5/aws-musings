@@ -31,6 +31,13 @@
             }
         }
 
+    },
+
+    "Outputs": {
+        "VPCId": {
+            "Description": "The id of the VPC in which the resources will be created.",
+            "Value": { "Ref": "VPC" }
+        }
     }
 
 }

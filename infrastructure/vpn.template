@@ -83,6 +83,13 @@
             }
         }
 
+    },
+
+    "Outputs": {
+        "VPNGatewayId": {
+            "Description": "The VPN gateway to which route tables will be connected via route propagation.",
+            "Value": { "Ref": "VPNGateway" }
+        }
     }
 
 }

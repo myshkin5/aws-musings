@@ -143,6 +143,13 @@
             "DependsOn": "NATInstance"
         }
 
+    },
+
+    "Outputs": {
+        "NATInstanceId": {
+            "Description": "This id of the NAT instance to be added to private route tables.",
+            "Value": { "Ref": "NATInstance" }
+        }
     }
 
 }

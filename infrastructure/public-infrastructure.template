@@ -42,15 +42,16 @@
         },
         "JumpBoxKeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName",
+            "Default": "jump-box",
             "Description": "SSH key name used to connect with the jump box."
         },
         "JumpBoxSSHCIDRIP": {
             "Type": "String",
-            "Default": "50.183.202.137/32",
             "Description": "Range of IP addresses that will be able to connect to the jump box via SSH."
         },
         "InternalKeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName",
+            "Default": "internal",
             "Description": "SSH key name used to connect with internal servers."
         },
         "VPNGatewayId": {
@@ -356,7 +357,15 @@
     "Outputs": {
         "JumpBoxPublicIPAddress": {
             "Description": "The public IP address of the newly created jump box.",
-            "Value": { "Fn::GetAtt" : [ "JumpBoxInstanceStack", "Outputs.JumpBoxPublicIPAddress" ] }
+            "Value": { "Fn::GetAtt": [ "JumpBoxInstanceStack", "Outputs.JumpBoxPublicIPAddress" ] }
+        },
+        "NetworkACLId": {
+            "Description": "The id of the network access control list used to protect instances in the VPC.",
+            "Value": { "Ref": "NetworkACL" }
+        },
+        "NATInstanceId": {
+            "Description": "This id of the NAT instance to be added to private route tables.",
+            "Value": { "Fn::GetAtt": [ "NATInstanceStack", "Outputs.NATInstanceId" ] }
         }
     }
 

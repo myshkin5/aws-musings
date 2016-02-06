@@ -191,7 +191,7 @@
     "Outputs": {
         "JumpBoxPublicIPAddress": {
             "Description": "The public IP address of the newly created jump box.",
-            "Value": { "Fn::GetAtt" : [ "JumpBoxInstance", "PublicIp" ] }
+            "Value": { "Fn::GetAtt": [ "JumpBoxInstance", "PublicIp" ] }
         }
     }
 

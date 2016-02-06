@@ -68,19 +68,19 @@
                             "/etc/named.conf": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                                     "infrastructure/dns/named.conf" ] ] },
-                                "context" : {
-                                    "DNS_ZONE" : { "Ref": "DNSZone" },
-                                    "FULLY_QUALIFIED_PARENT_DNS_ZONE" : { "Ref": "FullyQualifiedInternalParentDNSZone" },
-                                    "SECOND_OCTET" : { "Ref": "SecondOctet" }
+                                "context": {
+                                    "DNS_ZONE": { "Ref": "DNSZone" },
+                                    "FULLY_QUALIFIED_PARENT_DNS_ZONE": { "Ref": "FullyQualifiedInternalParentDNSZone" },
+                                    "SECOND_OCTET": { "Ref": "SecondOctet" }
                                 }
                             },
                             "/var/named/dynamic/named.vpc": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                                     "infrastructure/dns/named.vpc" ] ] },
-                                "context" : {
-                                    "DNS_ZONE" : { "Ref": "DNSZone" },
-                                    "FULLY_QUALIFIED_PARENT_DNS_ZONE" : { "Ref": "FullyQualifiedInternalParentDNSZone" },
-                                    "SECOND_OCTET" : { "Ref": "SecondOctet" }
+                                "context": {
+                                    "DNS_ZONE": { "Ref": "DNSZone" },
+                                    "FULLY_QUALIFIED_PARENT_DNS_ZONE": { "Ref": "FullyQualifiedInternalParentDNSZone" },
+                                    "SECOND_OCTET": { "Ref": "SecondOctet" }
                                 },
                                 "mode": "000644",
                                 "owner": "named",
@@ -89,10 +89,10 @@
                             "/var/named/dynamic/named.vpc-rev": {
                                 "source": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                                     "infrastructure/dns/named.vpc-rev" ] ] },
-                                "context" : {
-                                    "DNS_ZONE" : { "Ref": "DNSZone" },
-                                    "FULLY_QUALIFIED_PARENT_DNS_ZONE" : { "Ref": "FullyQualifiedInternalParentDNSZone" },
-                                    "SECOND_OCTET" : { "Ref": "SecondOctet" }
+                                "context": {
+                                    "DNS_ZONE": { "Ref": "DNSZone" },
+                                    "FULLY_QUALIFIED_PARENT_DNS_ZONE": { "Ref": "FullyQualifiedInternalParentDNSZone" },
+                                    "SECOND_OCTET": { "Ref": "SecondOctet" }
                                 },
                                 "mode": "000644",
                                 "owner": "named",
