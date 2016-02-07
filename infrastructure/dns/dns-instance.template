@@ -38,11 +38,11 @@
             "Description": "S3 path to aws-musings."
         },
         "SubnetId": {
-            "Type": "String",
+            "Type": "AWS::EC2::Subnet::Id",
             "Description": "The id of the subnet where the server will be added."
         },
         "SecurityGroupId": {
-            "Type": "String",
+            "Type": "AWS::EC2::SecurityGroup::Id",
             "Description": "The id of the security group protecting the DNS server."
         }
     },

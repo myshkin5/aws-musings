@@ -36,6 +36,8 @@ while [ $# -gt 0 ] ; do
     shift
 done
 
+cd $(dirname $0)/..
+
 aws s3 sync --profile $PROFILE --delete --acl $ACL \
     --exclude .git/\* \
     --exclude .idea/\* \

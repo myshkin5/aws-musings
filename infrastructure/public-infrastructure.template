@@ -364,7 +364,7 @@
             "Value": { "Ref": "NetworkACL" }
         },
         "NATInstanceId": {
-            "Description": "This id of the NAT instance to be added to private route tables.",
+            "Description": "The id of the NAT instance to be added to private route tables.",
             "Value": { "Fn::GetAtt": [ "NATInstanceStack", "Outputs.NATInstanceId" ] }
         }
     }
