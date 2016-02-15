@@ -4,9 +4,9 @@
     "Description": "The VPC's DNS server.",
 
     "Parameters": {
-        "ImageId": {
+        "AWSMusingsS3URL": {
             "Type": "String",
-            "Description": "The AMI used to create the instance."
+            "Description": "S3 path to aws-musings."
         },
         "DNSZone": {
             "Type": "String",
@@ -16,34 +16,31 @@
         },
         "FullyQualifiedInternalParentDNSZone": {
             "Type": "String",
-            "Default": "compute.local",
             "Description": "The internal parent DNS zone (should not start or end with .).",
             "AllowedPattern": "[a-z][a-z0-9\\-.]*[a-z0-9]",
             "ConstraintDescription": "must contain only lowercase letters, numbers, dashes and dots"
         },
-        "SecondOctet": {
-            "Type": "Number",
-            "Default": "0",
-            "MinValue": "0",
-            "MaxValue": "255",
-            "Description": "The second octet of the CIDR block for the VPC."
+        "ImageId": {
+            "Type": "AWS::EC2::Image::Id",
+            "Description": "The AMI used to create the instance."
         },
         "KeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName",
             "Description": "SSH key name used to connect to the DNS server."
         },
-        "AWSMusingsS3URL": {
-            "Type": "String",
-            "Default": "https://s3.amazonaws.com/aws-musings-us-east-1",
-            "Description": "S3 path to aws-musings."
-        },
-        "SubnetId": {
-            "Type": "AWS::EC2::Subnet::Id",
-            "Description": "The id of the subnet where the server will be added."
+        "SecondOctet": {
+            "Type": "Number",
+            "MinValue": "0",
+            "MaxValue": "255",
+            "Description": "The second octet of the CIDR block for the VPC."
         },
         "SecurityGroupId": {
             "Type": "AWS::EC2::SecurityGroup::Id",
             "Description": "The id of the security group protecting the DNS server."
+        },
+        "SubnetId": {
+            "Type": "AWS::EC2::Subnet::Id",
+            "Description": "The id of the subnet where the server will be added."
         }
     },
 

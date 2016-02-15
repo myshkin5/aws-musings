@@ -4,6 +4,10 @@
     "Description": "The VPC's identity server.",
 
     "Parameters": {
+        "AWSMusingsS3URL": {
+            "Type": "String",
+            "Description": "S3 path to aws-musings."
+        },
         "DNSZone": {
             "Type": "String",
             "Description": "The DNS zone name of the VPC (should not end in 'vpc', .FullyQualifiedInternalParentDNSZone will be appended).",
@@ -12,7 +16,6 @@
         },
         "FullyQualifiedInternalParentDNSZone": {
             "Type": "String",
-            "Default": "compute.local",
             "Description": "The internal parent DNS zone (should not start or end with .).",
             "AllowedPattern": "[a-z][a-z0-9\\-.]*[a-z0-9]",
             "ConstraintDescription": "must contain only lowercase letters, numbers, dashes and dots"
@@ -21,18 +24,13 @@
             "Type": "AWS::EC2::KeyPair::KeyName",
             "Description": "SSH key name used to connect to the identity server."
         },
-        "AWSMusingsS3URL": {
-            "Type": "String",
-            "Default": "https://s3.amazonaws.com/aws-musings-us-east-1",
-            "Description": "S3 path to aws-musings."
+        "SecurityGroupId": {
+            "Type": "AWS::EC2::SecurityGroup::Id",
+            "Description": "The id of the security group protecting the identity server."
         },
         "SubnetId": {
             "Type": "AWS::EC2::Subnet::Id",
             "Description": "The id of the subnet where the server will be added."
-        },
-        "SecurityGroupId": {
-            "Type": "AWS::EC2::SecurityGroup::Id",
-            "Description": "The id of the security group protecting the identity server."
         }
     },
 

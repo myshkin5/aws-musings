@@ -4,9 +4,9 @@
     "Description": "A jump box for a specific availability zone.",
 
     "Parameters": {
-        "ImageId": {
+        "AWSMusingsS3URL": {
             "Type": "String",
-            "Description": "The AMI used to create the instance."
+            "Description": "S3 path to aws-musings."
         },
         "DNSZone": {
             "Type": "String",
@@ -14,12 +14,11 @@
             "AllowedPattern": "[a-z0-9\\-]*",
             "ConstraintDescription": "must contain only lowercase letters, numbers and dashes"
         },
-        "FullyQualifiedInternalParentDNSZone": {
+        "EIPAddress": {
             "Type": "String",
-            "Default": "compute.local",
-            "Description": "The internal parent DNS zone (should not start or end with .).",
-            "AllowedPattern": "[a-z][a-z0-9\\-.]*[a-z0-9]",
-            "ConstraintDescription": "must contain only lowercase letters, numbers, dashes and dots"
+            "Description": "An EIP reserved for the jump box. Optional, a public IP address is reserved if not specified.",
+            "AllowedPattern": "((\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3}))|(^$)",
+            "ConstraintDescription": "must contain four dot-separated octets, optional"
         },
         "FullyQualifiedExternalParentDNSZone": {
             "Type": "String",
@@ -27,28 +26,27 @@
             "AllowedPattern": "([a-z][a-z0-9\\-.]*[a-z0-9])|(^$)",
             "ConstraintDescription": "must contain only lowercase letters, numbers, dashes and dots, optional"
         },
-        "EIPAddress": {
+        "FullyQualifiedInternalParentDNSZone": {
             "Type": "String",
-            "Description": "An EIP reserved for the jump box. Optional, a public IP address is reserved if not specified.",
-            "AllowedPattern": "((\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3}))|(^$)",
-            "ConstraintDescription": "must contain four dot-separated octets, optional"
+            "Description": "The internal parent DNS zone (should not start or end with .).",
+            "AllowedPattern": "[a-z][a-z0-9\\-.]*[a-z0-9]",
+            "ConstraintDescription": "must contain only lowercase letters, numbers, dashes and dots"
+        },
+        "ImageId": {
+            "Type": "AWS::EC2::Image::Id",
+            "Description": "The AMI used to create the instance."
         },
         "KeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName",
             "Description": "SSH key name used to connect to the jump box."
         },
-        "AWSMusingsS3URL": {
-            "Type": "String",
-            "Default": "https://s3.amazonaws.com/aws-musings-us-east-1",
-            "Description": "S3 path to aws-musings."
+        "SecurityGroupId": {
+            "Type": "AWS::EC2::SecurityGroup::Id",
+            "Description": "The id of the security group protecting the jump box."
         },
         "SubnetId": {
             "Type": "AWS::EC2::Subnet::Id",
             "Description": "The id of the subnet where the server will be added."
-        },
-        "SecurityGroupId": {
-            "Type": "AWS::EC2::SecurityGroup::Id",
-            "Description": "The id of the security group protecting the jump box."
         }
     },
 
@@ -127,12 +125,12 @@
 
                             "set -e -x\n",
 
-                            "export RESOURCE=JumpBoxInstance\n",
-                            "export REGION=\"", { "Ref": "AWS::Region" }, "\"\n",
-                            "export STACK_NAME=\"", { "Ref": "AWS::StackName" }, "\"\n",
                             "export HANDLE=\"", { "Ref": "JumpBoxInstanceWaitHandle" }, "\"\n",
-                            "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
                             "export HOSTNAME=jump-box\n",
+                            "export REGION=\"", { "Ref": "AWS::Region" }, "\"\n",
+                            "export RESOURCE=JumpBoxInstance\n",
+                            "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
+                            "export STACK_NAME=\"", { "Ref": "AWS::StackName" }, "\"\n",
 
                             "curl --output /tmp/bootstrap.sh --silent $S3_URL/common/bootstrap.sh\n",
                             "source /tmp/bootstrap.sh\n",

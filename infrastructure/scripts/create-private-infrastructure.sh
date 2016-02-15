@@ -8,11 +8,10 @@ STACK_NAME=$STACK_PREFIX-private
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
     --template-url $S3_URL/infrastructure/private-infrastructure.template \
-    --parameters ParameterKey=DNSZone,ParameterValue=$DNS_ZONE \
+    --parameters ParameterKey=NATInstanceId,ParameterValue=$NAT_INSTANCE_ID \
+        ParameterKey=NetworkACLId,ParameterValue=$NETWORK_ACL_ID \
         ParameterKey=SecondOctet,ParameterValue=$SECOND_OCTET \
         ParameterKey=VPCId,ParameterValue=$VPC_ID \
-        ParameterKey=NetworkACLId,ParameterValue=$NETWORK_ACL_ID \
-        ParameterKey=NATInstanceId,ParameterValue=$NAT_INSTANCE_ID \
         ParameterKey=VPNGatewayId,ParameterValue=$VPN_GATEWAY_ID \
     --disable-rollback --profile $PROFILE > /dev/null
 

@@ -4,10 +4,6 @@
     "Description": "VPN related resources.",
 
     "Parameters": {
-        "VPCId": {
-            "Type": "AWS::EC2::VPC::Id",
-            "Description": "The id of the VPC in which the resources will be created."
-        },
         "BGPASNumber": {
             "Type": "Number",
             "Default": "65000",
@@ -16,6 +12,10 @@
         "CustomerGatewayIPAddress": {
             "Type": "String",
             "Description": "The public IP address of the customer gateway."
+        }
+        "VPCId": {
+            "Type": "AWS::EC2::VPC::Id",
+            "Description": "The id of the VPC in which the resources will be created."
         }
     },
 

@@ -4,9 +4,16 @@
     "Description": "The private resources of a VPC.",
 
     "Parameters": {
+        "NATInstanceId": {
+            "Type": "String",
+            "Description": "This id of the NAT instance to be added to private route tables."
+        },
+        "NetworkACLId": {
+            "Type": "String",
+            "Description": "The id of the network access control list used to protect instances in the VPC."
+        },
         "SecondOctet": {
             "Type": "Number",
-            "Default": "0",
             "MinValue": "0",
             "MaxValue": "255",
             "Description": "The second octet of the CIDR block for the VPC."
@@ -14,14 +21,6 @@
         "VPCId": {
             "Type": "AWS::EC2::VPC::Id",
             "Description": "The id of the VPC in which the resources will be created."
-        },
-        "NetworkACLId": {
-            "Type": "String",
-            "Description": "The id of the network access control list used to protect instances in the VPC."
-        },
-        "NATInstanceId": {
-            "Type": "String",
-            "Description": "This id of the NAT instance to be added to private route tables."
         },
         "VPNGatewayId": {
             "Type": "String",

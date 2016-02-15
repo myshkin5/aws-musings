@@ -46,7 +46,6 @@
         },
         "AWSMusingsS3URL": {
             "Type": "String",
-            "Default": "https://s3.amazonaws.com/aws-musings-us-east-1",
             "Description": "S3 path to aws-musings."
         }
     },

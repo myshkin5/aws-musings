@@ -4,11 +4,22 @@
     "Description": "The public resources of a VPC.",
 
     "Parameters": {
+        "AWSMusingsS3URL": {
+            "Type": "String",
+            "Default": "https://s3.amazonaws.com/aws-musings-us-east-1",
+            "Description": "S3 path to aws-musings."
+        },
         "DNSZone": {
             "Type": "String",
             "Description": "The DNS zone name of the VPC (should not end in 'vpc', .FullyQualifiedInternalParentDNSZone will be appended).",
             "AllowedPattern": "[a-z0-9\\-]*",
             "ConstraintDescription": "must contain only lowercase letters, numbers and dashes"
+        },
+        "FullyQualifiedExternalParentDNSZone": {
+            "Type": "String",
+            "Description": "The external parent DNS zone (should not start or end with .). Optional, Route 53 resources will be created if specified.",
+            "AllowedPattern": "([a-z][a-z0-9\\-.]*[a-z0-9])|(^$)",
+            "ConstraintDescription": "must contain only lowercase letters, numbers, dashes and dots, optional"
         },
         "FullyQualifiedInternalParentDNSZone": {
             "Type": "String",
@@ -17,22 +28,10 @@
             "AllowedPattern": "[a-z][a-z0-9\\-.]*[a-z0-9]",
             "ConstraintDescription": "must contain only lowercase letters, numbers, dashes and dots"
         },
-        "FullyQualifiedExternalParentDNSZone": {
-            "Type": "String",
-            "Description": "The external parent DNS zone (should not start or end with .). Optional, Route 53 resources will be created if specified.",
-            "AllowedPattern": "([a-z][a-z0-9\\-.]*[a-z0-9])|(^$)",
-            "ConstraintDescription": "must contain only lowercase letters, numbers, dashes and dots, optional"
-        },
-        "SecondOctet": {
-            "Type": "Number",
-            "Default": "0",
-            "MinValue": "0",
-            "MaxValue": "255",
-            "Description": "The second octet of the CIDR block for the VPC."
-        },
-        "VPCId": {
-            "Type": "AWS::EC2::VPC::Id",
-            "Description": "The id of the VPC in which the resources will be created."
+        "InternalKeyName": {
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "Default": "internal",
+            "Description": "SSH key name used to connect with internal servers."
         },
         "JumpBoxEIPAddress": {
             "Type": "String",
@@ -49,19 +48,19 @@
             "Type": "String",
             "Description": "Range of IP addresses that will be able to connect to the jump box via SSH."
         },
-        "InternalKeyName": {
-            "Type": "AWS::EC2::KeyPair::KeyName",
-            "Default": "internal",
-            "Description": "SSH key name used to connect with internal servers."
+        "SecondOctet": {
+            "Type": "Number",
+            "MinValue": "0",
+            "MaxValue": "255",
+            "Description": "The second octet of the CIDR block for the VPC."
+        },
+        "VPCId": {
+            "Type": "AWS::EC2::VPC::Id",
+            "Description": "The id of the VPC in which the resources will be created."
         },
         "VPNGatewayId": {
             "Type": "String",
             "Description": "The VPN gateway to which route tables will be connected via route propagation. Optional, no propagation occurs if not specified."
-        },
-        "AWSMusingsS3URL": {
-            "Type": "String",
-            "Default": "https://s3.amazonaws.com/aws-musings-us-east-1",
-            "Description": "S3 path to aws-musings."
         }
     },
 
@@ -323,15 +322,15 @@
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                     "infrastructure/jump-box-instance.template" ] ] },
                 "Parameters": {
-                    "ImageId": { "Fn::FindInMap": [ "AMIRegionMap", { "Ref": "AWS::Region" }, "standard" ] },
-                    "DNSZone": { "Ref": "DNSZone" },
-                    "FullyQualifiedInternalParentDNSZone": { "Ref": "FullyQualifiedInternalParentDNSZone" },
-                    "FullyQualifiedExternalParentDNSZone": { "Ref": "FullyQualifiedExternalParentDNSZone" },
-                    "EIPAddress": { "Ref": "JumpBoxEIPAddress" },
-                    "KeyName": { "Ref": "JumpBoxKeyName" },
                     "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
-                    "SubnetId": { "Ref": "PublicSubnetA" },
-                    "SecurityGroupId": { "Ref": "JumpBoxSecurityGroup" }
+                    "DNSZone": { "Ref": "DNSZone" },
+                    "EIPAddress": { "Ref": "JumpBoxEIPAddress" },
+                    "FullyQualifiedExternalParentDNSZone": { "Ref": "FullyQualifiedExternalParentDNSZone" },
+                    "FullyQualifiedInternalParentDNSZone": { "Ref": "FullyQualifiedInternalParentDNSZone" },
+                    "ImageId": { "Fn::FindInMap": [ "AMIRegionMap", { "Ref": "AWS::Region" }, "standard" ] },
+                    "KeyName": { "Ref": "JumpBoxKeyName" },
+                    "SecurityGroupId": { "Ref": "JumpBoxSecurityGroup" },
+                    "SubnetId": { "Ref": "PublicSubnetA" }
                 }
             }
         },
@@ -341,13 +340,13 @@
                 "TemplateURL": { "Fn::Join": [ "/", [ { "Ref": "AWSMusingsS3URL" },
                     "infrastructure/nat-instance.template" ] ] },
                 "Parameters": {
-                    "ImageId": { "Fn::FindInMap": [ "AMIRegionMap", { "Ref": "AWS::Region" }, "nat" ] },
+                    "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
                     "DNSZone": { "Ref": "DNSZone" },
                     "FullyQualifiedInternalParentDNSZone": { "Ref": "FullyQualifiedInternalParentDNSZone" },
+                    "ImageId": { "Fn::FindInMap": [ "AMIRegionMap", { "Ref": "AWS::Region" }, "nat" ] },
                     "KeyName": { "Ref": "InternalKeyName" },
-                    "AWSMusingsS3URL": { "Ref": "AWSMusingsS3URL" },
-                    "SubnetId": { "Ref": "PublicSubnetB" },
-                    "SecurityGroupId": { "Ref": "NATSecurityGroup" }
+                    "SecurityGroupId": { "Ref": "NATSecurityGroup" },
+                    "SubnetId": { "Ref": "PublicSubnetB" }
                 }
             }
         }

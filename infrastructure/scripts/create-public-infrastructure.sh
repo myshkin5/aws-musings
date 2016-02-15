@@ -18,17 +18,17 @@ fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
     --template-url $S3_URL/infrastructure/public-infrastructure.template \
-    --parameters ParameterKey=DNSZone,ParameterValue=$DNS_ZONE \
-        ParameterKey=FullyQualifiedInternalParentDNSZone,ParameterValue=$FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE \
+    --parameters ParameterKey=AWSMusingsS3URL,ParameterValue=$S3_URL \
+        ParameterKey=DNSZone,ParameterValue=$DNS_ZONE \
         ParameterKey=FullyQualifiedExternalParentDNSZone,ParameterValue=$FULLY_QUALIFIED_EXTERNAL_PARENT_DNS_ZONE \
-        ParameterKey=SecondOctet,ParameterValue=$SECOND_OCTET \
-        ParameterKey=VPCId,ParameterValue=$VPC_ID \
+        ParameterKey=FullyQualifiedInternalParentDNSZone,ParameterValue=$FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE \
+        ParameterKey=InternalKeyName,ParameterValue=$INTERNAL_KEY_NAME \
         ParameterKey=JumpBoxEIPAddress,ParameterValue=$JUMP_BOX_EIP_ADDRESS \
         ParameterKey=JumpBoxKeyName,ParameterValue=$JUMP_BOX_KEY_NAME \
         ParameterKey=JumpBoxSSHCIDRIP,ParameterValue=$JUMP_BOX_SSH_CIDR_IP \
-        ParameterKey=InternalKeyName,ParameterValue=$INTERNAL_KEY_NAME \
+        ParameterKey=SecondOctet,ParameterValue=$SECOND_OCTET \
+        ParameterKey=VPCId,ParameterValue=$VPC_ID \
         ParameterKey=VPNGatewayId,ParameterValue=$VPN_GATEWAY_ID \
-        ParameterKey=AWSMusingsS3URL,ParameterValue=$S3_URL \
     --disable-rollback --profile $PROFILE > /dev/null
 
 wait-for-stack-completion

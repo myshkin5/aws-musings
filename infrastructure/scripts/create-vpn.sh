@@ -12,9 +12,9 @@ fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
     --template-url $S3_URL/infrastructure/vpn.template \
-    --parameters ParameterKey=VPCId,ParameterValue=$VPC_ID \
-        ParameterKey=BGPASNumber,ParameterValue=$BGP_AS_NUMBER \
+    --parameters ParameterKey=BGPASNumber,ParameterValue=$BGP_AS_NUMBER \
         ParameterKey=CustomerGatewayIPAddress,ParameterValue=$CUSTOMER_GATEWAY_IP_ADDRESS \
+        ParameterKey=VPCId,ParameterValue=$VPC_ID \
     --disable-rollback --profile $PROFILE > /dev/null
 
 wait-for-stack-completion
