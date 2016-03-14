@@ -151,15 +151,9 @@
                         "Value": { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "bosh-init" ] ] }
                     }
                 ],
-                "NetworkInterfaces": [
-                    {
-                        "DeleteOnTermination": "true",
-                        "Description": "Primary network interface",
-                        "DeviceIndex": 0,
-                        "SubnetId": { "Ref": "ManagementSubnetId" },
-                        "GroupSet": [ { "Ref": "BOSHInitSecurityGroup" } ]
-                    }
-                ],
+                "PrivateIpAddress": { "Fn::Join": [ ".", [ { "Ref": "ManagementThreeOctetCIDRBlock" }, "10" ] ] },
+                "SubnetId": { "Ref": "ManagementSubnetId" },
+                "SecurityGroupIds": [ { "Ref": "BOSHInitSecurityGroup" } ],
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [ "", [
@@ -173,6 +167,7 @@
                             "export RESOURCE=BOSHInitInstance\n",
                             "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
                             "export STACK_NAME=\"", { "Ref": "AWS::StackName" }, "\"\n",
+                            "export STACK_PREFIX=\"", { "Ref": "StackPrefix" }, "\"\n",
 
                             "export EXTRA_PACKAGES=\"build-essential zlibc zlib1g-dev ruby ruby-dev openssl ",
                                 "libxslt-dev libxml2-dev libssl-dev libreadline6 libreadline6-dev libyaml-dev ",
@@ -209,13 +204,12 @@
 
                             "gem install bosh_cli --no-ri --no-rdoc\n",
 
-                            "# TODO: The run once script doesn't work but running bosh-init interactively does\n",
-                            "#curl --output /etc/init.d/bosh-init-run-once $S3_URL/bosh/bosh-init-run-once.sh\n",
-                            "#chmod +x /etc/init.d/bosh-init-run-once\n",
-                            "#update-rc.d bosh-init-run-once defaults 99\n",
+                            "curl --output /etc/init.d/bosh-init-run-once $S3_URL/bosh/bosh-init-run-once.sh\n",
+                            "chmod +x /etc/init.d/bosh-init-run-once\n",
+                            "sed -i -e \"s#HANDLE#$(echo $HANDLE | sed -e 's/\\&/\\\\&/g')#g\" /etc/init.d/bosh-init-run-once\n",
+                            "update-rc.d bosh-init-run-once defaults 99\n",
 
-                            "# All done so signal success\n",
-                            "aws-signal-success\n",
+                            "# Success (aws-signal-success) is signalled from the run-once script\n",
                             "reboot\n"
                         ] ]
                     }
@@ -231,7 +225,7 @@
             "Type": "AWS::CloudFormation::WaitCondition",
             "Properties": {
                 "Handle": { "Ref": "BOSHInitInstanceWaitHandle" },
-                "Timeout": "1200"
+                "Timeout": "2400"
             },
             "DependsOn": "BOSHInitInstance"
         }

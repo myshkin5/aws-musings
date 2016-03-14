@@ -21,9 +21,16 @@ do_start () {
     else
         log_action_msg "Running bosh-init..."
         cd /usr/local/bosh-init
-        export BOSH_INIT_LOG_LEVEL=debug
+
+        # HOME must be set so bosh-init can locate $HOME/.bosh_init
+        export HOME=/root
+
+        #export BOSH_INIT_LOG_LEVEL=debug
+        echo "$(date) Starting bosh-init..."
         ./bosh-init deploy ./bosh.yml >> /var/log/bosh-init.log 2>&1
+        echo "$(date) Finished bosh-init"
         touch $ONCE_FILE
+        /usr/local/bin/cfn-signal --exit-code 0 --reason "BOSHInitInstance setup complete" "HANDLE"
     fi
 }
 
