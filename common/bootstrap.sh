@@ -45,7 +45,8 @@ aws-bootstrap() {
         ;;
     esac
 
-    $AWS_DIR/cfn-init --stack $STACK_NAME --resource $RESOURCE --region $REGION || aws-error-exit 'Failed to run cfn-init'
+    $AWS_DIR/cfn-init --stack $STACK_NAME --resource $RESOURCE --region $REGION \
+        || aws-error-exit 'Failed to run cfn-init'
     $AWS_DIR/cfn-hup || aws-error-exit 'Failed to start cfn-hup'
 
     echo $HOSTNAME > /etc/hostname

@@ -7,16 +7,20 @@ source $(dirname $0)/../../scripts/cf-utils.sh $@
 STACK_NAME=$STACK_PREFIX-bosh-infrastructure
 
 if [[ $MANAGEMENT_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
-    MANAGEMENT_THREE_OCTET_CIDR_BLOCK=$(jq -r .Parameters.ManagementThreeOctetCIDRBlock.Default $(dirname $0)/../bosh-infrastructure.template)
+    MANAGEMENT_THREE_OCTET_CIDR_BLOCK=$(jq -r .Parameters.ManagementThreeOctetCIDRBlock.Default \
+        $(dirname $0)/../bosh-infrastructure.template)
 fi
 if [[ $THREE_OCTET_CIDR_BLOCK_A == "" ]] ; then
-    THREE_OCTET_CIDR_BLOCK_A=$(jq -r .Parameters.ThreeOctetCIDRBlockA.Default $(dirname $0)/../bosh-infrastructure.template)
+    THREE_OCTET_CIDR_BLOCK_A=$(jq -r .Parameters.ThreeOctetCIDRBlockA.Default \
+        $(dirname $0)/../bosh-infrastructure.template)
 fi
 if [[ $THREE_OCTET_CIDR_BLOCK_B == "" ]] ; then
-    THREE_OCTET_CIDR_BLOCK_B=$(jq -r .Parameters.ThreeOctetCIDRBlockB.Default $(dirname $0)/../bosh-infrastructure.template)
+    THREE_OCTET_CIDR_BLOCK_B=$(jq -r .Parameters.ThreeOctetCIDRBlockB.Default \
+        $(dirname $0)/../bosh-infrastructure.template)
 fi
 if [[ $THREE_OCTET_CIDR_BLOCK_C == "" ]] ; then
-    THREE_OCTET_CIDR_BLOCK_C=$(jq -r .Parameters.ThreeOctetCIDRBlockC.Default $(dirname $0)/../bosh-infrastructure.template)
+    THREE_OCTET_CIDR_BLOCK_C=$(jq -r .Parameters.ThreeOctetCIDRBlockC.Default \
+        $(dirname $0)/../bosh-infrastructure.template)
 fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \

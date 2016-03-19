@@ -177,11 +177,14 @@
                             "source /tmp/bootstrap.sh\n",
                             "aws-bootstrap\n",
 
-                            "export AVAILABILITY_ZONE=\"", { "Fn::FindInMap": [ "AZRegionMap", { "Ref": "AWS::Region" }, "a" ] }, "\"\n",
+                            "export AVAILABILITY_ZONE=\"",
+                                { "Fn::FindInMap": [ "AZRegionMap", { "Ref": "AWS::Region" }, "a" ] }, "\"\n",
                             "export AWS_ACCESS_KEY_ID=\"", { "Ref": "AWSAccessKeyId" }, "\"\n",
                             "export AWS_SECRET_ACCESS_KEY=\"", { "Ref": "AWSSecretAccessKey" }, "\"\n",
-                            "export MANAGEMENT_THREE_OCTET_CIDR_BLOCK=\"", { "Ref": "ManagementThreeOctetCIDRBlock" }, "\"\n",
-                            "export BOSH_DIRECTOR_SECURITY_GROUP_ID=\"", { "Ref": "BOSHDirectorSecurityGroupId" }, "\"\n",
+                            "export MANAGEMENT_THREE_OCTET_CIDR_BLOCK=\"",
+                                { "Ref": "ManagementThreeOctetCIDRBlock" }, "\"\n",
+                            "export BOSH_DIRECTOR_SECURITY_GROUP_ID=\"",
+                                { "Ref": "BOSHDirectorSecurityGroupId" }, "\"\n",
                             "export PRIVATE_KEY=\"", { "Ref": "PrivateKey" }, "\"\n",
                             "export SUBNET_ID=\"", { "Ref": "ManagementSubnetId" }, "\"\n",
 
@@ -199,14 +202,16 @@
                             "sed -i -e \"s/SUBNET_ID/$SUBNET_ID/g\" bosh.yml\n",
                             "echo \"$PRIVATE_KEY\" > bosh.pem\n",
 
-                            "curl --output bosh-init https://s3.amazonaws.com/bosh-init-artifacts/bosh-init-0.0.81-linux-amd64\n",
+                            "curl --output bosh-init --silent ",
+                                "https://s3.amazonaws.com/bosh-init-artifacts/bosh-init-0.0.81-linux-amd64\n",
                             "chmod +x bosh-init\n",
 
                             "gem install bosh_cli --no-ri --no-rdoc\n",
 
-                            "curl --output /etc/init.d/bosh-init-run-once $S3_URL/bosh/bosh-init-run-once.sh\n",
+                            "curl --output /etc/init.d/bosh-init-run-once --silent $S3_URL/bosh/bosh-init-run-once.sh\n",
                             "chmod +x /etc/init.d/bosh-init-run-once\n",
-                            "sed -i -e \"s#HANDLE#$(echo $HANDLE | sed -e 's/\\&/\\\\&/g')#g\" /etc/init.d/bosh-init-run-once\n",
+                            "sed -i -e \"s#HANDLE#$(echo $HANDLE | sed -e 's/\\&/\\\\&/g')#g\" ",
+                                "/etc/init.d/bosh-init-run-once\n",
                             "update-rc.d bosh-init-run-once defaults 99\n",
 
                             "# Success (aws-signal-success) is signalled from the run-once script\n",

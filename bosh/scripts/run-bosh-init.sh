@@ -10,13 +10,16 @@ if [[ $DNS_ZONE == "" ]] ; then
     DNS_ZONE=dev
 fi
 if [[ $FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE == "" ]] ; then
-    FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE=$(jq -r .Parameters.FullyQualifiedInternalParentDNSZone.Default $(dirname $0)/../../infrastructure/public-infrastructure.template)
+    FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE=$(jq -r .Parameters.FullyQualifiedInternalParentDNSZone.Default \
+        $(dirname $0)/../../infrastructure/public-infrastructure.template)
 fi
 if [[ $INTERNAL_KEY_NAME == "" ]] ; then
-    INTERNAL_KEY_NAME=$(jq -r .Parameters.InternalKeyName.Default $(dirname $0)/../../infrastructure/public-infrastructure.template)
+    INTERNAL_KEY_NAME=$(jq -r .Parameters.InternalKeyName.Default \
+        $(dirname $0)/../../infrastructure/public-infrastructure.template)
 fi
 if [[ $MANAGEMENT_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
-    MANAGEMENT_THREE_OCTET_CIDR_BLOCK=$(jq -r .Parameters.ManagementThreeOctetCIDRBlock.Default $(dirname $0)/../bosh-infrastructure.template)
+    MANAGEMENT_THREE_OCTET_CIDR_BLOCK=$(jq -r .Parameters.ManagementThreeOctetCIDRBlock.Default \
+        $(dirname $0)/../bosh-infrastructure.template)
 fi
 if [[ $AWS_ACCESS_KEY_ID == "" ]] ; then
     >&2 echo "ERROR: AWS_ACCESS_KEY_ID must be set to an AWS access key id"
