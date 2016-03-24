@@ -125,12 +125,11 @@
 
                             "set -e -x\n",
 
-                            "export HANDLE=\"", { "Ref": "JumpBoxInstanceWaitHandle" }, "\"\n",
                             "export HOSTNAME=jump-box\n",
-                            "export REGION=\"", { "Ref": "AWS::Region" }, "\"\n",
-                            "export RESOURCE=JumpBoxInstance\n",
-                            "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
                             "export STACK_NAME=\"", { "Ref": "AWS::StackName" }, "\"\n",
+                            "export RESOURCE=JumpBoxInstance\n",
+                            "export REGION=\"", { "Ref": "AWS::Region" }, "\"\n",
+                            "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
 
                             "curl --output /tmp/bootstrap.sh --silent $S3_URL/common/bootstrap.sh\n",
                             "source /tmp/bootstrap.sh\n",
@@ -142,20 +141,12 @@
                         ] ]
                     }
                 }
-            }
-        },
-
-        "JumpBoxInstanceWaitHandle": {
-            "Type": "AWS::CloudFormation::WaitConditionHandle"
-        },
-
-        "JumpBoxInstanceWaitCondition": {
-            "Type": "AWS::CloudFormation::WaitCondition",
-            "Properties": {
-                "Handle": { "Ref": "JumpBoxInstanceWaitHandle" },
-                "Timeout": "600"
             },
-            "DependsOn": "JumpBoxInstance"
+            "CreationPolicy" : {
+                "ResourceSignal" : {
+                    "Timeout" : "PT10M"
+                }
+            }
         },
 
         "JumpBoxEIPAssociation": {

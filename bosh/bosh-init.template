@@ -161,13 +161,11 @@
 
                             "set -e -x\n",
 
-                            "export HANDLE=\"", { "Ref": "BOSHInitInstanceWaitHandle" }, "\"\n",
                             "export HOSTNAME=bosh-init\n",
-                            "export REGION=\"", { "Ref": "AWS::Region" }, "\"\n",
-                            "export RESOURCE=BOSHInitInstance\n",
-                            "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
                             "export STACK_NAME=\"", { "Ref": "AWS::StackName" }, "\"\n",
-                            "export STACK_PREFIX=\"", { "Ref": "StackPrefix" }, "\"\n",
+                            "export RESOURCE=BOSHInitInstance\n",
+                            "export REGION=\"", { "Ref": "AWS::Region" }, "\"\n",
+                            "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
 
                             "export EXTRA_PACKAGES=\"build-essential zlibc zlib1g-dev ruby ruby-dev openssl ",
                                 "libxslt-dev libxml2-dev libssl-dev libreadline6 libreadline6-dev libyaml-dev ",
@@ -186,6 +184,7 @@
                             "export BOSH_DIRECTOR_SECURITY_GROUP_ID=\"",
                                 { "Ref": "BOSHDirectorSecurityGroupId" }, "\"\n",
                             "export PRIVATE_KEY=\"", { "Ref": "PrivateKey" }, "\"\n",
+                            "export STACK_PREFIX=\"", { "Ref": "StackPrefix" }, "\"\n",
                             "export SUBNET_ID=\"", { "Ref": "ManagementSubnetId" }, "\"\n",
 
                             "mkdir -p /usr/local/bosh-init\n",
@@ -210,8 +209,9 @@
 
                             "curl --output /etc/init.d/bosh-init-run-once --silent $S3_URL/bosh/bosh-init-run-once.sh\n",
                             "chmod +x /etc/init.d/bosh-init-run-once\n",
-                            "sed -i -e \"s#HANDLE#$(echo $HANDLE | sed -e 's/\\&/\\\\&/g')#g\" ",
-                                "/etc/init.d/bosh-init-run-once\n",
+                            "sed -i -e \"s/STACK_NAME/$STACK_NAME/g\" /etc/init.d/bosh-init-run-once\n",
+                            "sed -i -e \"s/RESOURCE/$RESOURCE/g\" /etc/init.d/bosh-init-run-once\n",
+                            "sed -i -e \"s/REGION/$REGION/g\" /etc/init.d/bosh-init-run-once\n",
                             "update-rc.d bosh-init-run-once defaults 99\n",
 
                             "# Success (aws-signal-success) is signalled from the run-once script\n",
@@ -219,20 +219,12 @@
                         ] ]
                     }
                 }
-            }
-        },
-
-        "BOSHInitInstanceWaitHandle": {
-            "Type": "AWS::CloudFormation::WaitConditionHandle"
-        },
-
-        "BOSHInitInstanceWaitCondition": {
-            "Type": "AWS::CloudFormation::WaitCondition",
-            "Properties": {
-                "Handle": { "Ref": "BOSHInitInstanceWaitHandle" },
-                "Timeout": "2400"
             },
-            "DependsOn": "BOSHInitInstance"
+            "CreationPolicy" : {
+                "ResourceSignal" : {
+                    "Timeout" : "PT40M"
+                }
+            }
         }
 
     },

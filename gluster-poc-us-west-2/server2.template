@@ -117,26 +117,17 @@
                         "Fn::Join": [ "", [
                             "#!/bin/bash\n",
 
-                            "# Helper function\n",
-                            "function error_exit\n",
-                            "{\n",
-                            "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '", { "Ref": "Instance2WaitHandle" }, "'\n",
-                            "  exit 1\n",
-                            "}\n",
+                            "set -e -x\n",
 
-                            "yum -y update || error_exit 'yum update failed'\n",
+                            "export HOSTNAME=", { "Ref": "NamePrefix" }, "2\n",
+                            "export STACK_NAME=\"", { "Ref": "AWS::StackName" }, "\"\n",
+                            "export RESOURCE=NATInstance\n",
+                            "export REGION=\"", { "Ref": "AWS::Region" }, "\"\n",
+                            "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
 
-                            "sed -i -e \"s/localhost/", { "Ref": "NamePrefix" }, "2/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/", { "Ref": "NamePrefix"  }, "2 ",
-                                { "Ref": "NamePrefix" },
-                                "2.localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
-
-                            "# Initialize CloudFormation\n",
-                            "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r Instance2 ",
-                                "--region ", { "Ref": "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
-
-                            "# Start up the cfn-hup daemon to listen for changes to the metadata\n",
-                            "/opt/aws/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n",
+                            "curl --output /tmp/bootstrap.sh --silent $S3_URL/common/bootstrap.sh\n",
+                            "source /tmp/bootstrap.sh\n",
+                            "aws-bootstrap\n",
 
                             "# Gluster configuration common to both servers\n",
                             "echo -e \"n\n\n\n\n\nw\" | fdisk /dev/xvdb || error_exit 'Failed fdisk'\n",
@@ -151,26 +142,17 @@
                             "chkconfig glusterd on\n",
 
                             "# All done so signal success\n",
-                            "/opt/aws/bin/cfn-signal -e 0 -r \"Instance2 setup complete\" '",
-                                { "Ref": "Instance2WaitHandle" }, "'\n",
+                            "aws-signal-success\n",
                             "reboot\n"
                         ] ]
                     }
                 }
-            }
-        },
-
-        "Instance2WaitHandle": {
-            "Type": "AWS::CloudFormation::WaitConditionHandle"
-        },
-
-        "Instance2WaitCondition": {
-            "Type": "AWS::CloudFormation::WaitCondition",
-            "Properties": {
-                "Handle": { "Ref": "Instance2WaitHandle" },
-                "Timeout": "600"
             },
-            "DependsOn": "Instance2"
+            "CreationPolicy" : {
+                "ResourceSignal" : {
+                    "Timeout" : "PT10M"
+                }
+            }
         },
 
         "Volume": {

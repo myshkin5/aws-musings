@@ -117,68 +117,50 @@
                         "Fn::Join": [ "", [
                             "#!/bin/bash\n",
 
-                            "# Helper function\n",
-                            "function error_exit\n",
-                            "{\n",
-                            "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '", { "Ref": "Instance1WaitHandle" }, "'\n",
-                            "  exit 1\n",
-                            "}\n",
+                            "set -e -x\n",
 
-                            "yum -y update || error_exit 'yum update failed'\n",
+                            "export HOSTNAME=", { "Ref": "NamePrefix" }, "1\n",
+                            "export STACK_NAME=\"", { "Ref": "AWS::StackName" }, "\"\n",
+                            "export RESOURCE=NATInstance\n",
+                            "export REGION=\"", { "Ref": "AWS::Region" }, "\"\n",
+                            "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
 
-                            "sed -i -e \"s/localhost/", { "Ref": "NamePrefix" }, "1/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/", { "Ref": "NamePrefix"  }, "1 ",
-                                { "Ref": "NamePrefix" },
-                                "1.localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
-
-                            "# Initialize CloudFormation\n",
-                            "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r Instance1 ",
-                                "--region ", { "Ref": "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
-
-                            "# Start up the cfn-hup daemon to listen for changes to the metadata\n",
-                            "/opt/aws/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n",
+                            "curl --output /tmp/bootstrap.sh --silent $S3_URL/common/bootstrap.sh\n",
+                            "source /tmp/bootstrap.sh\n",
+                            "aws-bootstrap\n",
 
                             "# Gluster configuration common to both servers\n",
-                            "echo -e \"n\n\n\n\n\nw\" | fdisk /dev/xvdb || error_exit 'Failed fdisk'\n",
-                            "mkfs.ext4 /dev/xvdb1 || error_exit 'Failed mkfs'\n",
-                            "mkdir /mnt/brick1 || error_exit 'Failed mkdir'\n",
+                            "echo -e \"n\n\n\n\n\nw\" | fdisk /dev/xvdb || aws-error-exit 'Failed fdisk'\n",
+                            "mkfs.ext4 /dev/xvdb1 || aws-error-exit 'Failed mkfs'\n",
+                            "mkdir /mnt/brick1 || aws-error-exit 'Failed mkdir'\n",
                             "echo \"/dev/xvdb1 /mnt/brick1 ext4 defaults 1 2\" >> /etc/fstab\n",
                             "wget -P /etc/yum.repos.d ",
                                 "http://download.gluster.org/pub/gluster/glusterfs/LATEST/EPEL.repo/",
-                                    "glusterfs-epel.repo || error_exit 'Failed gluster repo wget'\n",
+                                    "glusterfs-epel.repo || aws-error-exit 'Failed gluster repo wget'\n",
                             "sed -i 's/$releasever/6/g' /etc/yum.repos.d/glusterfs-epel.repo\n",
                             "yum -y install glusterfs{-fuse,-server}\n",
                             "chkconfig glusterd on\n",
 
                             "# Gluster configuration for server1 only\n",
                             "gluster peer probe ", { "Ref": "NamePrefix" },
-                                "2 || error_exit 'gluster peer probe failed'\n",
+                                "2 || aws-error-exit 'gluster peer probe failed'\n",
                             "gluster volume create gluster replica 2 transport tcp ",
                                 { "Ref": "NamePrefix" }, "1:/mnt/brick1/brick1 ",
                                 { "Ref": "NamePrefix" }, "2:/mnt/brick1/brick1 ",
-                                    "|| error_exit 'gluster volume create failed'\n",
+                                    "|| aws-error-exit 'gluster volume create failed'\n",
 
                             "# All done so signal success\n",
-                            "/opt/aws/bin/cfn-signal -e 0 -r \"Instance1 setup complete\" '",
-                                { "Ref": "Instance1WaitHandle" }, "'\n",
+                            "aws-signal-success\n",
                             "reboot\n"
                         ] ]
                     }
                 }
-            }
-        },
-
-        "Instance1WaitHandle": {
-            "Type": "AWS::CloudFormation::WaitConditionHandle"
-        },
-
-        "Instance1WaitCondition": {
-            "Type": "AWS::CloudFormation::WaitCondition",
-            "Properties": {
-                "Handle": { "Ref": "Instance1WaitHandle" },
-                "Timeout": "600"
             },
-            "DependsOn": "Instance1"
+            "CreationPolicy" : {
+                "ResourceSignal" : {
+                    "Timeout" : "PT10M"
+                }
+            }
         },
 
         "Volume": {

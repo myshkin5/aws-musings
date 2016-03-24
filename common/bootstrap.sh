@@ -22,12 +22,14 @@ esac
 
 aws-error-exit() {
     REASON=$1
-    $AWS_DIR/cfn-signal --exit-code 1 --reason "$REASON" "$HANDLE"
+    $AWS_DIR/cfn-signal --exit-code 1 --stack $STACK_NAME --resource $RESOURCE --region $REGION \
+        --reason "$REASON"
     exit 1
 }
 
 aws-signal-success() {
-    $AWS_DIR/cfn-signal --exit-code 0 --reason "$RESOURCE setup complete" "$HANDLE"
+    $AWS_DIR/cfn-signal --exit-code 0 --stack $STACK_NAME --resource $RESOURCE --region $REGION \
+        --reason "$RESOURCE setup complete"
 }
 
 aws-bootstrap() {

@@ -188,53 +188,33 @@
                         "Fn::Join": [ "", [
                             "#!/bin/bash\n",
 
-                            "# Helper function\n",
-                            "function error_exit\n",
-                            "{\n",
-                            "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '", { "Ref": "DNSInstanceWaitHandle" }, "'\n",
-                            "  exit 1\n",
-                            "}\n",
+                            "set -e -x\n",
+
+                            "export HOSTNAME=dns\n",
+                            "export STACK_NAME=\"", { "Ref": "AWS::StackName" }, "\"\n",
+                            "export RESOURCE=NATInstance\n",
+                            "export REGION=\"", { "Ref": "AWS::Region" }, "\"\n",
+                            "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
+
+                            "curl --output /tmp/bootstrap.sh --silent $S3_URL/common/bootstrap.sh\n",
+                            "source /tmp/bootstrap.sh\n",
+                            "aws-bootstrap\n",
 
                             "mkdir /var/log/named\n",
                             "chown named:named /var/log/named\n",
 
-                            "yum -y update || error_exit 'yum update failed'\n",
-
-                            "sed -i -e \"s/localhost/", { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "dns" ] ] },
-                                "/g\" /etc/sysconfig/network\n",
-                            "sed -i -e \"s/localhost localhost.localdomain/",
-                                { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "dns" ] ] }, " ",
-                                { "Fn::Join": [ "-", [ { "Ref": "DNSZone" }, "dns" ] ] },
-                                ".localdomain localhost localhost.localdomain/g\" /etc/hosts\n",
-
-                            "# Initialize CloudFormation\n",
-                            "/opt/aws/bin/cfn-init -s ", { "Ref": "AWS::StackId" }, " -r DNSInstance ",
-                                "--region ", { "Ref": "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
-
-                            "# Start up the cfn-hup daemon to listen for changes to the metadata\n",
-                            "/opt/aws/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n",
-
                             "# All done so signal success\n",
-                            "/opt/aws/bin/cfn-signal -e 0 -r \"DNSInstance setup complete\" '",
-                                { "Ref": "DNSInstanceWaitHandle" }, "'\n",
+                            "aws-signal-success\n",
                             "reboot\n"
                         ] ]
                     }
                 }
-            }
-        },
-
-        "DNSInstanceWaitHandle": {
-            "Type": "AWS::CloudFormation::WaitConditionHandle"
-        },
-
-        "DNSInstanceWaitCondition": {
-            "Type": "AWS::CloudFormation::WaitCondition",
-            "Properties": {
-                "Handle": { "Ref": "DNSInstanceWaitHandle" },
-                "Timeout": "600"
             },
-            "DependsOn": "DNSInstance"
+            "CreationPolicy" : {
+                "ResourceSignal" : {
+                    "Timeout" : "PT10M"
+                }
+            }
         }
 
     },

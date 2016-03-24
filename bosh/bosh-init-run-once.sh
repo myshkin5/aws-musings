@@ -30,7 +30,8 @@ do_start () {
         ./bosh-init deploy ./bosh.yml >> /var/log/bosh-init.log 2>&1
         echo "$(date) Finished bosh-init"
         touch $ONCE_FILE
-        /usr/local/bin/cfn-signal --exit-code 0 --reason "BOSHInitInstance setup complete" "HANDLE"
+        /usr/local/bin/cfn-signal --exit-code 0 --stack "STACK_NAME" --resource "RESOURCE" --region "REGION" \
+            --reason "BOSHInitInstance setup complete"
     fi
 }
 
