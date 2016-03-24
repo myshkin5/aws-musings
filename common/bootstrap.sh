@@ -20,16 +20,26 @@ case $FLAVOR in
     ;;
 esac
 
+aws-signal() {
+    EXIT_CODE=$1
+    REASON=$2
+    SIGNAL_RESOURCE=$RESOURCE
+    if [[ $AUTO_SCALING_GROUP != "" ]] ; then
+        SIGNAL_RESOURCE=$AUTO_SCALING_GROUP
+    fi
+
+    $AWS_DIR/cfn-signal --exit-code $EXIT_CODE --stack $STACK_NAME --resource $SIGNAL_RESOURCE --region $REGION \
+        --reason "$REASON"
+}
+
 aws-error-exit() {
     REASON=$1
-    $AWS_DIR/cfn-signal --exit-code 1 --stack $STACK_NAME --resource $RESOURCE --region $REGION \
-        --reason "$REASON"
+    aws-signal 1 $REASON
     exit 1
 }
 
 aws-signal-success() {
-    $AWS_DIR/cfn-signal --exit-code 0 --stack $STACK_NAME --resource $RESOURCE --region $REGION \
-        --reason "$RESOURCE setup complete"
+    aws-signal 0 "$RESOURCE setup complete"
 }
 
 aws-bootstrap() {
