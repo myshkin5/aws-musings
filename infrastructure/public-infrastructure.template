@@ -365,6 +365,10 @@
         "NATInstanceId": {
             "Description": "The id of the NAT instance to be added to private route tables.",
             "Value": { "Fn::GetAtt": [ "NATInstanceStack", "Outputs.NATInstanceId" ] }
+        },
+        "PublicRouteTableId": {
+            "Description": "The id of the public route table.",
+            "Value": { "Ref": "PublicRouteTable" }
         }
     }
 
