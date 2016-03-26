@@ -165,13 +165,13 @@
                             "export STACK_NAME=\"", { "Ref": "AWS::StackName" }, "\"\n",
                             "export RESOURCE=BOSHInitInstance\n",
                             "export REGION=\"", { "Ref": "AWS::Region" }, "\"\n",
-                            "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
+                            "export AWS_MUSINGS_S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
 
                             "export EXTRA_PACKAGES=\"build-essential zlibc zlib1g-dev ruby ruby-dev openssl ",
                                 "libxslt-dev libxml2-dev libssl-dev libreadline6 libreadline6-dev libyaml-dev ",
                                 "libsqlite3-dev sqlite3 libpq-dev libmysqlclient-dev\"\n",
 
-                            "curl --output /tmp/bootstrap.sh --silent $S3_URL/common/bootstrap.sh\n",
+                            "curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh\n",
                             "source /tmp/bootstrap.sh\n",
                             "aws-bootstrap\n",
 
@@ -190,7 +190,7 @@
                             "mkdir -p /usr/local/bosh-init\n",
                             "cd /usr/local/bosh-init\n",
 
-                            "curl --output bosh.yml --silent $S3_URL/bosh/bosh.yml\n",
+                            "curl --output bosh.yml --silent $AWS_MUSINGS_S3_URL/bosh/bosh.yml\n",
                             "sed -i -e \"s/AVAILABILITY_ZONE/$AVAILABILITY_ZONE/g\" bosh.yml\n",
                             "sed -i -e \"s/AWS_ACCESS_KEY_ID/$AWS_ACCESS_KEY_ID/g\" bosh.yml\n",
                             "sed -i -e \"s#AWS_SECRET_ACCESS_KEY#$AWS_SECRET_ACCESS_KEY#g\" bosh.yml\n",
@@ -207,7 +207,8 @@
 
                             "gem install bosh_cli --no-ri --no-rdoc\n",
 
-                            "curl --output /etc/init.d/bosh-init-run-once --silent $S3_URL/bosh/bosh-init-run-once.sh\n",
+                            "curl --output /etc/init.d/bosh-init-run-once ",
+                                "--silent $AWS_MUSINGS_S3_URL/bosh/bosh-init-run-once.sh\n",
                             "chmod +x /etc/init.d/bosh-init-run-once\n",
                             "sed -i -e \"s/STACK_NAME/$STACK_NAME/g\" /etc/init.d/bosh-init-run-once\n",
                             "sed -i -e \"s/RESOURCE/$RESOURCE/g\" /etc/init.d/bosh-init-run-once\n",

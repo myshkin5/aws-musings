@@ -20,7 +20,7 @@ if [[ $BOSH_LITE_PRIVATE_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
 fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
-    --template-url $S3_URL/bosh-lite/bosh-lite-infrastructure.template \
+    --template-url $AWS_MUSINGS_S3_URL/bosh-lite/bosh-lite-infrastructure.template \
     --parameters ParameterKey=BOSHLiteAvailabilityZone,ParameterValue=$BOSH_LITE_AVAILABILITY_ZONE \
         ParameterKey=BOSHLitePublicThreeOctetCIDRBlock,ParameterValue=$BOSH_LITE_PUBLIC_THREE_OCTET_CIDR_BLOCK \
         ParameterKey=BOSHLitePrivateThreeOctetCIDRBlock,ParameterValue=$BOSH_LITE_PRIVATE_THREE_OCTET_CIDR_BLOCK \

@@ -36,9 +36,9 @@ fi
 PRIVATE_KEY=$(cat $PRIVATE_KEY_FILE)
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
-    --template-url $S3_URL/bosh/bosh-init.template \
+    --template-url $AWS_MUSINGS_S3_URL/bosh/bosh-init.template \
     --parameters ParameterKey=AWSAccessKeyId,ParameterValue=$AWS_ACCESS_KEY_ID \
-        ParameterKey=AWSMusingsS3URL,ParameterValue=$S3_URL \
+        ParameterKey=AWSMusingsS3URL,ParameterValue=$AWS_MUSINGS_S3_URL \
         ParameterKey=AWSSecretAccessKey,ParameterValue="$AWS_SECRET_ACCESS_KEY" \
         ParameterKey=BOSHDirectorSecurityGroupId,ParameterValue=$BOSH_DIRECTOR_SECURITY_GROUP_ID \
         ParameterKey=DNSZone,ParameterValue=$DNS_ZONE \

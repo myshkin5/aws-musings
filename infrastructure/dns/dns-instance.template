@@ -194,9 +194,9 @@
                             "export STACK_NAME=\"", { "Ref": "AWS::StackName" }, "\"\n",
                             "export RESOURCE=NATInstance\n",
                             "export REGION=\"", { "Ref": "AWS::Region" }, "\"\n",
-                            "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
+                            "export AWS_MUSINGS_S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
 
-                            "curl --output /tmp/bootstrap.sh --silent $S3_URL/common/bootstrap.sh\n",
+                            "curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh\n",
                             "source /tmp/bootstrap.sh\n",
                             "aws-bootstrap\n",
 

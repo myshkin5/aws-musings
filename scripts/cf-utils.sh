@@ -1,25 +1,14 @@
 #!/usr/bin/env bash
 
-PROFILE=myshkin5
-S3_URL=https://s3.amazonaws.com/aws-musings-us-east-1
-STACK_PREFIX=vkzone-dev
-
-while [ $# -gt 0 ] ; do
-    if [[ "$1" == "-u" || "$1" == "--url" ]] ; then
-        S3_URL=$2
-        shift
-    elif [[ "$1" == "-p" || "$1" == "--profile" ]] ; then
-        PROFILE=$2
-        shift
-    elif [[ "$1" == "-s" || "$1" == "--stack-prefix" ]] ; then
-        STACK_PREFIX=$2
-        shift
-    else
-        echo "Unknown command line argument, $1"
-        exit -1
-    fi
-    shift
-done
+if [[ $AWS_MUSINGS_S3_URL == "" ]] ; then
+    AWS_MUSINGS_S3_URL=https://s3.amazonaws.com/aws-musings-us-east-1
+fi
+if [[ $PROFILE == "" ]] ; then
+    PROFILE=default
+fi
+if [[ $STACK_PREFIX == "" ]] ; then
+    STACK_PREFIX=vkzone-dev
+fi
 
 wait-for-stack-completion() {
     while $(true) ; do

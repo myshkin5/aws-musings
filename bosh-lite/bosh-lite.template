@@ -146,12 +146,12 @@
                             "export STACK_NAME=\"", { "Ref": "AWS::StackName" }, "\"\n",
                             "export RESOURCE=BOSHLiteLaunchConfig\n",
                             "export REGION=\"", { "Ref": "AWS::Region" }, "\"\n",
-                            "export S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
+                            "export AWS_MUSINGS_S3_URL=\"", { "Ref": "AWSMusingsS3URL" }, "\"\n",
 
                             "export EXTRA_PACKAGES=\"bundler\"\n",
                             "export AUTO_SCALING_GROUP=BOSHLiteAutoScalingGroup\n",
 
-                            "curl --output /tmp/bootstrap.sh --silent $S3_URL/common/bootstrap.sh\n",
+                            "curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh\n",
                             "source /tmp/bootstrap.sh\n",
                             "aws-bootstrap\n",
 
@@ -159,7 +159,7 @@
                                 { "Ref": "FullyQualifiedExternalParentDNSZone" } ] ] }, "\"\n",
 
                             "curl --output /etc/init.d/bosh-lite-run-once --silent ",
-                            "$S3_URL/bosh-lite/run-once.sh\n",
+                                "$AWS_MUSINGS_S3_URL/bosh-lite/run-once.sh\n",
                             "chmod +x /etc/init.d/bosh-lite-run-once\n",
                             "sed -i -e \"s/STACK_NAME/$STACK_NAME/g\" /etc/init.d/bosh-lite-run-once\n",
                             "sed -i -e \"s/RESOURCE/$AUTO_SCALING_GROUP/g\" /etc/init.d/bosh-lite-run-once\n",
@@ -167,7 +167,8 @@
                             "sed -i -e \"s/BOSH_LITE_URL/$BOSH_LITE_URL/g\" /etc/init.d/bosh-lite-run-once\n",
                                 "update-rc.d bosh-lite-run-once defaults 99\n",
 
-                            "curl --output /usr/local/bootstrap-bosh-lite.sh --silent $S3_URL/bosh-lite/bootstrap.sh\n",
+                            "curl --output /usr/local/bootstrap-bosh-lite.sh ",
+                                "--silent $AWS_MUSINGS_S3_URL/bosh-lite/bootstrap.sh\n",
                             "chmod +x /usr/local/bootstrap-bosh-lite.sh\n",
 
                             "# Success (aws-signal-success) is signalled from the run-once script\n",

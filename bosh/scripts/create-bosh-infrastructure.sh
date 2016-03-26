@@ -24,7 +24,7 @@ if [[ $THREE_OCTET_CIDR_BLOCK_C == "" ]] ; then
 fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
-    --template-url $S3_URL/bosh/bosh-infrastructure.template \
+    --template-url $AWS_MUSINGS_S3_URL/bosh/bosh-infrastructure.template \
     --parameters ParameterKey=ManagementThreeOctetCIDRBlock,ParameterValue=$MANAGEMENT_THREE_OCTET_CIDR_BLOCK \
         ParameterKey=NetworkACLId,ParameterValue=$NETWORK_ACL_ID \
         ParameterKey=PrivateRouteTableId,ParameterValue=$PRIVATE_ROUTE_TABLE_ID \
