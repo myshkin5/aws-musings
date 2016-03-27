@@ -27,7 +27,7 @@ Creates the core constructs starting with the VPC. This project is a prerequisit
 
 Just creates a VPC.
 
- |
+ | |
 ---|---
  Definition | [`vpc.template`](./vpc.template)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpc.template
@@ -49,7 +49,7 @@ Just creates a VPC.
 
 Creates network artifacts to route traffic through a VPN.
 
- |
+ | |
 ---|---
  Definition | [`vpn.template`](./vpn.template)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpn.template
@@ -73,7 +73,7 @@ Creates network artifacts to route traffic through a VPN.
 
 Creates network routing artifacts for public subnets along with jump box and NAT instances.
 
- |
+ | |
 ---|---
  Definition | [`public-infrastructure.template`](./public-infrastructure.template)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public-infrastructure.template
@@ -108,7 +108,7 @@ Creates network routing artifacts for public subnets along with jump box and NAT
 
 Creates network routing artifacts for private subnets.
 
- |
+ | |
 ---|---
  Definition | [`private-infrastructure.template`](./private-infrastructure.template)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private-infrastructure.template
@@ -134,37 +134,39 @@ Creates network routing artifacts for private subnets.
 
 The full stack isn't really a stack but a set of convenience shell scripts for creating and deleting the [VPC](#vpc), [public infrastructure](#public-infrastructure), and [private infrastructure](#private-infrastructure) stacks in the proper order. Note that create script outputs several sets of environment variables that all need to be exported for use in other stacks.
 
- |
+ | |
 ---|---
  Create Script | [`scripts/create-full-stack.sh`](scripts/create-full-stack.sh)
  Delete Script | [`scripts/delete-full-stack.sh`](scripts/delete-full-stack.sh)
 
-[//]: # DNS Notes
-[//]: # 1. Create VPC stack [`vpc.template`](./vpc.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpc.template).
+<!---
+DNS Notes
+1. Create VPC stack [`vpc.template`](./vpc.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpc.template).
 
-[//]: # 2. Create VPN stack [`vpn.template`](./vpn.template) (optional, S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpn.template).
+2. Create VPN stack [`vpn.template`](./vpn.template) (optional, S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpn.template).
 
-[//]: # 3. Create Public Infrastructure stack [`public-infrastructure.template`](./public-infrastructure.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public-infrastructure.template).
+3. Create Public Infrastructure stack [`public-infrastructure.template`](./public-infrastructure.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public-infrastructure.template).
 
-[//]: #   NOTE: IF THE STACK IN STEP 3 IS BURNED DOWN, THE STACK IN STEP 1 WILL BE IN A BAD STATE.
-[//]: #   RESET THE VPC'S DHCP OPTIONS BEFORE ATTEMPTING TO REBUILD THE STACK IN STEP 3!!!!!!!!!!!
+  NOTE: IF THE STACK IN STEP 3 IS BURNED DOWN, THE STACK IN STEP 1 WILL BE IN A BAD STATE.
+  RESET THE VPC'S DHCP OPTIONS BEFORE ATTEMPTING TO REBUILD THE STACK IN STEP 3!!!!!!!!!!!
 
-[//]: #   Burning down the step 3 stack sets the DHCP options to 'default' which probably doesn't
-[//]: #   really exist. Set the DHCP options back to the DHCP options created by AWS (one with
-[//]: #   domain-name-servers = AmazonProvidedDNS).
+  Burning down the step 3 stack sets the DHCP options to 'default' which probably doesn't
+  really exist. Set the DHCP options back to the DHCP options created by AWS (one with
+  domain-name-servers = AmazonProvidedDNS).
 
-[//]: # 4. Connect to DNS instance and execute the following:
+4. Connect to DNS instance and execute the following:
 
-[//]: #   ```bash
-[//]: #   sudo chown named:named /var/log/named
-[//]: #   ```
+  ```bash
+  sudo chown named:named /var/log/named
+  ```
 
-[//]: #   TODO: CF init should be able to resolve the chown issue eventually.
+  TODO: CF init should be able to resolve the chown issue eventually.
 
-[//]: # 5. Restarting is only necessary to make the previous change take effect.
+5. Restarting is only necessary to make the previous change take effect.
 
-[//]: #   ```bash
-[//]: #   sudo /etc/init.d/named restart
-[//]: #   ```
+  ```bash
+  sudo /etc/init.d/named restart
+  ```
 
-[//]: # 6. Create Private Infrastructure stack [`private-infrastructure.template`](./private-infrastructure.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private-infrastructure.template).
+6. Create Private Infrastructure stack [`private-infrastructure.template`](./private-infrastructure.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private-infrastructure.template).
+--->
