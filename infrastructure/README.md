@@ -7,19 +7,19 @@ Creates the core constructs starting with the VPC. This project is a prerequisit
 
 1. **Jump Box SSH Key Pair:** Via the EC2 console, create or import an SSH key pair named `jump-box`. If an alternate name is used, specify the name via the [`JumpBoxKeyName`](#jump-box-key-name) parameter. This SSH key is only used to connect to the `jump-box` instance from the open Internet so distribute it carefully.
 2. **Internal SSH Key Pair:** Via the EC2 console, create or import an SSH key pair named `internal`. If an alternate name is used, specify the name via the [`InternalKeyName`](#internal-key-name) parameter. This SSH key is used to connect to all infrastructure instances except the `jump-box` instance.
-    Note: For convenience the following `$HOME/.ssh/config` file can be used to manage both SSH keys (assumes the `jump-box` and `internal` private keys are stored in `$HOME/.ssh/id_rsa_jump_box` and `$HOME/.ssh/id_rsa_internal` respectively):
+    Note: For convenience the following `$HOME/.ssh/config` file can be used to manage both SSH keys (assumes the `jump-box` and `internal` private keys are stored in `$HOME/.ssh/id_rsa_jump_box` and `$HOME/.ssh/id_rsa_internal` respectively and [`DNSZone`](#dns-zone) and [`FullyQualifiedExternalParentDNSZone`](#fully-qualified-external-parent-dns-zone) are set to `prod` and `example.com` respectively):
     ```
     ForwardAgent yes
 
-    Host jb jump-box jump-box.dev.vkzone.net
-      Hostname jump-box.dev.vkzone.net
+    Host jb jump-box jump-box.prod.example.com
+      Hostname jump-box.prod.example.com
       User ubuntu
       IdentityFile ~/.ssh/id_rsa_jump_box
       IdentityFile ~/.ssh/id_rsa_internal
     ```
 3. **DNS Hosted Zone (optional):** Create a publicly accessible DNS hosted zone via the Route 53 console. The infrastructure project only uses this zone to create a DNS `A` record pointing to the `jump-box` instance (i.e.: `jump-box.prod.example.com` if [`DNSZone`](#dns-zone) is set to `prod` and [`FullyQualifiedExternalParentDNSZone`](#fully-qualified-external-parent-dns-zone) is set to `example.com`).
 
-4. **Virtual Private Network (optional):** Deploy either an [AWS-compatible hardware or software VPN](https://aws.amazon.com/vpc/faqs/#C9). By doing so, the site of the VPN will have direct connectivity to your VPC.
+4. **Virtual Private Network (optional):** Deploy either an [AWS-compatible hardware or software VPN](https://aws.amazon.com/vpc/faqs/#C9). By doing so, the site of the VPN will have direct connectivity to your VPC without having to use the jump box.
 
 # Stacks
 
@@ -27,6 +27,7 @@ Creates the core constructs starting with the VPC. This project is a prerequisit
 
 Just creates a VPC.
 
+ |
 ---|---
  Definition | [`vpc.template`](./vpc.template)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpc.template
@@ -36,18 +37,19 @@ Just creates a VPC.
 ### Parameters
 
  Name | Environment Variable | Required/Default | Description
----|---
+---|---|---|---
  `SecondOctet` | `SECOND_OCTET` | No / `0` | The second octet of CIDR of the entire VPC. The first octet is always `10` for a full CIDR of `10.0.0.0/16` (assuming `SecondOctet` is set to `0`).
 
 ### Outputs
  Name | Environment Variable | Description
----|---
+---|---|---
  `VPCId` | `VPC_ID` | The id of the freshly created VPC.
 
 ## VPN
 
 Creates network artifacts to route traffic through a VPN.
 
+ |
 ---|---
  Definition | [`vpn.template`](./vpn.template)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpn.template
@@ -57,20 +59,21 @@ Creates network artifacts to route traffic through a VPN.
 ### Parameters
 
  Name | Environment Variable | Required/Default | Description
----|---
+---|---|---|---
  `BGPASNumber` | `BGP_AS_NUMBER` | No / `65000` | The Border Gateway Protocol Autonomous System Number.
  `CustomerGatewayIPAddress` | `CUSTOMER_GATEWAY_IP_ADDRESS` | Yes | The public IP address of the customer gateway.
  `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
 
 ### Outputs
  Name | Environment Variable | Description
----|---
+---|---|---
  `VPNGatewayId` | `VPN_GATEWAY_ID` | The VPN gateway to which route tables will be connected via route propagation.
 
 ## Public Infrastructure
 
 Creates network routing artifacts for public subnets along with jump box and NAT instances.
 
+ |
 ---|---
  Definition | [`public-infrastructure.template`](./public-infrastructure.template)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public-infrastructure.template
@@ -80,10 +83,10 @@ Creates network routing artifacts for public subnets along with jump box and NAT
 ### Parameters
 
  Name | Environment Variable | Required/Default | Description
----|---
+---|---|---|---
  `AWSMusingsS3URL` | `AWS_MUSINGS_S3_URL` | No / (see [README](../#environment-variables)) |
- `DNSZone` | `DNS_ZONE` | No, `dev` | The DNS zone within the external and internal DNS zones (i.e.: with an external DNS of `example.com`, the full external zone would be `dev.example.com`.
- `FullyQualifiedExternalParentDNSZone` | `FULLY_QUALIFIED_EXTERNAL_PARENT_DNS_ZONE` | No, `vkzone.net` | The public DNS zone configured in Route 53.
+ `DNSZone` | `DNS_ZONE` | No, `dev` | <a name="dns-zone">The</a> DNS zone within the external and internal DNS zones (i.e.: with an external DNS of `example.com`, the full external zone would be `dev.example.com`.
+ `FullyQualifiedExternalParentDNSZone` | `FULLY_QUALIFIED_EXTERNAL_PARENT_DNS_ZONE` | No, `vkzone.net` | <a name="fully-qualified-external-parent-dns-zone">The</a> public DNS zone configured in Route 53.
  `FullyQualifiedInternalParentDNSZone` | `FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE` | No, `compute.local` | The private DNS zone (parent zone to the `DNSZone` specified above.
  `InternalKeyName` | `INTERNAL_KEY_NAME` | No / `internal` | <a name="internal-key-name">The</a> SSH key pair used to connect to internal EC2 instances.
  `JumpBoxEIPAddress` | `JUMP_BOX_EIP_ADDRESS` | No | The Elastic IP address that will be assigned to the jump box instance. If not specified, a new EIP address will be allocated. By pre-allocating an EIP and specifying it via this parameter, the jump box will be accessible with the same address even though the infrastructure may have been rebuilt repeatedly.
@@ -95,7 +98,7 @@ Creates network routing artifacts for public subnets along with jump box and NAT
 
 ### Outputs
  Name | Environment Variable | Description
----|---
+---|---|---
  `JumpBoxPublicIPAddress` | `JUMP_BOX_PUBLIC_IP_ADDRESS` | The public IP address of the jump box.
  `NetworkACLId` | `NETWORK_ACL_ID` | The id of the network access control list.
  `NATInstanceId` | `NAT_INSTANCE_ID` | The id of the NAT instance to be used in the private route table.
@@ -105,6 +108,7 @@ Creates network routing artifacts for public subnets along with jump box and NAT
 
 Creates network routing artifacts for private subnets.
 
+ |
 ---|---
  Definition | [`private-infrastructure.template`](./private-infrastructure.template)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private-infrastructure.template
@@ -114,7 +118,7 @@ Creates network routing artifacts for private subnets.
 ### Parameters
 
  Name | Environment Variable | Required/Default | Description
----|---
+---|---|---|---
  `NATInstanceId` | `NAT_INSTANCE_ID` | Yes | See the [public infrastructure stack](#public-infrastructure) above. 
  `NetworkACLId` | `NETWORK_ACL_ID` | Yes | See the [public infrastructure stack](#public-infrastructure) above.
  `SecondOctet` | `SECOND_OCTET` | No / `0` | See the [VPC stack](#vpc) above.
@@ -123,43 +127,44 @@ Creates network routing artifacts for private subnets.
 
 ### Outputs
  Name | Environment Variable | Description
----|---
+---|---|---
  `PrivateRouteTableId` | `PRIVATE_ROUTE_TABLE_ID` | The id of the private routing table to be used in private subnets.
 
 ## Full Stack
 
 The full stack isn't really a stack but a set of convenience shell scripts for creating and deleting the [VPC](#vpc), [public infrastructure](#public-infrastructure), and [private infrastructure](#private-infrastructure) stacks in the proper order. Note that create script outputs several sets of environment variables that all need to be exported for use in other stacks.
 
+ |
 ---|---
  Create Script | [`scripts/create-full-stack.sh`](scripts/create-full-stack.sh)
  Delete Script | [`scripts/delete-full-stack.sh`](scripts/delete-full-stack.sh)
 
-<!--DNS Notes-->
-<!--1. Create VPC stack [`vpc.template`](./vpc.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpc.template).-->
+[//]: # DNS Notes
+[//]: # 1. Create VPC stack [`vpc.template`](./vpc.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpc.template).
 
-<!--2. Create VPN stack [`vpn.template`](./vpn.template) (optional, S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpn.template).-->
+[//]: # 2. Create VPN stack [`vpn.template`](./vpn.template) (optional, S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpn.template).
 
-<!--3. Create Public Infrastructure stack [`public-infrastructure.template`](./public-infrastructure.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public-infrastructure.template).-->
+[//]: # 3. Create Public Infrastructure stack [`public-infrastructure.template`](./public-infrastructure.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public-infrastructure.template).
 
-  <!--NOTE: IF THE STACK IN STEP 3 IS BURNED DOWN, THE STACK IN STEP 1 WILL BE IN A BAD STATE.-->
-  <!--RESET THE VPC'S DHCP OPTIONS BEFORE ATTEMPTING TO REBUILD THE STACK IN STEP 3!!!!!!!!!!!-->
+[//]: #   NOTE: IF THE STACK IN STEP 3 IS BURNED DOWN, THE STACK IN STEP 1 WILL BE IN A BAD STATE.
+[//]: #   RESET THE VPC'S DHCP OPTIONS BEFORE ATTEMPTING TO REBUILD THE STACK IN STEP 3!!!!!!!!!!!
 
-  <!--Burning down the step 3 stack sets the DHCP options to 'default' which probably doesn't-->
-  <!--really exist. Set the DHCP options back to the DHCP options created by AWS (one with-->
-  <!--domain-name-servers = AmazonProvidedDNS).-->
+[//]: #   Burning down the step 3 stack sets the DHCP options to 'default' which probably doesn't
+[//]: #   really exist. Set the DHCP options back to the DHCP options created by AWS (one with
+[//]: #   domain-name-servers = AmazonProvidedDNS).
 
-<!--4. Connect to DNS instance and execute the following:-->
+[//]: # 4. Connect to DNS instance and execute the following:
 
-  <!--```bash-->
-  <!--sudo chown named:named /var/log/named-->
-  <!--```-->
+[//]: #   ```bash
+[//]: #   sudo chown named:named /var/log/named
+[//]: #   ```
 
-  <!--TODO: CF init should be able to resolve the chown issue eventually.-->
+[//]: #   TODO: CF init should be able to resolve the chown issue eventually.
 
-<!--5. Restarting is only necessary to make the previous change take effect.-->
+[//]: # 5. Restarting is only necessary to make the previous change take effect.
 
-  <!--```bash-->
-  <!--sudo /etc/init.d/named restart-->
-  <!--```-->
+[//]: #   ```bash
+[//]: #   sudo /etc/init.d/named restart
+[//]: #   ```
 
-<!--6. Create Private Infrastructure stack [`private-infrastructure.template`](./private-infrastructure.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private-infrastructure.template).-->
+[//]: # 6. Create Private Infrastructure stack [`private-infrastructure.template`](./private-infrastructure.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private-infrastructure.template).

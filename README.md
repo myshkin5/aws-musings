@@ -28,7 +28,7 @@ All shell scripts support and use the following environment variables:
 
 ## Chaining Outputs to Inputs
 
-Several scripts will print out environment variables for use by subsequent scripts. Cut and paste these values into your shell so other scripts can use them as inputs. You may also want to store the values somewhere safe depending on the lifecycle of your AWS artifacts.
+Several scripts will print out environment variables for use by subsequent scripts. Cut and paste these values into your terminal session so other scripts can use them as inputs. You may also want to store the values somewhere safe depending on the lifecycle of your AWS artifacts.
 
 The following shows the output of the script to create a VPC and the subsequent invocation of the private infrastructure script:
 ```bash
@@ -56,6 +56,6 @@ Note: The environment variable `VPC_ID` was output by the `create-vpc.sh` script
 
 Whether you are adding new content or forking `aws-musings` into a whole new direction (pull requests are always welcome), you will need to have an S3 bucket to host the CloudFormation scripts. You can upload some of the simple scripts directly into the AWS console but most of the scripts pull down supporting scripts from S3 or have nested CloudFormation scripts (which must be pulled from S3). In most cases you won't have update permissions to the default `aws-musings-us-east-1` S3 bucket.
 
-Simply create your own S3 bucket that you can read and write to, set the path to the bucket via the `--url` command line option, then run the `./scripts/upload.sh` script. Any `create-*` script run with the same `--url` option will pull all scripts (CloudFormation and otherwise) from the specified S3 bucket.
+Simply create your own S3 bucket that you can read and write to, set the path to the bucket via the `AWS_MUSINGS_S3_URL` environment variable, then run the `./scripts/upload.sh` script. Any `create-*` script executed with the same `AWS_MUSINGS_S3_URL` variable will pull all scripts (CloudFormation and otherwise) from the specified S3 bucket.
 
 NOTE: Take care not to have sensitive content in your `aws-musings` working directory such as passwords or private keys. All files in your working directory are uploaded to the S3 bucket
