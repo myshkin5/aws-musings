@@ -84,10 +84,10 @@ Creates network routing artifacts for public subnets along with jump box and NAT
 
  Name | Environment Variable | Required/Default | Description
 ---|---|---|---
- `AWSMusingsS3URL` | `AWS_MUSINGS_S3_URL` | No / (see [README](../#environment-variables)) |
+ `AWSMusingsS3URL` | `AWS_MUSINGS_S3_URL` | No / (see [README](../README.md#environment-variables)) |
  `DNSZone` | `DNS_ZONE` | No, `dev` | <a name="dns-zone">The</a> DNS zone within the external and internal DNS zones (i.e.: with an external DNS of `example.com`, the full external zone would be `dev.example.com`.
- `FullyQualifiedExternalParentDNSZone` | `FULLY_QUALIFIED_EXTERNAL_PARENT_DNS_ZONE` | No, `vkzone.net` | <a name="fully-qualified-external-parent-dns-zone">The</a> public DNS zone configured in Route 53.
- `FullyQualifiedInternalParentDNSZone` | `FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE` | No, `compute.local` | The private DNS zone (parent zone to the `DNSZone` specified above.
+ `FullyQualifiedExternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_EXTERNAL _PARENT_DNS_ZONE` (without space) | No, `vkzone.net` | <a name="fully-qualified-external-parent-dns-zone">The</a> public DNS zone configured in Route 53.
+ `FullyQualifiedInternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_INTERNAL _PARENT_DNS_ZONE` (without space) | No, `compute.local` | The private DNS zone (parent zone to the `DNSZone` specified above.
  `InternalKeyName` | `INTERNAL_KEY_NAME` | No / `internal` | <a name="internal-key-name">The</a> SSH key pair used to connect to internal EC2 instances.
  `JumpBoxEIPAddress` | `JUMP_BOX_EIP_ADDRESS` | No | The Elastic IP address that will be assigned to the jump box instance. If not specified, a new EIP address will be allocated. By pre-allocating an EIP and specifying it via this parameter, the jump box will be accessible with the same address even though the infrastructure may have been rebuilt repeatedly.
  `JumpBoxKeyName` | `JUMP_BOX_KEY_NAME` | No / `jump-box` | <a name="jump-box-key-name">The</a> SSH key pair used to connect to the jump box EC2 instances.
