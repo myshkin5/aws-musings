@@ -97,7 +97,7 @@ Creates network routing artifacts for public subnets along with jump box and NAT
  `InternalKeyName` | `INTERNAL_KEY_NAME` | Yes / `internal` | <a name="internal-key-name">The</a> SSH key pair used to connect to internal EC2 instances.
  `JumpBoxEIPAddress` | `JUMP_BOX_EIP_ADDRESS` | No | The Elastic IP address that will be assigned to the jump box instance. If not specified, a new EIP address will be allocated. By pre-allocating an EIP and specifying it via this parameter, the jump box will be accessible with the same address even though the infrastructure may have been rebuilt repeatedly.
  `JumpBoxKeyName` | `JUMP_BOX_KEY_NAME` | Yes / `jump-box` | <a name="jump-box-key-name">The</a> SSH key pair used to connect to the jump box EC2 instances.
- `JumpBoxSSHCIDRIP` | `JUMP_BOX_SSH_CIDR_IP` | Yes / `0.0.0.0/0` | Any IP address included in this CIDR will be able to access the jump box via SSH (client must also use the `JumpBoxKeyName` SSH key pair). It is highly recommended to restrict this CIDR to only IP addresses that need to access the jump box.
+ `JumpBoxSSHCIDRIP` | `JUMP_BOX_SSH_CIDR_IP` | Yes / `0.0.0.0/0` | Any IP address included in this CIDR will be able to access the jump box via SSH (client must also use the `JumpBoxKeyName` SSH key pair). It is highly recommended to restrict this CIDR to only IP addresses that need to access the jump box. **DEFAULT VALUE MAY BE A SECURITY CONCERN**
  `SecondOctet` | `SECOND_OCTET` | Yes | See the [VPC stack](#vpc) above.
  `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
  `VPNGatewayId` | `VPN_GATEWAY_ID` | No | See the [VPN stack](#vpn) above. Optional, if not specified, a VPN gateway will not be included in the public routing table.
