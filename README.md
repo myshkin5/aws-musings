@@ -16,6 +16,8 @@ git clone https://github.com/myshkin5/aws-musings.git
 
 **Note:** Although both the shell scripts and the CloudFormation scripts are cloned locally, only the shell scripts are needed. The CloudFormation scripts are actually pulled from a public S3 bucket. If you would like to fork and modify the scripts, see [Making Modifications](#making-modifications) below.
 
+At first the sheer number of parameters might appear daunting, but most parameters either are not required, have reasonable defaults or are supplied by a previously run stack. If a parameter does not meet any of these attributes, its description will contain the text **REQUIRED, NO DEFAULT AND NOT SUPPLIED BY A PREVIOUS STACK**. For these parameters, you may want to take steps to assure that they are defined properly such as adding them to your `~/.bashrc`.
+
 ## Environment Variables
 
 All shell scripts support and use the following environment variables:
@@ -43,6 +45,10 @@ $ ./infrastructure/scripts/create-public-infrastructure.sh
 ...
 ```
 **Note:** The environment variable `VPC_ID` was output by the `create-vpc.sh` script and *_manually_* copied and executed after the `create-vpc.sh` completed. The `create-public-infrastructure.sh` script then was able to use the value when it was subsequently executed.
+
+# CIDR Addressing Scheme for Private IP Addresses
+
+Of the four octets of any IPv4 address, `aws-musings` hardcodes the first to `10` for private IP addresses. The second octet is configurable in the infrastructure sub-project (see [SECOND_OCTET](./infrastructure#second-octet)). The third octet divides public subnets (`0` through `49`) from private subnets (`50` through `255`). The infrastructure sub-project also reserves the first three public and private subnets (`0`, `1`, `2`, `50`, `51` and `52`). Other sub-projects typically allow the third octet to be configurable.
 
 # Sub-Projects
  Name | Description
