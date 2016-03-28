@@ -22,9 +22,11 @@ All shell scripts support and use the following environment variables:
 
  Name | Default | Description
 ---|---|---
- `AWS_MUSINGS_S3_URL` | `https://s3.amazonaws.com/aws-musings-us-east-1` | The S3 bucket where the CloudFormation scripts and supporting files are loaded from.
+ `AWS_MUSINGS_S3_BUCKET` | `aws-musings-us-east-1` | The S3 bucket where the CloudFormation scripts and supporting files are uploaded to and loaded from.
+ `AWS_MUSINGS_S3_URL` | `https://s3.amazonaws.com/$AWS_MUSINGS_S3_BUCKET` | The URL to the `aws-musings` S3 bucket.
  `PROFILE` | `default` | The AWS CLI configured profile used with all invocations of the `aws` CLI.
  `STACK_PREFIX` | `vkzone-dev` | Used as a prefix to all CloudFormation stacks. Multiple groups of stacks should all use the same prefix.
+ `ACL` | `public-read` | The Access Control List of files uploaded with the `upload.sh` script (see [Making Modifications](#making-modifications) below). See this [ACL overview](http://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) for more details.
 
 ## Chaining Outputs to Inputs
 

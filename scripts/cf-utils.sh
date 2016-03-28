@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+if [[ $AWS_MUSINGS_S3_BUCKET == "" ]] ; then
+    AWS_MUSINGS_S3_BUCKET=aws-musings-us-east-1
+fi
 if [[ $AWS_MUSINGS_S3_URL == "" ]] ; then
-    AWS_MUSINGS_S3_URL=https://s3.amazonaws.com/aws-musings-us-east-1
+    AWS_MUSINGS_S3_URL=https://s3.amazonaws.com/$AWS_MUSINGS_S3_BUCKET
 fi
 if [[ $PROFILE == "" ]] ; then
     PROFILE=default
