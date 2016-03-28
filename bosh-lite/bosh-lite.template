@@ -8,6 +8,10 @@
             "Type": "String",
             "Description": "S3 path to aws-musings."
         },
+        "BOSHLiteCFAdminPassword": {
+            "Type": "String",
+            "Description": "The password for the admin account to Cloud Foundry."
+        },
         "BOSHLiteELBSecurityGroupId": {
             "Type": "AWS::EC2::SecurityGroup::Id",
             "Description": "The id of the bosh-lite ELB security group."
@@ -157,6 +161,7 @@
 
                             "export BOSH_LITE_URL=\"", { "Fn::Join": [ ".", [ { "Ref": "DNSZone"},
                                 { "Ref": "FullyQualifiedExternalParentDNSZone" } ] ] }, "\"\n",
+                            "export BOSH_LITE_CF_ADMIN_PASSWORD=\"", { "Ref": "BOSHLiteCFAdminPassword" }, "\"\n",
 
                             "curl --output /etc/init.d/bosh-lite-run-once --silent ",
                                 "$AWS_MUSINGS_S3_URL/bosh-lite/run-once.sh\n",
@@ -164,11 +169,13 @@
                             "sed -i -e \"s/STACK_NAME/$STACK_NAME/g\" /etc/init.d/bosh-lite-run-once\n",
                             "sed -i -e \"s/RESOURCE/$AUTO_SCALING_GROUP/g\" /etc/init.d/bosh-lite-run-once\n",
                             "sed -i -e \"s/REGION/$REGION/g\" /etc/init.d/bosh-lite-run-once\n",
-                            "sed -i -e \"s/BOSH_LITE_URL/$BOSH_LITE_URL/g\" /etc/init.d/bosh-lite-run-once\n",
-                                "update-rc.d bosh-lite-run-once defaults 99\n",
+                            "update-rc.d bosh-lite-run-once defaults 99\n",
 
                             "curl --output /usr/local/bootstrap-bosh-lite.sh ",
                                 "--silent $AWS_MUSINGS_S3_URL/bosh-lite/bootstrap.sh\n",
+                            "sed -i -e \"s/BOSH_LITE_URL/$BOSH_LITE_URL/g\" /usr/local/bootstrap-bosh-lite.sh\n",
+                            "sed -i -e \"s/BOSH_LITE_CF_ADMIN_PASSWORD/$BOSH_LITE_CF_ADMIN_PASSWORD/g\" ",
+                                "/usr/local/bootstrap-bosh-lite.sh\n",
                             "chmod +x /usr/local/bootstrap-bosh-lite.sh\n",
 
                             "# Success (aws-signal-success) is signalled from the run-once script\n",

@@ -33,6 +33,7 @@ STACK_NAME=$STACK_PREFIX-$BOSH_LITE_INSTANCE_NAME
 aws cloudformation create-stack --stack-name $STACK_NAME \
     --template-url $AWS_MUSINGS_S3_URL/bosh-lite/bosh-lite.template \
     --parameters ParameterKey=AWSMusingsS3URL,ParameterValue=$AWS_MUSINGS_S3_URL \
+        ParameterKey=BOSHLiteCFAdminPassword,ParameterValue=$BOSH_LITE_CF_ADMIN_PASSWORD \
         ParameterKey=BOSHLiteELBSecurityGroupId,ParameterValue=$BOSH_LITE_ELB_SECURITY_GROUP_ID \
         ParameterKey=BOSHLiteELBSSLCertificateId,ParameterValue=$BOSH_LITE_ELB_SSL_CERTIFICATE_ID \
         ParameterKey=BOSHLiteImageId,ParameterValue=$BOSH_LITE_IMAGE_ID \

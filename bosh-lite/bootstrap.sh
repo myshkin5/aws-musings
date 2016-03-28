@@ -3,8 +3,6 @@
 #set -e -x TODO: Add back -e if it can be made to work with the retry function
 set -x
 
-BOSH_LITE_URL=$1
-
 retry() {
     TRIES=$1
     shift
@@ -59,7 +57,8 @@ bundle install --frozen
 
 ./scripts/generate-bosh-lite-dev-manifest
 MANIFEST=$CF_DIR/bosh-lite/deployments/cf.yml
-sed -i -e "s/bosh-lite.com/$BOSH_LITE_URL/g" $MANIFEST
+sed -i -e "s/bosh-lite.com/BOSH_LITE_URL/g" $MANIFEST
+sed -i -e "s/admin|admin|scim.write/admin|BOSH_LITE_CF_ADMIN_PASSWORD|scim.write/g" $MANIFEST
 bosh status
 
 retry 5 bosh -n create release --force

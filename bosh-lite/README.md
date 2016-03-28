@@ -56,6 +56,7 @@ Creates a single bosh-lite instance.
  Name | Environment Variable | Required/Default | Description
 ---|---|---|---
  `AWSMusingsS3URL` | `AWS_MUSINGS_S3_URL` | Yes | See the [public infrastructure stack](../infrastructure#public-infrastructure).
+ `BOSHLiteCFAdminPassword` | `BOSH_LITE_CF_ADMIN_PASSWORD` | Yes | The password for the `admin` account to Cloud Foundry. **REQUIRED, NO DEFAULT AND NOT SUPPLIED BY A PREVIOUS STACK**
  `BOSHLiteELBSecurityGroupId` | `BOSH_LITE_ELB_SECURITY_GROUP_ID` | Yes | See the [bosh-lite-infrastructure](#bosh-lite-infrastructure) above.
  `BOSHLiteELBSecurityGroupId` | `BOSH_LITE_ELB_SECURITY_GROUP_ID` | Yes | See the [bosh-lite-infrastructure](#bosh-lite-infrastructure) above.
  `BOSHLiteELBSSLCertificateId` | `BOSH_LITE_ELB_SSL_CERTIFICATE_ID` | No | TODO: Not currently used. The ARN id of the SSL/TLS certificate used by the ELB to communicate with clients.
@@ -79,13 +80,4 @@ After a bosh-lite instance has been created, the Cloud Foundry router is still n
 ```bash
 IP_ADDR=$(ifconfig eth0 | grep "inet addr" | cut -d : -f 2 | cut -d \  -f 1)
 ssh -L $IP_ADDR:443:10.244.0.34:443 localhost
-```
-
-_*IMPORTANT:*_ The `cf` command line `admin` password defaults to `admin`. Use the following to generate a new password and set it on the `admin` account:
-
-```bash
-NEW_PASSWD=$(cat /dev/urandom | head -c 80 | base64 | tr -dc 'a-zA-Z0-9-_' | head -c 16)
-echo $NEW_PASSWD
-cf login --skip-ssl-validation -a api.dev.example.com -u admin -p admin
-cf passwd # follow prompts to change password
 ```
