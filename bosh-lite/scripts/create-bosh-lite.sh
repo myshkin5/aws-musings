@@ -22,7 +22,7 @@ if [[ $INTERNAL_KEY_NAME == "" ]] ; then
         $(dirname $0)/../../infrastructure/public-infrastructure.template)
 fi
 if [[ $BOSH_LITE_IMAGE_ID == "" ]] ; then
-    BOSH_LITE_IMAGE_ID=ami-5670703c
+    BOSH_LITE_IMAGE_ID=ami-104a457a
 fi
 if [[ $BOSH_LITE_INSTANCE_TYPE == "" ]] ; then
     BOSH_LITE_INSTANCE_TYPE=m3.xlarge

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-set -e -x
+#set -e -x TODO: Add back -e if it can be made to work with the retry function
+set -x
 
 BOSH_LITE_URL=$1
 
@@ -10,9 +11,9 @@ retry() {
 
     COUNT=0
     while $(true) ; do
-        set +e
+# TODO:        set +e
         eval $* && break
-        set -e
+# TODO:        set -e
         (( COUNT++ ))
         if (( $COUNT >= $TRIES )) ; then
             echo "Giving up after $COUNT tries"

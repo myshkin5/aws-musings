@@ -39,7 +39,7 @@ do_start () {
 
         echo "$(date) Starting bosh-lite configuration..."
 
-        /usr/local/bootstrap-bosh-lite.sh "BOSH_LITE_URL" >> /var/log/bosh-lite.log 2>&1 \
+        /usr/local/bootstrap-bosh-lite.sh "BOSH_LITE_URL" >> /var/log/bosh-lite.log 2>&1 || \
             aws-error-exit "Failed bosh-lite bootstrap"
 
         echo "$(date) Finished bosh-lite configuration"
