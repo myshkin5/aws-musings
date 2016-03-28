@@ -6,9 +6,6 @@ source $(dirname $0)/setenv.sh $@
 
 STACK_NAME=$STACK_PREFIX-public
 
-if [[ $FULLY_QUALIFIED_EXTERNAL_PARENT_DNS_ZONE == "" ]] ; then
-    FULLY_QUALIFIED_EXTERNAL_PARENT_DNS_ZONE=vkzone.net
-fi
 if [[ $JUMP_BOX_KEY_NAME == "" ]] ; then
     JUMP_BOX_KEY_NAME=$(jq -r .Parameters.JumpBoxKeyName.Default $(dirname $0)/../public-infrastructure.template)
 fi

@@ -66,10 +66,10 @@ Creates a single bosh-lite instance.
  `BOSHLitePublicSubnetId` | `BOSH_LITE_PUBLIC_SUBNET_ID` | Yes | See the [bosh-lite-infrastructure](#bosh-lite-infrastructure) above.
  `BOSHLitePrivateSubnetId` | `BOSH_LITE_PRIVATE_SUBNET_ID` | Yes | See the [bosh-lite-infrastructure](#bosh-lite-infrastructure) above.
  `BOSHLiteSpotPrice` | `BOSH_LITE_SPOT_PRICE` | Yes / `0.06` | The spot price in US dollars of the bosh-lite instance. 
- `DNSZone` | `DNS_ZONE` | No, `dev` |  See the [public infrastructure stack](../infrastructure#private-infrastructure).
- `FullyQualifiedExternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_EXTERNAL _PARENT_DNS_ZONE` (without space) | No, `vkzone.net` |  See the [public infrastructure stack](../infrastructure#private-infrastructure).
- `FullyQualifiedInternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_INTERNAL _PARENT_DNS_ZONE` (without space) | No, `compute.local` |  See the [public infrastructure stack](../infrastructure#private-infrastructure).
- `InternalKeyName` | `INTERNAL_KEY_NAME` | No / `internal` |  See the [public infrastructure stack](../infrastructure#private-infrastructure).
+ `DNSZone` | `DNS_ZONE` | Yes / `dev` |  See the [public infrastructure stack](../infrastructure#private-infrastructure).
+ `FullyQualifiedExternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_EXTERNAL _PARENT_DNS_ZONE` (without space) | Yes |  See the [public infrastructure stack](../infrastructure#private-infrastructure).
+ `FullyQualifiedInternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_INTERNAL _PARENT_DNS_ZONE` (without space) | Yes / `compute.local` |  See the [public infrastructure stack](../infrastructure#private-infrastructure).
+ `InternalKeyName` | `INTERNAL_KEY_NAME` | Yes / `internal` |  See the [public infrastructure stack](../infrastructure#private-infrastructure).
  `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc).
 
 ### Post Creation Steps
