@@ -75,15 +75,17 @@ Creates a single bosh-lite instance.
 ### Post Creation Steps
 
 After a bosh-lite instance has been created, the Cloud Foundry router is still not accessible to the outside world. Eventually the router should be automatically available via `iptables` configuration but until then, the following commands should be executed from a `root` terminal session:
-    ```bash
-    IP_ADDR=$(ifconfig eth0 | grep "inet addr" | cut -d : -f 2 | cut -d \  -f 1)
-    ssh -L $IP_ADDR:443:10.244.0.34:443 localhost
-    ```
+
+```bash
+IP_ADDR=$(ifconfig eth0 | grep "inet addr" | cut -d : -f 2 | cut -d \  -f 1)
+ssh -L $IP_ADDR:443:10.244.0.34:443 localhost
+```
 
 _*IMPORTANT:*_ The `cf` command line `admin` password defaults to `admin`. Use the following to generate a new password and set it on the `admin` account:
-    ```bash
-    NEW_PASSWD=$(cat /dev/urandom | head -c 80 | base64 | tr -dc 'a-zA-Z0-9-_' | head -c 16)
-    echo $NEW_PASSWD
-    cf login --skip-ssl-validation -a api.dev.example.com -u admin -p admin
-    cf passwd # follow prompts to change password
-    ```
+
+```bash
+NEW_PASSWD=$(cat /dev/urandom | head -c 80 | base64 | tr -dc 'a-zA-Z0-9-_' | head -c 16)
+echo $NEW_PASSWD
+cf login --skip-ssl-validation -a api.dev.example.com -u admin -p admin
+cf passwd # follow prompts to change password
+```
