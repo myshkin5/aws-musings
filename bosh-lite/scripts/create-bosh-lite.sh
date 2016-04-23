@@ -19,13 +19,17 @@ if [[ $INTERNAL_KEY_NAME == "" ]] ; then
         $(dirname $0)/../../infrastructure/public-infrastructure.template)
 fi
 if [[ $BOSH_LITE_IMAGE_ID == "" ]] ; then
-    BOSH_LITE_IMAGE_ID=ami-104a457a
+    BOSH_LITE_IMAGE_ID=ami-22839a48
 fi
 if [[ $BOSH_LITE_INSTANCE_TYPE == "" ]] ; then
     BOSH_LITE_INSTANCE_TYPE=m3.xlarge
 fi
 if [[ $BOSH_LITE_SPOT_PRICE == "" ]] ; then
     BOSH_LITE_SPOT_PRICE=0.06
+fi
+if [[ $BOSH_LITE_CF_ADMIN_PASSWORD == "" ]] ; then
+    echo "Set BOSH_LITE_CF_ADMIN_PASSWORD to a generated password before running"
+    exit 1
 fi
 
 STACK_NAME=$STACK_PREFIX-$BOSH_LITE_INSTANCE_NAME

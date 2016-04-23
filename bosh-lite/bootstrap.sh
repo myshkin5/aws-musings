@@ -53,6 +53,7 @@ retry 5 bosh -n -u admin -p admin upload stemcell --skip-if-exists $STEMCELL_FIL
 cd $CF_DIR
 ./scripts/update
 
+gem install bundler
 bundle install --frozen
 
 ./scripts/generate-bosh-lite-dev-manifest

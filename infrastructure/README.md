@@ -10,7 +10,7 @@ Creates the core constructs starting with the VPC. This project is a prerequisit
     **Note:** For convenience the following `$HOME/.ssh/config` file can be used to manage the jump box SSH key (assumes the `jump-box` private key is stored in `$HOME/.ssh/id_rsa_jump_box` with [`DNSZone`](#dns-zone) and [`FullyQualifiedExternalParentDNSZone`](#fully-qualified-external-parent-dns-zone) set to `prod` and `example.com` respectively):
     ```
     Host jb jump-box jump-box.prod.example.com
-      Hostname jump-box.prod.example.com
+      HostName jump-box.prod.example.com
       User ubuntu
       IdentityFile ~/.ssh/id_rsa_jump_box
       ForwardAgent yes

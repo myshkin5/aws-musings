@@ -66,8 +66,8 @@
 
     "Mappings": {
         "AMIRegionMap": {
-            "us-east-1": { "standard": "ami-fce3c696", "nat": "ami-68115b02" },
-            "us-west-2": { "standard": "ami-9abea4fb", "nat": "ami-77a4b816" }
+            "us-east-1": { "standard": "ami-fce3c696", "nat": "ami-311a1a5b" },
+            "us-west-2": { "standard": "ami-9abea4fb", "nat": "ami-7a2bc21a" }
         },
         "AZRegionMap": {
             "us-east-1": { "a": "us-east-1a", "b": "us-east-1b", "c": "us-east-1c" },
