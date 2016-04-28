@@ -6,7 +6,24 @@ if [[ $ACL == "" ]] ; then
     ACL=public-read
 fi
 
-cd $(dirname $0)/..
+PROJECT_DIR=$(dirname $0)/..
+TMP_DIR=$PROJECT_DIR/tmp
+
+rm -r $TMP_DIR
+
+cd $PROJECT_DIR
+ROOT_FILES=$(ls | grep -v *.iml)
+
+mkdir $TMP_DIR
+
+cp -rp $ROOT_FILES $TMP_DIR
+
+cd $TMP_DIR
+
+for FILE in $(find . -name \*.template.yml) ; do
+    NEW_FILE=${FILE::${#FILE}-4}
+    python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, indent=4)' < $FILE > $NEW_FILE
+done
 
 aws s3 sync --profile $PROFILE --delete --acl $ACL \
     --exclude .git/\* \

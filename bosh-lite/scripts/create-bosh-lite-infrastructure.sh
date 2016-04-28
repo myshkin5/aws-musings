@@ -2,21 +2,24 @@
 
 set -e
 
-source $(dirname $0)/../../scripts/cf-utils.sh $@
+PROJECT_DIR=$(dirname $0)/../..
+TMP_DIR=$PROJECT_DIR/tmp
+
+source $PROJECT_DIR/scripts/cf-utils.sh $@
 
 STACK_NAME=$STACK_PREFIX-bosh-lite-infrastructure
 
 if [[ $BOSH_LITE_AVAILABILITY_ZONE == "" ]] ; then
     BOSH_LITE_AVAILABILITY_ZONE=$(jq -r .Parameters.BOSHLiteAvailabilityZone.Default \
-        $(dirname $0)/../bosh-lite-infrastructure.template)
+        $TMP_DIR/bosh-lite/bosh-lite-infrastructure.template)
 fi
 if [[ $BOSH_LITE_PUBLIC_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
     BOSH_LITE_PUBLIC_THREE_OCTET_CIDR_BLOCK=$(jq -r .Parameters.BOSHLitePublicThreeOctetCIDRBlock.Default \
-        $(dirname $0)/../bosh-lite-infrastructure.template)
+        $TMP_DIR/bosh-lite/bosh-lite-infrastructure.template)
 fi
 if [[ $BOSH_LITE_PRIVATE_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
     BOSH_LITE_PRIVATE_THREE_OCTET_CIDR_BLOCK=$(jq -r .Parameters.BOSHLitePrivateThreeOctetCIDRBlock.Default \
-        $(dirname $0)/../bosh-lite-infrastructure.template)
+        $TMP_DIR/bosh-lite/bosh-lite-infrastructure.template)
 fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
