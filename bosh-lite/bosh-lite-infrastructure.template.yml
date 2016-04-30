@@ -1,7 +1,7 @@
 ---
   AWSTemplateFormatVersion: "2010-09-09"
 
-  Description: bosh-lite networking and master
+  Description: bosh-lite networking
 
   Parameters:
     BOSHLiteAvailabilityZone:

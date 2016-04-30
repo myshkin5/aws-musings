@@ -8,18 +8,18 @@ TMP_DIR=$PROJECT_DIR/tmp
 source $PROJECT_DIR/scripts/cf-utils.sh $@
 
 if [[ $BOSH_LITE_INSTANCE_NAME == "" ]] ; then
-    BOSH_LITE_INSTANCE_NAME=$(jq -r .Parameters.BOSHLiteInstanceName.Default $TMP_DIR/bosh-lite/bosh-lite.template)
+    BOSH_LITE_INSTANCE_NAME=$(jq -r .Parameters.BOSHLiteInstanceName.Default $TMP_DIR/new/bosh-lite/bosh-lite.template)
 fi
 if [[ $DNS_ZONE == "" ]] ; then
     DNS_ZONE=dev
 fi
 if [[ $FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE == "" ]] ; then
     FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE=$(jq -r .Parameters.FullyQualifiedInternalParentDNSZone.Default \
-        $TMP_DIR/infrastructure/public-infrastructure.template)
+        $TMP_DIR/new/infrastructure/public-infrastructure.template)
 fi
 if [[ $INTERNAL_KEY_NAME == "" ]] ; then
     INTERNAL_KEY_NAME=$(jq -r .Parameters.InternalKeyName.Default \
-        $TMP_DIR/infrastructure/public-infrastructure.template)
+        $TMP_DIR/new/infrastructure/public-infrastructure.template)
 fi
 if [[ $BOSH_LITE_IMAGE_ID == "" ]] ; then
     BOSH_LITE_IMAGE_ID=ami-22839a48

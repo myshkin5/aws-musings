@@ -11,15 +11,15 @@ STACK_NAME=$STACK_PREFIX-bosh-lite-infrastructure
 
 if [[ $BOSH_LITE_AVAILABILITY_ZONE == "" ]] ; then
     BOSH_LITE_AVAILABILITY_ZONE=$(jq -r .Parameters.BOSHLiteAvailabilityZone.Default \
-        $TMP_DIR/bosh-lite/bosh-lite-infrastructure.template)
+        $TMP_DIR/new/bosh-lite/bosh-lite-infrastructure.template)
 fi
 if [[ $BOSH_LITE_PUBLIC_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
     BOSH_LITE_PUBLIC_THREE_OCTET_CIDR_BLOCK=$(jq -r .Parameters.BOSHLitePublicThreeOctetCIDRBlock.Default \
-        $TMP_DIR/bosh-lite/bosh-lite-infrastructure.template)
+        $TMP_DIR/new/bosh-lite/bosh-lite-infrastructure.template)
 fi
 if [[ $BOSH_LITE_PRIVATE_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
     BOSH_LITE_PRIVATE_THREE_OCTET_CIDR_BLOCK=$(jq -r .Parameters.BOSHLitePrivateThreeOctetCIDRBlock.Default \
-        $TMP_DIR/bosh-lite/bosh-lite-infrastructure.template)
+        $TMP_DIR/new/bosh-lite/bosh-lite-infrastructure.template)
 fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
