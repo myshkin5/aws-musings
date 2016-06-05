@@ -1,0 +1,53 @@
+---
+  AWSTemplateFormatVersion: "2010-09-09"
+
+  Description: My API via the AWS API Gateway.
+
+  Resources:
+    MyAPI:
+      Type: "AWS::ApiGateway::RestApi"
+      Properties:
+        Description: A sample API
+        Name: myApi
+
+    PetsResource:
+      Type: "AWS::ApiGateway::Resource"
+      Properties:
+        ParentId: { "Fn::GetAtt": [ MyAPI, RootResourceId ] }
+        PathPart: pets
+        RestApiId: { Ref: MyAPI }
+      DependsOn: [ MyAPI ]
+
+    PetsGETMethod:
+      Type: "AWS::ApiGateway::Method"
+      Properties:
+        HttpMethod: GET
+        AuthorizationType: AWS_IAM
+        ResourceId: { Ref: PetsResource }
+        RestApiId: { Ref: MyAPI }
+        RequestParameters:
+          method.request.querystring.type: integration.request.querystring.type
+          method.request.querystring.page: integration.request.querystring.page
+        Integration:
+          Type: HTTP
+          Uri: http://petstore-demo-endpoint.execute-api.com/petstore/pets
+          IntegrationHttpMethod: GET
+          RequestParameters:
+            integration.request.querystring.type: method.request.querystring.type
+            integration.request.querystring.page: method.request.querystring.page
+          IntegrationResponses:
+          - StatusCode: 200
+        MethodResponses:
+        - StatusCode: 200
+          ResponseModels: { application/json: Empty }
+      DependsOn: [ PetsResource ]
+
+    PetsGETDeployment:
+      Type: "AWS::ApiGateway::Deployment"
+      Properties:
+        RestApiId: { Ref: MyAPI }
+        Description: Initial deployment
+        StageName: test
+        StageDescription:
+          Description: GET on Pets only
+      DependsOn: [ PetsGETMethod ]

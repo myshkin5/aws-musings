@@ -15,7 +15,7 @@ Creates a public subnet, a private subnet and security groups all used by bosh-l
 
  | |
 ---|---
- Definition | [`bosh-lite-infrastructure.template`](./bosh-lite-infrastructure.template)
+ Definition | [`bosh-lite-infrastructure.template`](./bosh-lite-infrastructure.template.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/bosh-lite/bosh-lite-infrastructure.template
  Create Script | [`scripts/create-bosh-lite-infrastructure.sh`](scripts/create-bosh-lite-infrastructure.sh)
  Delete Script | [`scripts/delete-bosh-lite-infrastructure.sh`](scripts/delete-bosh-lite-infrastructure.sh)
@@ -46,7 +46,7 @@ Creates a single bosh-lite instance.
 
  | |
 ---|---
- Definition | [`bosh-lite.template`](./bosh-lite.template)
+ Definition | [`bosh-lite.template`](./bosh-lite.template.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/bosh-lite/bosh-lite.template
  Create Script | [`scripts/create-bosh-lite.sh`](scripts/create-bosh-lite.sh)
  Delete Script | [`scripts/delete-bosh-lite.sh`](scripts/delete-bosh-lite.sh)
