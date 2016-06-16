@@ -1,0 +1,141 @@
+---
+  AWSTemplateFormatVersion: "2010-09-09"
+
+  Description: Lambda functions called synchronously from AWS API Gateway.
+
+  Parameters:
+    LambdaIAMRole:
+      Type: String
+      Description: The IAM role assigned to Lambda functions
+      Default: lambda_basic_execution
+
+  Resources:
+    GetHelloWorldFunction:
+      Type: "AWS::Lambda::Function"
+      Properties:
+        FunctionName: GetHelloWorld
+        Description: "Returns {\"Hello\":\"World\"}"
+        Runtime: nodejs
+        Handler: index.handler
+        Role: { "Fn::Join": [ "", [ "arn:aws:iam::", { Ref: "AWS::AccountId" }, ":role/", { Ref: LambdaIAMRole } ] ] }
+        Code:
+          ZipFile: { "Fn::Join": [ "\n", [
+            "'use strict';",
+            "console.log('Loading event');",
+
+            "exports.handler = function(event, context) {",
+            "  console.log('\"Hello\":\"World\"');",
+            "  context.done(null, {\"Hello\":\"World\"});  // SUCCESS with message",
+            "};" ] ] }
+
+    GetHelloWithNameFunction:
+      Type: "AWS::Lambda::Function"
+      Properties:
+        FunctionName: GetHelloWithName
+        Description: "Returns {\"Hello\":\", a user-provided string, and \"}"
+        Runtime: nodejs
+        Handler: index.handler
+        Role: { "Fn::Join": [ "", [ "arn:aws:iam::", { Ref: "AWS::AccountId" }, ":role/", { Ref: LambdaIAMRole } ] ] }
+        Code:
+          ZipFile: { "Fn::Join": [ "\n", [
+            "'use strict';",
+            "console.log('Loading event');",
+
+            "exports.handler = function(event, context) {",
+            "  var name = (event.name === undefined ? 'No-Name' : event.name);",
+            "  console.log('\"Hello\":\"' + name + '\"');",
+            "  context.done(null, {\"Hello\":name}); // SUCCESS with message",
+            "};" ] ] }
+
+    MyDemoAPI:
+      Type: "AWS::ApiGateway::RestApi"
+      Properties:
+        Description: A sample API
+        Name: MyDemoAPI
+
+    MyDemoResource:
+      Type: "AWS::ApiGateway::Resource"
+      Properties:
+        ParentId: { "Fn::GetAtt": [ MyDemoAPI, RootResourceId ] }
+        PathPart: mydemoresource
+        RestApiId: { Ref: MyDemoAPI }
+      DependsOn: [ MyDemoAPI ]
+
+    GetHelloWorldGETMethod:
+      Type: "AWS::ApiGateway::Method"
+      Properties:
+        HttpMethod: GET
+        AuthorizationType: NONE
+        ResourceId: { Ref: MyDemoResource }
+        RestApiId: { Ref: MyDemoAPI }
+        Integration:
+          Type: AWS
+          Uri: { "Fn::Join": [ "", [ "arn:aws:apigateway:", { Ref: "AWS::Region" },
+            ":lambda:path/2015-03-31/functions/arn:aws:lambda:", { Ref: "AWS::Region" }, ":", { Ref: "AWS::AccountId" },
+            ":function:GetHelloWorld/invocations" ] ] }
+          IntegrationHttpMethod: GET
+          IntegrationResponses:
+          - StatusCode: 200
+        MethodResponses:
+        - StatusCode: 200
+          ResponseModels: { application/json: Empty }
+      DependsOn: [ MyDemoResource, GetHelloWorldFunction ]
+
+    # TODO: The following permission doesn't seem to work. To get the perms right, go to the AWS Console -> API Gateway
+    #   -> APIs -> MyDemoAPI -> Resources -> / -> /mydemoresource -> GET -> Integration Request -> Lambda Function
+    #   -> Edit. Then click the Update check and OK to add the permission via the console.
+    GetHelloWorldGETMethodPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: "lambda:InvokeFunction"
+        FunctionName: { "Fn::GetAtt": [ GetHelloWorldFunction, Arn ] }
+        Principal: apigateway.amazonaws.com
+        SourceArn: { "Fn::Join": [ "", [ "arn:aws:execute-api:", { Ref: "AWS::Region" }, ":", { Ref: "AWS::AccountId" },
+          ":", { Ref: MyDemoAPI }, "/*/GET/mydemoresource" ] ] }
+      DependsOn: [ GetHelloWorldGETMethod ]
+
+    GetHelloWithNamePOSTMethod:
+      Type: "AWS::ApiGateway::Method"
+      Properties:
+        HttpMethod: POST
+        AuthorizationType: NONE
+        ResourceId: { Ref: MyDemoResource }
+        RestApiId: { Ref: MyDemoAPI }
+        Integration:
+          Type: AWS
+          Uri: { "Fn::Join": [ "", [ "arn:aws:apigateway:", { Ref: "AWS::Region" },
+            ":lambda:path/2015-03-31/functions/arn:aws:lambda:", { Ref: "AWS::Region" }, ":", { Ref: "AWS::AccountId" },
+            ":function:GetHelloWithName/invocations" ] ] }
+          IntegrationHttpMethod: GET
+          IntegrationResponses:
+          - StatusCode: 200
+        MethodResponses:
+        - StatusCode: 200
+          ResponseModels: { application/json: Empty }
+      DependsOn: [ MyDemoResource, GetHelloWithNameFunction ]
+
+    # TODO: The following permission doesn't seem to work. To get the perms right, go to the AWS Console -> API Gateway
+    #   -> APIs -> MyDemoAPI -> Resources -> / -> /mydemoresource -> POST -> Integration Request -> Lambda Function
+    #   -> Edit. Then click the Update check and OK to add the permission via the console.
+    GetHelloWithNamePOSTMethodPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: "lambda:InvokeFunction"
+        FunctionName: { "Fn::GetAtt": [ GetHelloWithNameFunction, Arn ] }
+        Principal: apigateway.amazonaws.com
+        SourceArn: { "Fn::Join": [ "", [ "arn:aws:execute-api:", { Ref: "AWS::Region" }, ":", { Ref: "AWS::AccountId" },
+          ":", { Ref: MyDemoAPI }, "/*/POST/mydemoresource" ] ] }
+      DependsOn: [ GetHelloWithNamePOSTMethod ]
+
+    # TODO: Because the previous two TODOs left the API in a bad state this deployment doesn't work. Moving the
+    #   deployment to another stack that gets run after the above issues are fixed should be a viable workaround.
+    MyDemoDeployment:
+      Type: "AWS::ApiGateway::Deployment"
+      Properties:
+        RestApiId: { Ref: MyDemoAPI }
+        Description: Calling Lambda functions walkthrough
+        StageName: test
+        StageDescription:
+          Description: This is a test
+          Variables: {}
+      DependsOn: [ GetHelloWorldGETMethod, GetHelloWithNamePOSTMethod ]

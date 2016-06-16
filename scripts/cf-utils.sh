@@ -17,11 +17,11 @@ wait-for-stack-completion() {
     while $(true) ; do
         STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --profile $PROFILE \
             | jq -r .Stacks[0].StackStatus)
-        if [[ $STATUS == "CREATE_COMPLETE" ]] ; then
+        if [[ $STATUS == "CREATE_COMPLETE" || $STATUS == "UPDATE_COMPLETE" ]] ; then
             break
         fi
-        if [[ $STATUS != "CREATE_IN_PROGRESS" ]] ; then
-            echo "Creating stack returned $STATUS"
+        if [[ $STATUS != "CREATE_IN_PROGRESS" && $STATUS != "UPDATE_IN_PROGRESS" ]] ; then
+            echo "Creating/updating stack returned $STATUS"
             exit -1
         fi
         sleep 10
