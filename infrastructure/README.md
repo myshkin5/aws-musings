@@ -35,8 +35,8 @@ Just creates a VPC.
 
  | |
 ---|---
- Definition | [`vpc.template`](./vpc.template)
- S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpc.template
+ Definition | [`vpc.yml`](./vpc.yml)
+ S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpc.yml
  Create Script | [`scripts/create-vpc.sh`](scripts/create-vpc.sh) (also see [full stack](#full-stack))
  Delete Script | [`scripts/delete-vpc.sh`](scripts/delete-vpc.sh) (also see [full stack](#full-stack))
 
@@ -57,8 +57,8 @@ Creates network artifacts to route traffic through a VPN.
 
  | |
 ---|---
- Definition | [`vpn.template`](./vpn.template)
- S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpn.template
+ Definition | [`vpn.yml`](./vpn.yml)
+ S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpn.yml
  Create Script | [`scripts/create-vpn.sh`](scripts/create-vpn.sh)
  Delete Script | [`scripts/delete-vpn.sh`](scripts/delete-vpn.sh)
 
@@ -81,8 +81,8 @@ Creates network routing artifacts for public subnets along with jump box and NAT
 
  | |
 ---|---
- Definition | [`public-infrastructure.template`](./public-infrastructure.template)
- S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public-infrastructure.template
+ Definition | [`public-infrastructure.yml`](./public-infrastructure.yml)
+ S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public-infrastructure.yml
  Create Script | [`scripts/create-public-infrastructure.sh`](scripts/create-public-infrastructure.sh) (also see [full stack](#full-stack))
  Delete Script | [`scripts/delete-public-infrastructure.sh`](scripts/delete-public-infrastructure.sh) (also see [full stack](#full-stack))
 
@@ -116,8 +116,8 @@ Creates network routing artifacts for private subnets.
 
  | |
 ---|---
- Definition | [`private-infrastructure.template`](./private-infrastructure.template)
- S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private-infrastructure.template
+ Definition | [`private-infrastructure.yml`](./private-infrastructure.yml)
+ S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private-infrastructure.yml
  Create Script | [`scripts/create-private-infrastructure.sh`](scripts/create-private-infrastructure.sh) (also see [full stack](#full-stack))
  Delete Script | [`scripts/delete-private-infrastructure.sh`](scripts/delete-private-infrastructure.sh) (also see [full stack](#full-stack))
 
@@ -147,11 +147,11 @@ The full stack isn't really a stack but a set of convenience shell scripts for c
 
 <!---
 DNS Notes (something here may be useful when resurrecting the DNS functionality)
-1. Create VPC stack [`vpc.template`](./vpc.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpc.template).
+1. Create VPC stack [`vpc.yml`](./vpc.yml) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpc.yml).
 
-2. Create VPN stack [`vpn.template`](./vpn.template) (optional, S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpn.template).
+2. Create VPN stack [`vpn.yml`](./vpn.yml) (optional, S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpn.yml).
 
-3. Create Public Infrastructure stack [`public-infrastructure.template`](./public-infrastructure.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public-infrastructure.template).
+3. Create Public Infrastructure stack [`public-infrastructure.yml`](./public-infrastructure.yml) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public-infrastructure.yml).
 
   NOTE: IF THE STACK IN STEP 3 IS BURNED DOWN, THE STACK IN STEP 1 WILL BE IN A BAD STATE.
   RESET THE VPC'S DHCP OPTIONS BEFORE ATTEMPTING TO REBUILD THE STACK IN STEP 3!!!!!!!!!!!
@@ -174,5 +174,5 @@ DNS Notes (something here may be useful when resurrecting the DNS functionality)
   sudo /etc/init.d/named restart
   ```
 
-6. Create Private Infrastructure stack [`private-infrastructure.template`](./private-infrastructure.template) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private-infrastructure.template).
+6. Create Private Infrastructure stack [`private-infrastructure.yml`](./private-infrastructure.yml) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private-infrastructure.yml).
 --->

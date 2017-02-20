@@ -3,27 +3,26 @@
 set -e
 
 PROJECT_DIR=$(dirname $0)/../..
-TMP_DIR=$PROJECT_DIR/tmp
 
 source $PROJECT_DIR/scripts/cf-utils.sh $@
 
 STACK_NAME=$STACK_PREFIX-bosh-lite-infrastructure
 
 if [[ $BOSH_LITE_AVAILABILITY_ZONE == "" ]] ; then
-    BOSH_LITE_AVAILABILITY_ZONE=$(jq -r .Parameters.BOSHLiteAvailabilityZone.Default \
-        $TMP_DIR/new/bosh-lite/bosh-lite-infrastructure.template)
+    BOSH_LITE_AVAILABILITY_ZONE=$(cat $(dirname $0)/../bosh-lite-infrastructure.yml \
+        | shyaml get-value Parameters.BOSHLiteAvailabilityZone.Default)
 fi
 if [[ $BOSH_LITE_PUBLIC_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
-    BOSH_LITE_PUBLIC_THREE_OCTET_CIDR_BLOCK=$(jq -r .Parameters.BOSHLitePublicThreeOctetCIDRBlock.Default \
-        $TMP_DIR/new/bosh-lite/bosh-lite-infrastructure.template)
+    BOSH_LITE_PUBLIC_THREE_OCTET_CIDR_BLOCK=$(cat $(dirname $0)/../bosh-lite-infrastructure.yml \
+        | shyaml get-value Parameters.BOSHLitePublicThreeOctetCIDRBlock.Default)
 fi
 if [[ $BOSH_LITE_PRIVATE_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
-    BOSH_LITE_PRIVATE_THREE_OCTET_CIDR_BLOCK=$(jq -r .Parameters.BOSHLitePrivateThreeOctetCIDRBlock.Default \
-        $TMP_DIR/new/bosh-lite/bosh-lite-infrastructure.template)
+    BOSH_LITE_PRIVATE_THREE_OCTET_CIDR_BLOCK=$(cat $(dirname $0)/../bosh-lite-infrastructure.yml \
+        | shyaml get-value Parameters.BOSHLitePrivateThreeOctetCIDRBlock.Default)
 fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
-    --template-url $AWS_MUSINGS_S3_URL/bosh-lite/bosh-lite-infrastructure.template \
+    --template-url $AWS_MUSINGS_S3_URL/bosh-lite/bosh-lite-infrastructure.yml \
     --parameters ParameterKey=BOSHLiteAvailabilityZone,ParameterValue=$BOSH_LITE_AVAILABILITY_ZONE \
         ParameterKey=BOSHLitePublicThreeOctetCIDRBlock,ParameterValue=$BOSH_LITE_PUBLIC_THREE_OCTET_CIDR_BLOCK \
         ParameterKey=BOSHLitePrivateThreeOctetCIDRBlock,ParameterValue=$BOSH_LITE_PRIVATE_THREE_OCTET_CIDR_BLOCK \

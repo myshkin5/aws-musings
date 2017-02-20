@@ -1,17 +1,17 @@
 ---
-  AWSTemplateFormatVersion: "2010-09-09"
+  AWSTemplateFormatVersion: 2010-09-09
 
   Description: My API via the AWS API Gateway.
 
   Resources:
     MyAPI:
-      Type: "AWS::ApiGateway::RestApi"
+      Type: AWS::ApiGateway::RestApi
       Properties:
         Description: A sample API
         Name: myApi
 
     PetsResource:
-      Type: "AWS::ApiGateway::Resource"
+      Type: AWS::ApiGateway::Resource
       Properties:
         ParentId: { "Fn::GetAtt": [ MyAPI, RootResourceId ] }
         PathPart: pets
@@ -19,7 +19,7 @@
       DependsOn: [ MyAPI ]
 
     PetsGETMethod:
-      Type: "AWS::ApiGateway::Method"
+      Type: AWS::ApiGateway::Method
       Properties:
         HttpMethod: GET
         AuthorizationType: AWS_IAM
@@ -43,7 +43,7 @@
       DependsOn: [ PetsResource ]
 
     PetsGETDeployment:
-      Type: "AWS::ApiGateway::Deployment"
+      Type: AWS::ApiGateway::Deployment
       Properties:
         RestApiId: { Ref: MyAPI }
         Description: Initial deployment

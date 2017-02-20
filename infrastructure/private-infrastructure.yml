@@ -1,0 +1,121 @@
+---
+  AWSTemplateFormatVersion: 2010-09-09
+
+  Description: The private resources of a VPC.
+
+  Parameters:
+    NATInstanceId:
+      Type: String
+      Description: This id of the NAT instance to be added to private route tables.
+    NetworkACLId:
+      Type: String
+      Description: The id of the network access control list used to protect instances in the VPC.
+    SecondOctet:
+      Type: Number
+      MinValue: 0
+      MaxValue: 255
+      Description: The second octet of the CIDR block for the VPC.
+    VPCId:
+      Type: AWS::EC2::VPC::Id
+      Description: The id of the VPC in which the resources will be created.
+    VPNGatewayId:
+      Type: String
+      Description: The VPN gateway to which route tables will be connected via route propagation. Optional, no
+        propagation occurs if not specified.
+
+  Mappings:
+    AZRegionMap:
+      us-east-1: { a: us-east-1a, b: us-east-1b, c: us-east-1c }
+      us-west-2: { a: us-west-2a, b: us-west-2b, c: us-west-2c }
+
+  Conditions:
+    VPNGatewayIdDefined: { "Fn::Not": [ { "Fn::Equals": [ { Ref: VPNGatewayId }, "" ] } ] }
+
+  Resources:
+    PrivateSubnetA:
+      Type: AWS::EC2::Subnet
+      Properties:
+        CidrBlock: { "Fn::Join": [ ., [ 10, { Ref: SecondOctet }, 50.0/24 ] ] }
+        AvailabilityZone: { "Fn::FindInMap": [ AZRegionMap, { Ref: "AWS::Region" }, a ] }
+        VpcId: { Ref: VPCId }
+        Tags:
+        - Key: Name
+          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" },
+            { "Fn::Join": [ "", [ { Ref: "AWS::Region" }, a-private-subnet ] ] } ] ] }
+    PrivateSubnetB:
+      Type: AWS::EC2::Subnet
+      Properties:
+        CidrBlock: { "Fn::Join": [ ., [ 10, { Ref: SecondOctet }, 51.0/24 ] ] }
+        AvailabilityZone: { "Fn::FindInMap": [ AZRegionMap, { Ref: "AWS::Region" }, b ] }
+        VpcId: { Ref: VPCId }
+        Tags:
+        - Key: Name
+          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" },
+            { "Fn::Join": [ "", [ { Ref: "AWS::Region" }, b-private-subnet ] ] } ] ] }
+    PrivateSubnetC:
+      Type: AWS::EC2::Subnet
+      Properties:
+        CidrBlock: { "Fn::Join": [ ., [ 10, { Ref: SecondOctet }, 52.0/24 ] ] }
+        AvailabilityZone: { "Fn::FindInMap": [ AZRegionMap, { Ref: "AWS::Region" }, c ] }
+        VpcId: { Ref: VPCId }
+        Tags:
+        - Key: Name
+          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" },
+            { "Fn::Join": [ "", [ { Ref: "AWS::Region" }, c-private-subnet ] ] } ] ] }
+
+    PrivateRouteTable:
+      Type: AWS::EC2::RouteTable
+      Properties:
+        VpcId: { Ref: VPCId }
+        Tags:
+        - Key: Name
+          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, { Ref: "AWS::Region" }, private-rtb ] ] }
+    PrivateDefaultRoute:
+      Type: AWS::EC2::Route
+      Properties:
+        DestinationCidrBlock: 0.0.0.0/0
+        RouteTableId: { Ref: PrivateRouteTable }
+        InstanceId: { Ref: NATInstanceId }
+    PrivateSubnetARouteTableAssociation:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        RouteTableId: { Ref: PrivateRouteTable }
+        SubnetId: { Ref: PrivateSubnetA }
+    PrivateSubnetBRouteTableAssociation:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        RouteTableId: { Ref: PrivateRouteTable }
+        SubnetId: { Ref: PrivateSubnetB }
+    PrivateSubnetCRouteTableAssociation:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        RouteTableId: { Ref: PrivateRouteTable }
+        SubnetId: { Ref: PrivateSubnetC }
+
+    VPNGatewayRoutePropagation:
+      Type: AWS::EC2::VPNGatewayRoutePropagation
+      Condition: VPNGatewayIdDefined
+      Properties:
+        RouteTableIds: [ { Ref: PrivateRouteTable } ]
+        VpnGatewayId: { Ref: VPNGatewayId }
+
+    PrivateSubnetANetworkACLAssociation:
+      Type: AWS::EC2::SubnetNetworkAclAssociation
+      Properties:
+        NetworkAclId: { Ref: NetworkACLId }
+        SubnetId: { Ref: PrivateSubnetA }
+    PrivateSubnetBNetworkACLAssociation:
+      Type: AWS::EC2::SubnetNetworkAclAssociation
+      Properties:
+        NetworkAclId: { Ref: NetworkACLId }
+        SubnetId: { Ref: PrivateSubnetB }
+    PrivateSubnetCNetworkACLAssociation:
+      Type: AWS::EC2::SubnetNetworkAclAssociation
+      Properties:
+        NetworkAclId: { Ref: NetworkACLId }
+        SubnetId: { Ref: PrivateSubnetC }
+
+  Outputs:
+    PrivateRouteTableId:
+      Description: The id of the private route table.
+      Value: { Ref: PrivateRouteTable }

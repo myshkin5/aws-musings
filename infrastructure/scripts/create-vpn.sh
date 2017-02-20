@@ -6,8 +6,12 @@ source $(dirname $0)/setenv.sh $@
 
 STACK_NAME=$STACK_PREFIX-vpn
 
+if [[ $BGP_AS_NUMBER == "" ]] ; then
+    BGP_AS_NUMBER=$(cat $(dirname $0)/../vpn.yml | shyaml get-value Parameters.BGPASNumber.Default)
+fi
+
 aws cloudformation create-stack --stack-name $STACK_NAME \
-    --template-url $AWS_MUSINGS_S3_URL/infrastructure/vpn.template \
+    --template-url $AWS_MUSINGS_S3_URL/infrastructure/vpn.yml \
     --parameters ParameterKey=BGPASNumber,ParameterValue=$BGP_AS_NUMBER \
         ParameterKey=CustomerGatewayIPAddress,ParameterValue=$CUSTOMER_GATEWAY_IP_ADDRESS \
         ParameterKey=VPCId,ParameterValue=$VPC_ID \

@@ -15,8 +15,8 @@ Creates a private subnet and security groups used by elasticsearch instances.
 
  | |
 ---|---
- Definition | [`elasticsearch-infrastructure.template`](./elasticsearch-infrastructure.template)
- S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/elasticsearch/elasticsearch-infrastructure.template
+ Definition | [`elasticsearch-infrastructure.yml`](./elasticsearch-infrastructure.yml)
+ S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/elasticsearch/elasticsearch-infrastructure.yml
  Create Script | [`scripts/create-elasticsearch-infrastructure.sh`](scripts/create-elasticsearch-infrastructure.sh)
  Delete Script | [`scripts/delete-elasticsearch-infrastructure.sh`](scripts/delete-elasticsearch-infrastructure.sh)
 
@@ -42,8 +42,8 @@ Creates a single elasticsearch instance.
 
  | |
 ---|---
- Definition | [`elasticsearch.template`](./elasticsearch.template)
- S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/elasticsearch/elasticsearch.template
+ Definition | [`elasticsearch.yml`](./elasticsearch.yml)
+ S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/elasticsearch/elasticsearch.yml
  Create Script | [`scripts/create-elasticsearch.sh`](scripts/create-elasticsearch.sh)
  Delete Script | [`scripts/delete-elasticsearch.sh`](scripts/delete-elasticsearch.sh)
 

@@ -10,16 +10,16 @@ if [[ $DNS_ZONE == "" ]] ; then
     DNS_ZONE=dev
 fi
 if [[ $FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE == "" ]] ; then
-    FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE=$(jq -r .Parameters.FullyQualifiedInternalParentDNSZone.Default \
-        $(dirname $0)/../../infrastructure/public-infrastructure.template)
+    FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE=$(cat $(dirname $0)/../../infrastructure/public-infrastructure.yml \
+        | shyaml get-value Parameters.FullyQualifiedInternalParentDNSZone.Default)
 fi
 if [[ $INTERNAL_KEY_NAME == "" ]] ; then
-    INTERNAL_KEY_NAME=$(jq -r .Parameters.InternalKeyName.Default \
-        $(dirname $0)/../../infrastructure/public-infrastructure.template)
+    INTERNAL_KEY_NAME=$(cat $(dirname $0)/../../infrastructure/public-infrastructure.yml \
+        | shyaml get-value Parameters.InternalKeyName.Default)
 fi
 if [[ $MANAGEMENT_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
-    MANAGEMENT_THREE_OCTET_CIDR_BLOCK=$(jq -r .Parameters.ManagementThreeOctetCIDRBlock.Default \
-        $(dirname $0)/../bosh-infrastructure.template)
+    MANAGEMENT_THREE_OCTET_CIDR_BLOCK=$(cat $(dirname $0)/../bosh-infrastructure.yml \
+        | shyaml get-value Parameters.ManagementThreeOctetCIDRBlock.Default)
 fi
 if [[ $AWS_ACCESS_KEY_ID == "" ]] ; then
     >&2 echo "ERROR: AWS_ACCESS_KEY_ID must be set to an AWS access key id"
@@ -36,7 +36,7 @@ fi
 PRIVATE_KEY=$(cat $PRIVATE_KEY_FILE)
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
-    --template-url $AWS_MUSINGS_S3_URL/bosh/bosh-init.template \
+    --template-url $AWS_MUSINGS_S3_URL/bosh/bosh-init.yml \
     --parameters ParameterKey=AWSAccessKeyId,ParameterValue=$AWS_ACCESS_KEY_ID \
         ParameterKey=AWSMusingsS3URL,ParameterValue=$AWS_MUSINGS_S3_URL \
         ParameterKey=AWSSecretAccessKey,ParameterValue="$AWS_SECRET_ACCESS_KEY" \

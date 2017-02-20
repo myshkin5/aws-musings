@@ -11,7 +11,7 @@ Creates my API.
 
  | |
 ---|---
- Definition | [`my-api.template`](./my-api.template.yml)
- S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/my-api/my-api.template
+ Definition | [`my-api.yml`](./my-api.yml)
+ S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/my-api/my-api.yml
  Create Script | [`scripts/create-my-api.sh`](scripts/create-my-api.sh)
  Delete Script | [`scripts/delete-my-api.sh`](scripts/delete-my-api.sh)

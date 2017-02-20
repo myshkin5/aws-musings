@@ -1,5 +1,5 @@
 ---
-  AWSTemplateFormatVersion: "2010-09-09"
+  AWSTemplateFormatVersion: 2010-09-09
 
   Description: Lambda functions called synchronously from AWS API Gateway.
 
@@ -11,7 +11,7 @@
 
   Resources:
     GetHelloWorldFunction:
-      Type: "AWS::Lambda::Function"
+      Type: AWS::Lambda::Function
       Properties:
         FunctionName: GetHelloWorld
         Description: "Returns {\"Hello\":\"World\"}"
@@ -29,7 +29,7 @@
             "};" ] ] }
 
     GetHelloWithNameFunction:
-      Type: "AWS::Lambda::Function"
+      Type: AWS::Lambda::Function
       Properties:
         FunctionName: GetHelloWithName
         Description: "Returns {\"Hello\":\", a user-provided string, and \"}"
@@ -48,13 +48,13 @@
             "};" ] ] }
 
     MyDemoAPI:
-      Type: "AWS::ApiGateway::RestApi"
+      Type: AWS::ApiGateway::RestApi
       Properties:
         Description: A sample API
         Name: MyDemoAPI
 
     MyDemoResource:
-      Type: "AWS::ApiGateway::Resource"
+      Type: AWS::ApiGateway::Resource
       Properties:
         ParentId: { "Fn::GetAtt": [ MyDemoAPI, RootResourceId ] }
         PathPart: mydemoresource
@@ -62,7 +62,7 @@
       DependsOn: [ MyDemoAPI ]
 
     GetHelloWorldGETMethod:
-      Type: "AWS::ApiGateway::Method"
+      Type: AWS::ApiGateway::Method
       Properties:
         HttpMethod: GET
         AuthorizationType: NONE
@@ -85,9 +85,9 @@
     #   -> APIs -> MyDemoAPI -> Resources -> / -> /mydemoresource -> GET -> Integration Request -> Lambda Function
     #   -> Edit. Then click the Update check and OK to add the permission via the console.
     GetHelloWorldGETMethodPermission:
-      Type: "AWS::Lambda::Permission"
+      Type: AWS::Lambda::Permission
       Properties:
-        Action: "lambda:InvokeFunction"
+        Action: lambda:InvokeFunction
         FunctionName: { "Fn::GetAtt": [ GetHelloWorldFunction, Arn ] }
         Principal: apigateway.amazonaws.com
         SourceArn: { "Fn::Join": [ "", [ "arn:aws:execute-api:", { Ref: "AWS::Region" }, ":", { Ref: "AWS::AccountId" },
@@ -95,7 +95,7 @@
       DependsOn: [ GetHelloWorldGETMethod ]
 
     GetHelloWithNamePOSTMethod:
-      Type: "AWS::ApiGateway::Method"
+      Type: AWS::ApiGateway::Method
       Properties:
         HttpMethod: POST
         AuthorizationType: NONE
@@ -118,9 +118,9 @@
     #   -> APIs -> MyDemoAPI -> Resources -> / -> /mydemoresource -> POST -> Integration Request -> Lambda Function
     #   -> Edit. Then click the Update check and OK to add the permission via the console.
     GetHelloWithNamePOSTMethodPermission:
-      Type: "AWS::Lambda::Permission"
+      Type: AWS::Lambda::Permission
       Properties:
-        Action: "lambda:InvokeFunction"
+        Action: lambda:InvokeFunction
         FunctionName: { "Fn::GetAtt": [ GetHelloWithNameFunction, Arn ] }
         Principal: apigateway.amazonaws.com
         SourceArn: { "Fn::Join": [ "", [ "arn:aws:execute-api:", { Ref: "AWS::Region" }, ":", { Ref: "AWS::AccountId" },
@@ -130,7 +130,7 @@
     # TODO: Because the previous two TODOs left the API in a bad state this deployment doesn't work. Moving the
     #   deployment to another stack that gets run after the above issues are fixed should be a viable workaround.
     MyDemoDeployment:
-      Type: "AWS::ApiGateway::Deployment"
+      Type: AWS::ApiGateway::Deployment
       Properties:
         RestApiId: { Ref: MyDemoAPI }
         Description: Calling Lambda functions walkthrough

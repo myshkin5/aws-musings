@@ -11,7 +11,7 @@ Creates Lambda functions and API.
 
  | |
 ---|---
- Definition | [`api-gateway-with-lambda.template`](./api-gateway-with-lambda.template.yml)
- S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/call-lambda-synchronously/api-gateway-with-lambda.template
+ Definition | [`api-gateway-with-lambda.yml`](./api-gateway-with-lambda.yml)
+ S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/call-lambda-synchronously/api-gateway-with-lambda.yml
  Create Script | [`scripts/create-api.sh`](scripts/create-api.sh)
  Delete Script | [`scripts/delete-api.sh`](scripts/delete-api.sh)

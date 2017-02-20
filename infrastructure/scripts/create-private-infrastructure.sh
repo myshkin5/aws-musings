@@ -7,7 +7,7 @@ source $(dirname $0)/setenv.sh $@
 STACK_NAME=$STACK_PREFIX-private
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
-    --template-url $AWS_MUSINGS_S3_URL/infrastructure/private-infrastructure.template \
+    --template-url $AWS_MUSINGS_S3_URL/infrastructure/private-infrastructure.yml \
     --parameters ParameterKey=NATInstanceId,ParameterValue=$NAT_INSTANCE_ID \
         ParameterKey=NetworkACLId,ParameterValue=$NETWORK_ACL_ID \
         ParameterKey=SecondOctet,ParameterValue=$SECOND_OCTET \

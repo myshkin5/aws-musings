@@ -1,5 +1,5 @@
 ---
-  AWSTemplateFormatVersion: "2010-09-09"
+  AWSTemplateFormatVersion: 2010-09-09
 
   Description: The elasticsearch server.
 
@@ -8,7 +8,7 @@
       Type: String
       Description: S3 path to aws-musings.
     ElasticsearchImageId:
-      Type: "AWS::EC2::Image::Id"
+      Type: AWS::EC2::Image::Id
       Description: The image id of the elasticsearch instance.
     ElasticsearchInstanceName:
       Type: String
@@ -17,13 +17,13 @@
       AllowedPattern: "[a-z0-9\\-]*"
       ConstraintDescription: must contain only lowercase letters, numbers and dashes
     ElasticsearchInstanceSecurityGroupId:
-      Type: "AWS::EC2::SecurityGroup::Id"
+      Type: AWS::EC2::SecurityGroup::Id
       Description: The id of the elasticsearch instance security group.
     ElasticsearchInstanceType:
       Type: String
       Description: The instance type of the elasticsearch instance.
     ElasticsearchPrivateSubnetId:
-      Type: "AWS::EC2::Subnet::Id"
+      Type: AWS::EC2::Subnet::Id
       Description: The id of the elasticsearch private subnet.
     ElasticsearchSpotPrice:
       Type: String
@@ -41,15 +41,15 @@
       AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
       ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
     InternalKeyName:
-      Type: "AWS::EC2::KeyPair::KeyName"
+      Type: AWS::EC2::KeyPair::KeyName
       Description: SSH key name used to connect with internal servers.
     VPCId:
-      Type: "AWS::EC2::VPC::Id"
+      Type: AWS::EC2::VPC::Id
       Description: The id of the VPC in which the resources will be created.
 
   Resources:
     ElasticsearchLaunchConfig:
-      Type: "AWS::AutoScaling::LaunchConfiguration"
+      Type: AWS::AutoScaling::LaunchConfiguration
       Metadata:
         "AWS::CloudFormation::Init":
           config:
@@ -59,7 +59,7 @@
                 context:
                   STACK_ID: { Ref: "AWS::StackId" }
                   REGION: { Ref: "AWS::Region" }
-                mode: "000400"
+                mode: 000400
                 owner: root
                 group: root
               /etc/cfn/hooks.d/cfn-auto-reloader.conf:
@@ -74,12 +74,12 @@
                   FQDN: { "Fn::Join": [ "", [ { Ref: ElasticsearchInstanceName },
                     { Ref: DNSZone }, ., { Ref: FullyQualifiedInternalParentDNSZone } ] ] }
       Properties:
-        AssociatePublicIpAddress: "false"
+        AssociatePublicIpAddress: false
         BlockDeviceMappings:
         - DeviceName: /dev/sda1
           Ebs:
             VolumeType: gp2
-            VolumeSize: "30"
+            VolumeSize: 30
         - DeviceName: /dev/sdb
           VirtualName: ephemeral0
         ImageId: { Ref: ElasticsearchImageId }
@@ -107,7 +107,8 @@
               "source /tmp/bootstrap.sh\n",
               "aws-bootstrap\n",
 
-              "curl --output /tmp/elastic.deb --silent https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.3.2/elasticsearch-2.3.2.deb\n",
+              "curl --output /tmp/elastic.deb --silent https://download.elastic.co/elasticsearch/release/",
+                "org/elasticsearch/distribution/deb/elasticsearch/2.3.2/elasticsearch-2.3.2.deb\n",
               "dpkg --install /tmp/elastic.deb\n",
               "update-rc.d elasticsearch defaults 95 10\n",
               "echo 'network.bind_host: \"0.0.0.0\"' >> /etc/elasticsearch/elasticsearch.yml\n",
@@ -118,15 +119,15 @@
               "reboot\n"
             ] ]
     ElasticsearchAutoScalingGroup:
-      Type: "AWS::AutoScaling::AutoScalingGroup"
+      Type: AWS::AutoScaling::AutoScalingGroup
       Properties:
         LaunchConfigurationName: { Ref: ElasticsearchLaunchConfig }
-        MaxSize: "1"
-        MinSize: "1"
+        MaxSize: 1
+        MinSize: 1
         Tags:
         - Key: Name
           Value: { "Fn::Join": [ -, [ { Ref: DNSZone }, { Ref: ElasticsearchInstanceName }, asg ] ] }
-          PropagateAtLaunch: "true"
+          PropagateAtLaunch: true
         VPCZoneIdentifier: [ { Ref: ElasticsearchPrivateSubnetId } ]
       CreationPolicy:
         ResourceSignal:

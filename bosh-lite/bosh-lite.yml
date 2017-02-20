@@ -1,5 +1,5 @@
 ---
-  AWSTemplateFormatVersion: "2010-09-09"
+  AWSTemplateFormatVersion: 2010-09-09
 
   Description: The bosh-lite server.
 
@@ -11,13 +11,14 @@
       Type: String
       Description: The password for the admin account to Cloud Foundry.
     BOSHLiteELBSecurityGroupId:
-      Type: "AWS::EC2::SecurityGroup::Id"
+      Type: AWS::EC2::SecurityGroup::Id
       Description: The id of the bosh-lite ELB security group.
     BOSHLiteELBSSLCertificateId:
       Type: String
-      Description: "TODO: Not currently used. The ARN id of the SSL/TLS certificate used by the ELB to communicate with clients."
+      Description: TODO: Not currently used. The ARN id of the SSL/TLS certificate used by the ELB to communicate with
+        clients.
     BOSHLiteImageId:
-      Type: "AWS::EC2::Image::Id"
+      Type: AWS::EC2::Image::Id
       Description: The image id of the bosh-lite instance.
     BOSHLiteInstanceName:
       Type: String
@@ -26,16 +27,16 @@
       AllowedPattern: "[a-z0-9\\-]*"
       ConstraintDescription: must contain only lowercase letters, numbers and dashes
     BOSHLiteInstanceSecurityGroupId:
-      Type: "AWS::EC2::SecurityGroup::Id"
+      Type: AWS::EC2::SecurityGroup::Id
       Description: The id of the bosh-lite instance security group.
     BOSHLiteInstanceType:
       Type: String
       Description: The instance type of the bosh-lite instance.
     BOSHLitePublicSubnetId:
-      Type: "AWS::EC2::Subnet::Id"
+      Type: AWS::EC2::Subnet::Id
       Description: The id of the bosh-lite public subnet.
     BOSHLitePrivateSubnetId:
-      Type: "AWS::EC2::Subnet::Id"
+      Type: AWS::EC2::Subnet::Id
       Description: The id of the bosh-lite private subnet.
     BOSHLiteSpotPrice:
       Type: String
@@ -49,8 +50,9 @@
       ConstraintDescription: must contain only lowercase letters, numbers and dashes
     FullyQualifiedExternalParentDNSZone:
       Type: String
-      Description: The external parent DNS zone (should not start or end with .). Optional, Route 53 resources will be created if specified.
-      AllowedPattern: ([a-z][a-z0-9\-.]*[a-z0-9])|(^$)
+      Description: The external parent DNS zone (should not start or end with .). Optional, Route 53 resources will be
+        created if specified.
+      AllowedPattern: "([a-z][a-z0-9\-.]*[a-z0-9])|(^$)"
       ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots, optional
     FullyQualifiedInternalParentDNSZone:
       Type: String
@@ -58,15 +60,15 @@
       AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
       ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
     InternalKeyName:
-      Type: "AWS::EC2::KeyPair::KeyName"
+      Type: AWS::EC2::KeyPair::KeyName
       Description: SSH key name used to connect with internal servers.
     VPCId:
-      Type: "AWS::EC2::VPC::Id"
+      Type: AWS::EC2::VPC::Id
       Description: The id of the VPC in which the resources will be created.
 
   Resources:
     BOSHLiteLaunchConfig:
-      Type: "AWS::AutoScaling::LaunchConfiguration"
+      Type: AWS::AutoScaling::LaunchConfiguration
       Metadata:
         "AWS::CloudFormation::Init":
           config:
@@ -76,7 +78,7 @@
                 context:
                   STACK_ID: { Ref: "AWS::StackId" }
                   REGION: { Ref: "AWS::Region" }
-                mode: "000400"
+                mode: 000400
                 owner: root
                 group: root
               /etc/cfn/hooks.d/cfn-auto-reloader.conf:
@@ -91,12 +93,12 @@
                   FQDN: { "Fn::Join": [ "", [ { Ref: BOSHLiteInstanceName },
                     { Ref: DNSZone }, ., { Ref: FullyQualifiedInternalParentDNSZone } ] ] }
       Properties:
-        AssociatePublicIpAddress: "false"
+        AssociatePublicIpAddress: false
         BlockDeviceMappings:
         - DeviceName: /dev/sda1
           Ebs:
             VolumeType: gp2
-            VolumeSize: "30"
+            VolumeSize: 30
         - DeviceName: /dev/sdb
           VirtualName: ephemeral0
         ImageId: { Ref: BOSHLiteImageId }
@@ -111,7 +113,7 @@
 
               "set -e -x\n",
 
-              "export HOSTNAME=", { Ref: BOSHLiteInstanceName}, "\n",
+              "export HOSTNAME=", { Ref: BOSHLiteInstanceName }, "\n",
               "export STACK_NAME=\"", { Ref: "AWS::StackName" }, "\"\n",
               "export RESOURCE=BOSHLiteLaunchConfig\n",
               "export REGION=\"", { Ref: "AWS::Region" }, "\"\n",
@@ -125,11 +127,11 @@
               "aws-bootstrap\n",
 
               "export BOSH_LITE_URL=\"", { "Fn::Join": [ ., [ { Ref: DNSZone},
-                  { Ref: FullyQualifiedExternalParentDNSZone } ] ] }, "\"\n",
+                { Ref: FullyQualifiedExternalParentDNSZone } ] ] }, "\"\n",
               "export BOSH_LITE_CF_ADMIN_PASSWORD=\"", { Ref: BOSHLiteCFAdminPassword }, "\"\n",
 
               "curl --output /etc/init.d/bosh-lite-run-once --silent ",
-                  "$AWS_MUSINGS_S3_URL/bosh-lite/run-once.sh\n",
+                "$AWS_MUSINGS_S3_URL/bosh-lite/run-once.sh\n",
               "chmod +x /etc/init.d/bosh-lite-run-once\n",
               "sed -i -e \"s/STACK_NAME/$STACK_NAME/g\" /etc/init.d/bosh-lite-run-once\n",
               "sed -i -e \"s/RESOURCE/$AUTO_SCALING_GROUP/g\" /etc/init.d/bosh-lite-run-once\n",
@@ -137,26 +139,26 @@
               "update-rc.d bosh-lite-run-once defaults 99\n",
 
               "curl --output /usr/local/bootstrap-bosh-lite.sh ",
-                  "--silent $AWS_MUSINGS_S3_URL/bosh-lite/bootstrap.sh\n",
+                "--silent $AWS_MUSINGS_S3_URL/bosh-lite/bootstrap.sh\n",
               "sed -i -e \"s/BOSH_LITE_URL/$BOSH_LITE_URL/g\" /usr/local/bootstrap-bosh-lite.sh\n",
               "sed -i -e \"s/BOSH_LITE_CF_ADMIN_PASSWORD/$BOSH_LITE_CF_ADMIN_PASSWORD/g\" ",
-                  "/usr/local/bootstrap-bosh-lite.sh\n",
+                "/usr/local/bootstrap-bosh-lite.sh\n",
               "chmod +x /usr/local/bootstrap-bosh-lite.sh\n",
 
               "# Success (aws-signal-success) is signalled from the run-once script\n",
               "reboot\n"
             ] ]
     BOSHLiteAutoScalingGroup:
-      Type: "AWS::AutoScaling::AutoScalingGroup"
+      Type: AWS::AutoScaling::AutoScalingGroup
       Properties:
         LaunchConfigurationName: { Ref: BOSHLiteLaunchConfig }
         LoadBalancerNames: [ { Ref: BOSHLiteLoadBalancer } ]
-        MaxSize: "1"
-        MinSize: "1"
+        MaxSize: 1
+        MinSize: 1
         Tags:
         - Key: Name
           Value: { "Fn::Join": [ -, [ { Ref: DNSZone }, { Ref: BOSHLiteInstanceName }, asg ] ] }
-          PropagateAtLaunch: "true"
+          PropagateAtLaunch: true
         VPCZoneIdentifier: [ { Ref: BOSHLitePrivateSubnetId } ]
       CreationPolicy:
         ResourceSignal:
@@ -164,7 +166,7 @@
       DependsOn: [ BOSHLiteLaunchConfig, BOSHLiteLoadBalancer ]
 
     BOSHLiteLoadBalancer:
-      Type: "AWS::ElasticLoadBalancing::LoadBalancer"
+      Type: AWS::ElasticLoadBalancing::LoadBalancer
       Properties:
         LoadBalancerName: { "Fn::Join": [ -, [ { Ref: DNSZone }, { Ref: BOSHLiteInstanceName }, elb ] ] }
         Tags:
@@ -172,23 +174,23 @@
           Value: { "Fn::Join": [ -, [ { Ref: DNSZone }, { Ref: BOSHLiteInstanceName }, elb ] ] }
         HealthCheck:
           Target: TCP:443
-          HealthyThreshold: "3"
-          UnhealthyThreshold: "5"
-          Interval: "30"
-          Timeout: "5"
+          HealthyThreshold: 3
+          UnhealthyThreshold: 5
+          Interval: 30
+          Timeout: 5
         Listeners:
-        - LoadBalancerPort: "443"
+        - LoadBalancerPort: 443
           Protocol: TCP
-          InstancePort: "443"
+          InstancePort: 443
           InstanceProtocol: TCP
         SecurityGroups: [ { Ref: BOSHLiteELBSecurityGroupId } ]
         Subnets: [ { Ref: BOSHLitePublicSubnetId } ]
 
     BOSHLiteLoadBalancerRecordSet:
-      Type: "AWS::Route53::RecordSet"
+      Type: AWS::Route53::RecordSet
       Properties:
         HostedZoneName: { "Fn::Join": [ "", [ { Ref: FullyQualifiedExternalParentDNSZone }, . ] ] }
-        Name: { "Fn::Join": [ ., [ "*", { Ref: DNSZone }, { Ref: FullyQualifiedExternalParentDNSZone }, "" ] ] }
+        Name: { "Fn::Join": [ ., [ *, { Ref: DNSZone }, { Ref: FullyQualifiedExternalParentDNSZone }, "" ] ] }
         AliasTarget:
           DNSName: { "Fn::GetAtt": [ BOSHLiteLoadBalancer, CanonicalHostedZoneName ] }
           HostedZoneId: { "Fn::GetAtt": [ BOSHLiteLoadBalancer, CanonicalHostedZoneNameID ] }

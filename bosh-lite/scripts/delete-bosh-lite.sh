@@ -5,7 +5,8 @@ set -e
 source $(dirname $0)/../../scripts/cf-utils.sh $@
 
 if [[ $BOSH_LITE_INSTANCE_NAME == "" ]] ; then
-    BOSH_LITE_INSTANCE_NAME=$(jq -r .Parameters.BOSHLiteInstanceName.Default $(dirname $0)/../../tmp/new/bosh-lite/bosh-lite.template)
+    BOSH_LITE_INSTANCE_NAME=$(cat $(dirname $0)/../bosh-lite.yml \
+        | shyaml get-value Parameters.BOSHLiteInstanceName.Default)
 fi
 
 STACK_NAME=$STACK_PREFIX-$BOSH_LITE_INSTANCE_NAME

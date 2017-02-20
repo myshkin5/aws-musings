@@ -7,24 +7,24 @@ source $(dirname $0)/../../scripts/cf-utils.sh $@
 STACK_NAME=$STACK_PREFIX-bosh-infrastructure
 
 if [[ $MANAGEMENT_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
-    MANAGEMENT_THREE_OCTET_CIDR_BLOCK=$(jq -r .Parameters.ManagementThreeOctetCIDRBlock.Default \
-        $(dirname $0)/../bosh-infrastructure.template)
+    MANAGEMENT_THREE_OCTET_CIDR_BLOCK=$(cat $(dirname $0)/../bosh-infrastructure.yml \
+        | shyaml get-value Parameters.ManagementThreeOctetCIDRBlock.Default)
 fi
 if [[ $THREE_OCTET_CIDR_BLOCK_A == "" ]] ; then
-    THREE_OCTET_CIDR_BLOCK_A=$(jq -r .Parameters.ThreeOctetCIDRBlockA.Default \
-        $(dirname $0)/../bosh-infrastructure.template)
+    THREE_OCTET_CIDR_BLOCK_A=$(cat $(dirname $0)/../bosh-infrastructure.yml \
+        | shyaml get-value Parameters.ThreeOctetCIDRBlockA.Default)
 fi
 if [[ $THREE_OCTET_CIDR_BLOCK_B == "" ]] ; then
-    THREE_OCTET_CIDR_BLOCK_B=$(jq -r .Parameters.ThreeOctetCIDRBlockB.Default \
-        $(dirname $0)/../bosh-infrastructure.template)
+    THREE_OCTET_CIDR_BLOCK_B=$(cat $(dirname $0)/../bosh-infrastructure.yml \
+        | shyaml get-value Parameters.ThreeOctetCIDRBlockB.Default)
 fi
 if [[ $THREE_OCTET_CIDR_BLOCK_C == "" ]] ; then
-    THREE_OCTET_CIDR_BLOCK_C=$(jq -r .Parameters.ThreeOctetCIDRBlockC.Default \
-        $(dirname $0)/../bosh-infrastructure.template)
+    THREE_OCTET_CIDR_BLOCK_C=$(cat $(dirname $0)/../bosh-infrastructure.yml \
+        | shyaml get-value Parameters.ThreeOctetCIDRBlockC.Default)
 fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
-    --template-url $AWS_MUSINGS_S3_URL/bosh/bosh-infrastructure.template \
+    --template-url $AWS_MUSINGS_S3_URL/bosh/bosh-infrastructure.yml \
     --parameters ParameterKey=ManagementThreeOctetCIDRBlock,ParameterValue=$MANAGEMENT_THREE_OCTET_CIDR_BLOCK \
         ParameterKey=NetworkACLId,ParameterValue=$NETWORK_ACL_ID \
         ParameterKey=PrivateRouteTableId,ParameterValue=$PRIVATE_ROUTE_TABLE_ID \

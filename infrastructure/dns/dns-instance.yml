@@ -1,0 +1,166 @@
+---
+  AWSTemplateFormatVersion: 2010-09-09
+
+  Description: The VPC's DNS server.
+
+  Parameters:
+    AWSMusingsS3URL:
+      Type: String
+      Description: S3 path to aws-musings.
+    DNSZone:
+      Type: String
+      Description: The DNS zone name of the VPC (should not end in 'vpc', .FullyQualifiedInternalParentDNSZone will be
+        appended).
+      AllowedPattern: "[a-z0-9\\-]*"
+      ConstraintDescription: must contain only lowercase letters, numbers and dashes
+    FullyQualifiedInternalParentDNSZone:
+      Type: String
+      Description: The internal parent DNS zone (should not start or end with .).
+      AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
+      ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
+    ImageId:
+      Type: AWS::EC2::Image::Id
+      Description: The AMI used to create the instance.
+    KeyName:
+      Type: AWS::EC2::KeyPair::KeyName
+      Description: SSH key name used to connect to the DNS server.
+    SecondOctet:
+      Type: Number
+      MinValue: 0
+      MaxValue: 255
+      Description: The second octet of the CIDR block for the VPC.
+    SecurityGroupId:
+      Type: AWS::EC2::SecurityGroup::Id
+      Description: The id of the security group protecting the DNS server.
+    SubnetId:
+      Type: AWS::EC2::Subnet::Id
+      Description: The id of the subnet where the server will be added.
+
+    Resources:
+      DNSInstance:
+        Type: AWS::EC2::Instance
+        Metadata:
+          "AWS::CloudFormation::Init":
+            config:
+              packages:
+                yum: { bind: [] }
+              services:
+                sysvinit:
+                  named:
+                    enabled: true
+                    files: [ /etc/named.conf ]
+              files:
+                /etc/named.conf:
+                  source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, infrastructure/dns/named.conf ] ] }
+                  context:
+                    DNS_ZONE: { Ref: DNSZone }
+                    FULLY_QUALIFIED_PARENT_DNS_ZONE: { Ref: FullyQualifiedInternalParentDNSZone }
+                    SECOND_OCTET: { Ref: SecondOctet }
+                /var/named/dynamic/named.vpc:
+                  source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, infrastructure/dns/named.vpc ] ] }
+                  context:
+                    DNS_ZONE: { Ref: DNSZone }
+                    FULLY_QUALIFIED_PARENT_DNS_ZONE: { Ref: FullyQualifiedInternalParentDNSZone }
+                    SECOND_OCTET: { Ref: SecondOctet }
+                  mode: 000644
+                  owner: named
+                  group: named
+                /var/named/dynamic/named.vpc-rev:
+                    source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, infrastructure/dns/named.vpc-rev ] ] }
+                    context:
+                      DNS_ZONE: { Ref: DNSZone }
+                      FULLY_QUALIFIED_PARENT_DNS_ZONE: { Ref: FullyQualifiedInternalParentDNSZone }
+                      SECOND_OCTET: { Ref: SecondOctet }
+                    mode: 000644
+                    owner: named
+                    group: named
+                /etc/sysconfig/network-scripts/ifcfg-eth0:
+                  source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, infrastructure/dns/ifcfg-eth0 ] ] }
+                /etc/resolv.conf:
+                  content:
+                    "Fn::Join": [ "", [
+                      "search ", { Ref: DNSZone }, ., { Ref: FullyQualifiedInternalParentDNSZone }, \n,
+                        nameserver 127.0.0.1,10., { Ref: SecondOctet }, .0.2\n
+                    ] ]
+
+                /etc/cfn/cfn-hup.conf:
+                  source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/cfn-hup.conf ] ] }
+                  context:
+                    STACK_ID: { Ref: "AWS::StackId" }
+                    REGION: { Ref: "AWS::Region" }
+                  mode: 000400
+                  owner: root
+                  group: root
+                /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+                  source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/cfn-auto-reloader.conf ] ] }
+                  context:
+                    STACK_ID: { Ref: "AWS::StackId" }
+                    REGION: { Ref: "AWS::Region" }
+                    INSTANCE_NAME: DNSInstance
+
+                /etc/dhcp/dhclient.conf:
+                  source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/dhclient.conf ] ] }
+                  context:
+                    FQDN: { "Fn::Join": [ "", [ { Ref: DNSZone }, -dns.,
+                      { Ref: DNSZone }, ., { Ref: FullyQualifiedInternalParentDNSZone } ] ] }
+
+                /home/ec2-user/.bashrc:
+                  source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/bashrc.sh ] ] }
+                  mode: 000644
+                  owner: ec2-user
+                  group: ec2-user
+                /root/.bashrc:
+                  source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/bashrc.sh ] ] }
+                  mode: 000644
+                  owner: root
+                  group: root
+        Properties:
+          DisableApiTermination: false
+          ImageId: { Ref: ImageId }
+          InstanceType: t2.micro
+          KeyName: { Ref: KeyName }
+          Monitoring: false
+          Tags:
+          - Key: Name
+            Value: { "Fn::Join": [ -, [ { Ref: DNSZone }, dns ] ] }
+          NetworkInterfaces":
+          - AssociatePublicIpAddress: true
+            DeleteOnTermination: true
+            Description: Primary network interface
+            DeviceIndex: 0
+            SubnetId: { Ref: SubnetId }
+            PrivateIpAddresses:
+            - PrivateIpAddress: { "Fn::Join": [ ., [ 10, { Ref: SecondOctet }, 2.10 ] ] }
+              Primary: true
+            GroupSet: [ { Ref: SecurityGroupId } ]
+          UserData:
+            "Fn::Base64":
+              "Fn::Join": [ "", [
+                "#!/bin/bash\n",
+
+                "set -e -x\n",
+
+                "export HOSTNAME=dns\n",
+                "export STACK_NAME=\"", { Ref: AWS::StackName }, "\"\n",
+                "export RESOURCE=NATInstance\n",
+                "export REGION=\"", { Ref: AWS::Region }, "\"\n",
+                "export AWS_MUSINGS_S3_URL=\"", { Ref: AWSMusingsS3URL }, "\"\n",
+
+                "curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh\n",
+                "source /tmp/bootstrap.sh\n",
+                "aws-bootstrap\n",
+
+                "mkdir /var/log/named\n",
+                "chown named:named /var/log/named\n",
+
+                "# All done so signal success\n",
+                "aws-signal-success\n",
+                "reboot\n"
+              ] ]
+        CreationPolicy:
+          ResourceSignal:
+            Timeout: PT10M
+
+  Outputs:
+    PrivateIP:
+      Value: { "Fn::GetAtt": [ DNSInstance, PrivateIp ] }

@@ -7,15 +7,17 @@ source $(dirname $0)/setenv.sh $@
 STACK_NAME=$STACK_PREFIX-public
 
 if [[ $JUMP_BOX_KEY_NAME == "" ]] ; then
-    JUMP_BOX_KEY_NAME=$(jq -r .Parameters.JumpBoxKeyName.Default $(dirname $0)/../public-infrastructure.template)
+    JUMP_BOX_KEY_NAME=$(cat $(dirname $0)/../public-infrastructure.yml \
+        | shyaml get-value Parameters.JumpBoxKeyName.Default)
 fi
 if [[ $JUMP_BOX_SSH_CIDR_IP == "" ]] ; then
-    echo "WARNING: Jump box will be accessible from the open Internet. Set JUMP_BOX_SSH_CIDR_IP to restrict access."
-    JUMP_BOX_SSH_CIDR_IP=0.0.0.0/0
+    JUMP_BOX_SSH_CIDR_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)/32
+    >&2 echo "WARNING: ssh to the jump box will only be accessible from the current public IP address ($JUMP_BOX_SSH_CIDR_IP)."
+    >&2 echo "  Set JUMP_BOX_SSH_CIDR_IP to restrict access."
 fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
-    --template-url $AWS_MUSINGS_S3_URL/infrastructure/public-infrastructure.template \
+    --template-url $AWS_MUSINGS_S3_URL/infrastructure/public-infrastructure.yml \
     --parameters ParameterKey=AWSMusingsS3URL,ParameterValue=$AWS_MUSINGS_S3_URL \
         ParameterKey=DNSZone,ParameterValue=$DNS_ZONE \
         ParameterKey=FullyQualifiedExternalParentDNSZone,ParameterValue=$FULLY_QUALIFIED_EXTERNAL_PARENT_DNS_ZONE \

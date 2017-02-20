@@ -3,26 +3,26 @@
 set -e
 
 PROJECT_DIR=$(dirname $0)/../..
-TMP_DIR=$PROJECT_DIR/tmp
 
 source $PROJECT_DIR/scripts/cf-utils.sh $@
 
 if [[ $ELASTICSEARCH_INSTANCE_NAME == "" ]] ; then
-    ELASTICSEARCH_INSTANCE_NAME=$(jq -r .Parameters.ElasticsearchInstanceName.Default $TMP_DIR/new/elasticsearch/elasticsearch.template)
+    ELASTICSEARCH_INSTANCE_NAME=$(cat $(dirname $0)/../elasticsearch.yml \
+        | shyaml get-value Parameters.ElasticsearchInstanceName.Default)
 fi
 if [[ $DNS_ZONE == "" ]] ; then
     DNS_ZONE=dev
 fi
 if [[ $FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE == "" ]] ; then
-    FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE=$(jq -r .Parameters.FullyQualifiedInternalParentDNSZone.Default \
-        $TMP_DIR/new/infrastructure/public-infrastructure.template)
+    FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE=$(cat $PROJECT_DIR/infrastructure/public-infrastructure.yml \
+        | shyaml get-value Parameters.FullyQualifiedInternalParentDNSZone.Default)
 fi
 if [[ $INTERNAL_KEY_NAME == "" ]] ; then
-    INTERNAL_KEY_NAME=$(jq -r .Parameters.InternalKeyName.Default \
-        $TMP_DIR/new/infrastructure/public-infrastructure.template)
+    INTERNAL_KEY_NAME=$(cat $PROJECT_DIR/infrastructure/public-infrastructure.yml \
+        | shyaml get-value Parameters.InternalKeyName.Default)
 fi
 if [[ $ELASTICSEARCH_IMAGE_ID == "" ]] ; then
-    ELASTICSEARCH_IMAGE_ID=ami-fce3c696
+    ELASTICSEARCH_IMAGE_ID=ami-6edd3078
 fi
 if [[ $ELASTICSEARCH_INSTANCE_TYPE == "" ]] ; then
     ELASTICSEARCH_INSTANCE_TYPE=c3.large
@@ -34,7 +34,7 @@ fi
 STACK_NAME=$STACK_PREFIX-$ELASTICSEARCH_INSTANCE_NAME
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
-    --template-url $AWS_MUSINGS_S3_URL/elasticsearch/elasticsearch.template \
+    --template-url $AWS_MUSINGS_S3_URL/elasticsearch/elasticsearch.yml \
     --parameters ParameterKey=AWSMusingsS3URL,ParameterValue=$AWS_MUSINGS_S3_URL \
         ParameterKey=ElasticsearchImageId,ParameterValue=$ELASTICSEARCH_IMAGE_ID \
         ParameterKey=ElasticsearchInstanceName,ParameterValue=$ELASTICSEARCH_INSTANCE_NAME \
