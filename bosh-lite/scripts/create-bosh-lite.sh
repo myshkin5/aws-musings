@@ -31,7 +31,7 @@ if [[ $BOSH_LITE_SPOT_PRICE == "" ]] ; then
     BOSH_LITE_SPOT_PRICE=0.06
 fi
 if [[ $BOSH_LITE_CF_ADMIN_PASSWORD == "" ]] ; then
-    echo "Set BOSH_LITE_CF_ADMIN_PASSWORD to a generated password before running"
+    >&2 echo "Set BOSH_LITE_CF_ADMIN_PASSWORD to a generated password before running"
     exit 1
 fi
 

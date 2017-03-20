@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ $# != 1 ]] ; then
-    echo "Usage: $0 <client id>"
+    >&2 echo "Usage: $0 <client id>"
     exit -1
 fi
 

@@ -15,7 +15,7 @@ case $FLAVOR in
     AWS_DIR=/opt/aws/bin
     ;;
 *)
-    echo "Unknown Linux flavor $FLAVOR"
+    >&2 echo "Unknown Linux flavor $FLAVOR"
     exit -1
     ;;
 esac

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ $# != 2 ]] ; then
-    echo "Usage: $0 <file> <count>"
+    >&2 echo "Usage: $0 <file> <count>"
     exit -1
 fi
 
@@ -11,8 +11,8 @@ FILE=$1
 COUNT=$2
 
 if [[ ! -f $FILE ]] ; then
-    echo "$FILE not found"
-    echo "Usage: $0 <file> <count>"
+    >&2 echo "$FILE not found"
+    >&2 echo "Usage: $0 <file> <count>"
     exit -2
 fi
 

@@ -21,7 +21,7 @@ wait-for-stack-completion() {
             break
         fi
         if [[ $STATUS != "CREATE_IN_PROGRESS" && $STATUS != "UPDATE_IN_PROGRESS" ]] ; then
-            echo "Creating/updating stack returned $STATUS"
+            >&2 echo "Creating/updating stack returned $STATUS"
             exit -1
         fi
         sleep 10
@@ -38,7 +38,7 @@ delete-stack() {
             break
         fi
         if [[ $STATUS != "DELETE_IN_PROGRESS" ]] ; then
-            echo "Deleting stack returned $STATUS"
+            >&2 echo "Deleting stack returned $STATUS"
             exit -1
         fi
         sleep 10

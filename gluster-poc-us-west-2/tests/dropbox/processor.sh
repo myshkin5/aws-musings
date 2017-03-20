@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ $# != 3 ]] ; then
-    echo "Usage: $0 <client id> <consume queue> <produce queue>"
+    >&2 echo "Usage: $0 <client id> <consume queue> <produce queue>"
     exit -1
 fi
 

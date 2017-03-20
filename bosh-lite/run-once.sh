@@ -53,14 +53,14 @@ case "$1" in
         do_start
         ;;
     restart|reload|force-reload)
-        echo "Error: argument '$1' not supported" >&2
+        >&2 echo "Error: argument '$1' not supported"
         exit 3
         ;;
     stop)
         # No-op
         ;;
     *)
-        echo "Usage: $0 start|stop" >&2
+        >&2 echo "Usage: $0 start|stop"
         exit 3
         ;;
 esac
