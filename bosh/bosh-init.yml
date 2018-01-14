@@ -50,9 +50,6 @@
       Description: The id of the VPC in which the resources will be created.
 
   Mappings:
-    AZRegionMap:
-      us-east-1: { a: us-east-1a, b: us-east-1b, c: us-east-1c }
-      us-west-2: { a: us-west-2a, b: us-west-2b, c: us-west-2c }
     AMIRegionMap:
       us-east-1: { standard: ami-6edd3078 }
       us-west-2: { standard: ami-7c803d1c }
@@ -132,7 +129,7 @@
               "source /tmp/bootstrap.sh\n",
               "aws-bootstrap\n",
 
-              "export AVAILABILITY_ZONE=\"", { "Fn::FindInMap": [ AZRegionMap, { Ref: "AWS::Region" }, a ] }, "\"\n",
+              "export AVAILABILITY_ZONE=\"", { "Fn::Select": [ "0", { "Fn::GetAZs" } ] }, "\"\n",
               "export AWS_ACCESS_KEY_ID=\"", { Ref: AWSAccessKeyId }, "\"\n",
               "export AWS_SECRET_ACCESS_KEY=\"", { Ref: AWSSecretAccessKey }, "\"\n",
               "export MANAGEMENT_THREE_OCTET_CIDR_BLOCK=\"", { Ref: ManagementThreeOctetCIDRBlock }, "\"\n",

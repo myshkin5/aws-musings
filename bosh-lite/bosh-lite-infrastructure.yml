@@ -33,17 +33,12 @@
       Type: AWS::EC2::VPC::Id
       Description: The id of the VPC in which the resources will be created.
 
-  Mappings:
-    AZRegionMap:
-      us-east-1: { a: us-east-1a, b: us-east-1b, c: us-east-1c }
-      us-west-2: { a: us-west-2a, b: us-west-2b, c: us-west-2c }
-
   Resources:
     BOSHLitePublicSubnet:
       Type: AWS::EC2::Subnet
       Properties:
         CidrBlock: { "Fn::Join": [ ., [ { Ref: BOSHLitePublicThreeOctetCIDRBlock }, 0/24 ] ] }
-        AvailabilityZone: { "Fn::FindInMap": [ AZRegionMap, { Ref: "AWS::Region" }, a] }
+        AvailabilityZone: { "Fn::Select" : [ "0", { "Fn::GetAZs" : "" } ] }
         VpcId: { Ref: VPCId }
         Tags:
           -
@@ -53,7 +48,7 @@
       Type: AWS::EC2::Subnet
       Properties:
         CidrBlock: { "Fn::Join": [ ., [ { Ref: BOSHLitePrivateThreeOctetCIDRBlock }, 0/24 ] ] }
-        AvailabilityZone: { "Fn::FindInMap": [ AZRegionMap, { Ref: "AWS::Region" }, a] }
+        AvailabilityZone: { "Fn::Select" : [ "0", { "Fn::GetAZs" : "" } ] }
         VpcId: { Ref: VPCId }
         Tags:
           -

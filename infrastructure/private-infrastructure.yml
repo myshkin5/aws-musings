@@ -23,11 +23,6 @@
       Description: The VPN gateway to which route tables will be connected via route propagation. Optional, no
         propagation occurs if not specified.
 
-  Mappings:
-    AZRegionMap:
-      us-east-1: { a: us-east-1a, b: us-east-1b, c: us-east-1c }
-      us-west-2: { a: us-west-2a, b: us-west-2b, c: us-west-2c }
-
   Conditions:
     VPNGatewayIdDefined: { "Fn::Not": [ { "Fn::Equals": [ { Ref: VPNGatewayId }, "" ] } ] }
 
@@ -36,7 +31,7 @@
       Type: AWS::EC2::Subnet
       Properties:
         CidrBlock: { "Fn::Join": [ ., [ 10, { Ref: SecondOctet }, 50.0/24 ] ] }
-        AvailabilityZone: { "Fn::FindInMap": [ AZRegionMap, { Ref: "AWS::Region" }, a ] }
+        AvailabilityZone: { "Fn::Select" : [ "0", { "Fn::GetAZs" : "" } ] }
         VpcId: { Ref: VPCId }
         Tags:
         - Key: Name
@@ -46,7 +41,7 @@
       Type: AWS::EC2::Subnet
       Properties:
         CidrBlock: { "Fn::Join": [ ., [ 10, { Ref: SecondOctet }, 51.0/24 ] ] }
-        AvailabilityZone: { "Fn::FindInMap": [ AZRegionMap, { Ref: "AWS::Region" }, b ] }
+        AvailabilityZone: { "Fn::Select" : [ "1", { "Fn::GetAZs" : "" } ] }
         VpcId: { Ref: VPCId }
         Tags:
         - Key: Name
@@ -56,7 +51,7 @@
       Type: AWS::EC2::Subnet
       Properties:
         CidrBlock: { "Fn::Join": [ ., [ 10, { Ref: SecondOctet }, 52.0/24 ] ] }
-        AvailabilityZone: { "Fn::FindInMap": [ AZRegionMap, { Ref: "AWS::Region" }, c ] }
+        AvailabilityZone: { "Fn::Select" : [ "2", { "Fn::GetAZs" : "" } ] }
         VpcId: { Ref: VPCId }
         Tags:
         - Key: Name
