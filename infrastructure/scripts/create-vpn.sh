@@ -7,7 +7,7 @@ source $(dirname $0)/setenv.sh $@
 STACK_NAME=$STACK_PREFIX-vpn
 
 if [[ $BGP_AS_NUMBER == "" ]] ; then
-    BGP_AS_NUMBER=$(cat $(dirname $0)/../vpn.yml | shyaml get-value Parameters.BGPASNumber.Default)
+    BGP_AS_NUMBER=$(yq r $(dirname $0)/../vpn.yml Parameters.BGPASNumber.Default)
 fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \

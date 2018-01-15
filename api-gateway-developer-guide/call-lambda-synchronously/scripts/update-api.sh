@@ -9,8 +9,7 @@ source $PROJECT_DIR/scripts/cf-utils.sh $@
 STACK_NAME=$STACK_PREFIX-api-gateway-with-lambda
 
 if [[ $LAMBDA_IAM_ROLE == "" ]] ; then
-    LAMBDA_IAM_ROLE=$(cat $(dirname $0)/../api-gateway-with-lambda.yml \
-        | shyaml get-value Parameters.BOSHLiteInstanceName.Default)
+    LAMBDA_IAM_ROLE=$(yq r $(dirname $0)/../api-gateway-with-lambda.yml Parameters.BOSHLiteInstanceName.Default)
 fi
 
 aws cloudformation update-stack --stack-name $STACK_NAME \

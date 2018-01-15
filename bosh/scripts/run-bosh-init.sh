@@ -10,16 +10,16 @@ if [[ $DNS_ZONE == "" ]] ; then
     DNS_ZONE=dev
 fi
 if [[ $FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE == "" ]] ; then
-    FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE=$(cat $(dirname $0)/../../infrastructure/public-infrastructure.yml \
-        | shyaml get-value Parameters.FullyQualifiedInternalParentDNSZone.Default)
+    FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE=$(yq r $(dirname $0)/../../infrastructure/public-infrastructure.yml \
+        Parameters.FullyQualifiedInternalParentDNSZone.Default)
 fi
 if [[ $INTERNAL_KEY_NAME == "" ]] ; then
-    INTERNAL_KEY_NAME=$(cat $(dirname $0)/../../infrastructure/public-infrastructure.yml \
-        | shyaml get-value Parameters.InternalKeyName.Default)
+    INTERNAL_KEY_NAME=$(yq r $(dirname $0)/../../infrastructure/public-infrastructure.yml \
+        Parameters.InternalKeyName.Default)
 fi
 if [[ $MANAGEMENT_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
-    MANAGEMENT_THREE_OCTET_CIDR_BLOCK=$(cat $(dirname $0)/../bosh-infrastructure.yml \
-        | shyaml get-value Parameters.ManagementThreeOctetCIDRBlock.Default)
+    MANAGEMENT_THREE_OCTET_CIDR_BLOCK=$(yq r $(dirname $0)/../bosh-infrastructure.yml \
+        Parameters.ManagementThreeOctetCIDRBlock.Default)
 fi
 if [[ $AWS_ACCESS_KEY_ID == "" ]] ; then
     >&2 echo "ERROR: AWS_ACCESS_KEY_ID must be set to an AWS access key id"

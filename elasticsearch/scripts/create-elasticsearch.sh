@@ -7,19 +7,17 @@ PROJECT_DIR=$(dirname $0)/../..
 source $PROJECT_DIR/scripts/cf-utils.sh $@
 
 if [[ $ELASTICSEARCH_INSTANCE_NAME == "" ]] ; then
-    ELASTICSEARCH_INSTANCE_NAME=$(cat $(dirname $0)/../elasticsearch.yml \
-        | shyaml get-value Parameters.ElasticsearchInstanceName.Default)
+    ELASTICSEARCH_INSTANCE_NAME=$(yq r $(dirname $0)/../elasticsearch.yml Parameters.ElasticsearchInstanceName.Default)
 fi
 if [[ $DNS_ZONE == "" ]] ; then
     DNS_ZONE=dev
 fi
 if [[ $FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE == "" ]] ; then
-    FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE=$(cat $PROJECT_DIR/infrastructure/public-infrastructure.yml \
-        | shyaml get-value Parameters.FullyQualifiedInternalParentDNSZone.Default)
+    FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE=$(yq r $PROJECT_DIR/infrastructure/public-infrastructure.yml \
+        Parameters.FullyQualifiedInternalParentDNSZone.Default)
 fi
 if [[ $INTERNAL_KEY_NAME == "" ]] ; then
-    INTERNAL_KEY_NAME=$(cat $PROJECT_DIR/infrastructure/public-infrastructure.yml \
-        | shyaml get-value Parameters.InternalKeyName.Default)
+    INTERNAL_KEY_NAME=$(yq r $PROJECT_DIR/infrastructure/public-infrastructure.yml Parameters.InternalKeyName.Default)
 fi
 if [[ $ELASTICSEARCH_IMAGE_ID == "" ]] ; then
     ELASTICSEARCH_IMAGE_ID=ami-6edd3078

@@ -9,16 +9,16 @@ source $PROJECT_DIR/scripts/cf-utils.sh $@
 STACK_NAME=$STACK_PREFIX-bosh-lite-infrastructure
 
 if [[ $BOSH_LITE_AVAILABILITY_ZONE == "" ]] ; then
-    BOSH_LITE_AVAILABILITY_ZONE=$(cat $(dirname $0)/../bosh-lite-infrastructure.yml \
-        | shyaml get-value Parameters.BOSHLiteAvailabilityZone.Default)
+    BOSH_LITE_AVAILABILITY_ZONE=$(yq r $(dirname $0)/../bosh-lite-infrastructure.yml \
+        Parameters.BOSHLiteAvailabilityZone.Default)
 fi
 if [[ $BOSH_LITE_PUBLIC_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
-    BOSH_LITE_PUBLIC_THREE_OCTET_CIDR_BLOCK=$(cat $(dirname $0)/../bosh-lite-infrastructure.yml \
-        | shyaml get-value Parameters.BOSHLitePublicThreeOctetCIDRBlock.Default)
+    BOSH_LITE_PUBLIC_THREE_OCTET_CIDR_BLOCK=$(yq r $(dirname $0)/../bosh-lite-infrastructure.yml \
+        Parameters.BOSHLitePublicThreeOctetCIDRBlock.Default)
 fi
 if [[ $BOSH_LITE_PRIVATE_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
-    BOSH_LITE_PRIVATE_THREE_OCTET_CIDR_BLOCK=$(cat $(dirname $0)/../bosh-lite-infrastructure.yml \
-        | shyaml get-value Parameters.BOSHLitePrivateThreeOctetCIDRBlock.Default)
+    BOSH_LITE_PRIVATE_THREE_OCTET_CIDR_BLOCK=$(yq r $(dirname $0)/../bosh-lite-infrastructure.yml \
+        Parameters.BOSHLitePrivateThreeOctetCIDRBlock.Default)
 fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \

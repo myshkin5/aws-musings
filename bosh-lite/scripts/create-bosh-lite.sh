@@ -7,19 +7,17 @@ PROJECT_DIR=$(dirname $0)/../..
 source $PROJECT_DIR/scripts/cf-utils.sh $@
 
 if [[ $BOSH_LITE_INSTANCE_NAME == "" ]] ; then
-    BOSH_LITE_INSTANCE_NAME=$(cat $(dirname $0)/../bosh-lite.yml \
-        | shyaml get-value Parameters.BOSHLiteInstanceName.Default)
+    BOSH_LITE_INSTANCE_NAME=$(yq r $(dirname $0)/../bosh-lite.yml Parameters.BOSHLiteInstanceName.Default)
 fi
 if [[ $DNS_ZONE == "" ]] ; then
     DNS_ZONE=dev
 fi
 if [[ $FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE == "" ]] ; then
-    FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE=$(cat $PROJECT_DIR/infrastructure/public-infrastructure.yml \
-        | shyaml get-value Parameters.FullyQualifiedInternalParentDNSZone.Default)
+    FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE=$(yq r $PROJECT_DIR/infrastructure/public-infrastructure.yml \
+        Parameters.FullyQualifiedInternalParentDNSZone.Default)
 fi
 if [[ $INTERNAL_KEY_NAME == "" ]] ; then
-    INTERNAL_KEY_NAME=$(cat $PROJECT_DIR/infrastructure/public-infrastructure.yml \
-        | shyaml get-value Parameters.InternalKeyName.Default)
+    INTERNAL_KEY_NAME=$(yq r $PROJECT_DIR/infrastructure/public-infrastructure.yml Parameters.InternalKeyName.Default)
 fi
 if [[ $BOSH_LITE_IMAGE_ID == "" ]] ; then
     BOSH_LITE_IMAGE_ID=ami-22839a48

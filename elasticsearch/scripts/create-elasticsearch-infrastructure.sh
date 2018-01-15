@@ -9,12 +9,12 @@ source $PROJECT_DIR/scripts/cf-utils.sh $@
 STACK_NAME=$STACK_PREFIX-elasticsearch-infrastructure
 
 if [[ $ELASTICSEARCH_AVAILABILITY_ZONE == "" ]] ; then
-    ELASTICSEARCH_AVAILABILITY_ZONE=$(cat $(dirname $0)/../elasticsearch-infrastructure.yml \
-        | shyaml get-value Parameters.ElasticsearchAvailabilityZone.Default)
+    ELASTICSEARCH_AVAILABILITY_ZONE=$(yq r $(dirname $0)/../elasticsearch-infrastructure.yml \
+        Parameters.ElasticsearchAvailabilityZone.Default)
 fi
 if [[ $ELASTICSEARCH_PRIVATE_THREE_OCTET_CIDR_BLOCK == "" ]] ; then
-    ELASTICSEARCH_PRIVATE_THREE_OCTET_CIDR_BLOCK=$(cat $(dirname $0)/../elasticsearch-infrastructure.yml \
-        | shyaml get-value Parameters.ElasticsearchPrivateThreeOctetCIDRBlock.Default)
+    ELASTICSEARCH_PRIVATE_THREE_OCTET_CIDR_BLOCK=$(yq r $(dirname $0)/../elasticsearch-infrastructure.yml \
+        Parameters.ElasticsearchPrivateThreeOctetCIDRBlock.Default)
 fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \

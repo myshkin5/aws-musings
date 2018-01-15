@@ -7,8 +7,7 @@ source $(dirname $0)/setenv.sh $@
 STACK_NAME=$STACK_PREFIX-public
 
 if [[ $JUMP_BOX_KEY_NAME == "" ]] ; then
-    JUMP_BOX_KEY_NAME=$(cat $(dirname $0)/../public-infrastructure.yml \
-        | shyaml get-value Parameters.JumpBoxKeyName.Default)
+    JUMP_BOX_KEY_NAME=$(yq r $(dirname $0)/../public-infrastructure.yml Parameters.JumpBoxKeyName.Default)
 fi
 if [[ $JUMP_BOX_SSH_CIDR_IP == "" ]] ; then
     JUMP_BOX_SSH_CIDR_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)/32
