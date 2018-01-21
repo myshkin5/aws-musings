@@ -57,13 +57,10 @@
 
   Mappings:
     AMIRegionMap:
-      # standard search: ubuntu/images/hvm-ssd/ubuntu Root device type: ebs Virtualization type: hvm
+      # standard search: "ubuntu/images/hvm-ssd/ubuntu <year>" Root device type: ebs Virtualization type: hvm
       # nat search: amzn-ami-vpc-nat-hvm Root device type: ebs Virtualization type: hvm
-      us-east-1: { standard: ami-6edd3078, nat: ami-dd3dd7cb }
-      us-west-2: { standard: ami-7c803d1c, nat: ami-3b6fd05b }
-    AZRegionMap:
-      us-east-1: { a: us-east-1a, b: us-east-1b, c: us-east-1c }
-      us-west-2: { a: us-west-2a, b: us-west-2b, c: us-west-2c }
+      us-east-1: { standard: ami-c4bbe2be, nat: ami-3e83d444 }
+      us-west-2: { standard: ami-de1faba6, nat: ami-0541ea7d }
 
   Conditions:
     VPNGatewayIdDefined: !Not [ !Equals [ !Ref VPNGatewayId, "" ] ]

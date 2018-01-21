@@ -110,7 +110,7 @@
             ] ]
       CreationPolicy:
         ResourceSignal:
-          Timeout: PT10M
+          Timeout: PT20M
 
     JumpBoxEIPAssociation:
       Type: AWS::EC2::EIPAssociation
