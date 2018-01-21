@@ -42,6 +42,10 @@
     JumpBoxSSHCIDRIP:
       Type: String
       Description: Range of IP addresses that will be able to connect to the jump box via SSH.
+    JumpBoxInstanceType:
+      Type: String
+      Default: t2.nano
+      Description: The instance type of the jump box.
     SecondOctet:
       Type: Number
       MinValue: 0
@@ -234,6 +238,7 @@
           KeyName: !Ref JumpBoxKeyName
           SecurityGroupId: !Ref JumpBoxSecurityGroup
           SubnetId: !Ref PublicSubnetA
+          InstanceType: !Ref JumpBoxInstanceType
     NATInstanceStack:
       Type: AWS::CloudFormation::Stack
       Properties:

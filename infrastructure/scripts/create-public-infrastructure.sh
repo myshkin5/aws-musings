@@ -14,6 +14,9 @@ if [[ $JUMP_BOX_SSH_CIDR_IP == "" ]] ; then
     >&2 echo "WARNING: ssh to the jump box will only be accessible from the current public IP address ($JUMP_BOX_SSH_CIDR_IP)."
     >&2 echo "  Set JUMP_BOX_SSH_CIDR_IP to restrict access."
 fi
+if [[ $JUMP_BOX_INSTANCE_TYPE == "" ]] ; then
+    JUMP_BOX_INSTANCE_TYPE=$(yq r $(dirname $0)/../public-infrastructure.yml Parameters.JumpBoxInstanceType.Default)
+fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
     --template-url $AWS_MUSINGS_S3_URL/infrastructure/public-infrastructure.yml \
@@ -25,6 +28,7 @@ aws cloudformation create-stack --stack-name $STACK_NAME \
         ParameterKey=JumpBoxEIPAddress,ParameterValue=$JUMP_BOX_EIP_ADDRESS \
         ParameterKey=JumpBoxKeyName,ParameterValue=$JUMP_BOX_KEY_NAME \
         ParameterKey=JumpBoxSSHCIDRIP,ParameterValue=$JUMP_BOX_SSH_CIDR_IP \
+        ParameterKey=JumpBoxInstanceType,ParameterValue=$JUMP_BOX_INSTANCE_TYPE \
         ParameterKey=SecondOctet,ParameterValue=$SECOND_OCTET \
         ParameterKey=VPCId,ParameterValue=$VPC_ID \
         ParameterKey=VPNGatewayId,ParameterValue=$VPN_GATEWAY_ID \

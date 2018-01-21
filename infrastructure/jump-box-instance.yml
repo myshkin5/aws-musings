@@ -40,6 +40,9 @@
     SubnetId:
       Type: AWS::EC2::Subnet::Id
       Description: The id of the subnet where the server will be added.
+    InstanceType:
+      Type: String
+      Description: The instance type of the jump box.
 
   Conditions:
     EIPAddressDefined: !Not [ !Equals [ !Ref EIPAddress, "" ] ]
@@ -74,7 +77,7 @@
       Properties:
         DisableApiTermination: false
         ImageId: !Ref ImageId
-        InstanceType: t2.nano
+        InstanceType: !Ref InstanceType
         KeyName: !Ref KeyName
         Monitoring: false
         Tags:
