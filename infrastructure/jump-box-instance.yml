@@ -42,9 +42,8 @@
       Description: The id of the subnet where the server will be added.
 
   Conditions:
-    EIPAddressDefined: { "Fn::Not": [ { "Fn::Equals": [ { Ref: EIPAddress }, "" ] } ] }
-    FullyQualifiedExternalParentDNSZoneDefined: { "Fn::Not": [ { "Fn::Equals": [
-        { Ref: FullyQualifiedExternalParentDNSZone }, "" ] } ] }
+    EIPAddressDefined: !Not [ !Equals [ !Ref EIPAddress, "" ] ]
+    FullyQualifiedExternalParentDNSZoneDefined: !Not [ !Equals [ !Ref FullyQualifiedExternalParentDNSZone, "" ] ]
 
   Resources:
     JumpBoxInstance:
@@ -54,53 +53,52 @@
           config:
             files:
               /etc/cfn/cfn-hup.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/cfn-hup.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-hup.conf ] ]
                 context:
-                  STACK_ID: { Ref: "AWS::StackId" }
-                  REGION: { Ref: "AWS::Region" }
+                  STACK_ID: !Ref "AWS::StackId"
+                  REGION: !Ref "AWS::Region"
                 mode: 000400
                 owner: root
                 group: root
               /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/cfn-auto-reloader.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-auto-reloader.conf ] ]
                 context:
-                  STACK_ID: { Ref: "AWS::StackId" }
-                  REGION: { Ref: "AWS::Region" }
+                  STACK_ID: !Ref "AWS::StackId"
+                  REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: JumpBoxInstance
 
               /etc/dhcp/dhclient.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/dhclient.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/dhclient.conf ] ]
                 context:
-                  FQDN: { "Fn::Join": [ "", [ jump-box., { Ref: DNSZone }, .,
-                    { Ref: FullyQualifiedInternalParentDNSZone } ] ] }
+                  FQDN: !Join [ "", [ jump-box., !Ref DNSZone, ., !Ref FullyQualifiedInternalParentDNSZone ] ]
       Properties:
         DisableApiTermination: false
-        ImageId: { Ref: ImageId }
+        ImageId: !Ref ImageId
         InstanceType: t2.nano
-        KeyName: { Ref: KeyName }
+        KeyName: !Ref KeyName
         Monitoring: false
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: DNSZone }, jump-box ] ] }
+          Value: !Join [ -, [ !Ref DNSZone, jump-box ] ]
         NetworkInterfaces:
         - AssociatePublicIpAddress: true
           DeleteOnTermination: true
           Description: Primary network interface
           DeviceIndex: 0
-          SubnetId: { Ref: SubnetId }
-          GroupSet: [ { Ref: SecurityGroupId } ]
+          SubnetId: !Ref SubnetId
+          GroupSet: [ !Ref SecurityGroupId ]
         UserData:
-          "Fn::Base64":
-            "Fn::Join": [ "", [
+          Fn::Base64:
+            !Join [ "", [
               "#!/bin/bash\n",
 
               "set -e -x\n",
 
               "export HOSTNAME=jump-box\n",
-              "export STACK_NAME=\"", { Ref: "AWS::StackName" }, "\"\n",
+              "export STACK_NAME=\"", !Ref "AWS::StackName", "\"\n",
               "export RESOURCE=JumpBoxInstance\n",
-              "export REGION=\"", { Ref: "AWS::Region" }, "\"\n",
-              "export AWS_MUSINGS_S3_URL=\"", { Ref: AWSMusingsS3URL }, "\"\n",
+              "export REGION=\"", !Ref "AWS::Region", "\"\n",
+              "export AWS_MUSINGS_S3_URL=\"", !Ref AWSMusingsS3URL, "\"\n",
 
               "curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh\n",
               "source /tmp/bootstrap.sh\n",
@@ -118,18 +116,18 @@
       Type: AWS::EC2::EIPAssociation
       Condition: EIPAddressDefined
       Properties:
-        EIP: { Ref: EIPAddress }
-        InstanceId: { Ref: JumpBoxInstance }
+        EIP: !Ref EIPAddress
+        InstanceId: !Ref JumpBoxInstance
       DependsOn: JumpBoxInstance
 
     JumpBoxRecordSet:
       Type: AWS::Route53::RecordSet
       Condition: FullyQualifiedExternalParentDNSZoneDefined
       Properties:
-        HostedZoneName: { "Fn::Join": [ "", [ { Ref: FullyQualifiedExternalParentDNSZone }, . ] ] }
-        Name: { "Fn::Join": [ ., [ jump-box, { Ref: DNSZone }, { Ref: FullyQualifiedExternalParentDNSZone }, "" ] ] }
+        HostedZoneName: !Join [ "", [ !Ref FullyQualifiedExternalParentDNSZone, . ] ]
+        Name: !Join [ ., [ jump-box, !Ref DNSZone, !Ref FullyQualifiedExternalParentDNSZone, "" ] ]
         ResourceRecords:
-        - { "Fn::GetAtt": [ JumpBoxInstance, PublicIp ] }
+        - !GetAtt JumpBoxInstance.PublicIp
         TTL: 300
         Type: A
       DependsOn: JumpBoxInstance
@@ -137,4 +135,4 @@
   Outputs:
     JumpBoxPublicIPAddress:
       Description: The public IP address of the newly created jump box.
-      Value: { "Fn::GetAtt": [ JumpBoxInstance, PublicIp ] }
+      Value: !GetAtt JumpBoxInstance.PublicIp

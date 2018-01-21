@@ -20,11 +20,11 @@
       Type: AWS::EC2::CustomerGateway
       Properties:
         Type: ipsec.1
-        BgpAsn: { Ref: BGPASNumber }
-        IpAddress: { Ref: CustomerGatewayIPAddress }
+        BgpAsn: !Ref BGPASNumber
+        IpAddress: !Ref CustomerGatewayIPAddress
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, { Ref: "AWS::Region" }, cgw ] ] }
+          Value: !Join [ -, [ !Ref "AWS::StackName", !Ref "AWS::Region", cgw ] ]
 
     VPNGateway:
       Type: AWS::EC2::VPNGateway
@@ -32,32 +32,32 @@
         Type: ipsec.1
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, { Ref: "AWS::Region" }, vgw ] ] }
+          Value: !Join [ -, [ !Ref "AWS::StackName", !Ref "AWS::Region", vgw ] ]
 
     VPCGatewayAttachment:
       Type: AWS::EC2::VPCGatewayAttachment
       Properties:
-        VpcId: { Ref: VPCId }
-        VpnGatewayId: { Ref: VPNGateway }
+        VpcId: !Ref VPCId
+        VpnGatewayId: !Ref VPNGateway
 
     VPNConnection:
       Type: AWS::EC2::VPNConnection
       Properties:
         Type: ipsec.1
         StaticRoutesOnly: true
-        CustomerGatewayId: { Ref: CustomerGateway }
-        VpnGatewayId: { Ref: VPNGateway }
+        CustomerGatewayId: !Ref CustomerGateway
+        VpnGatewayId: !Ref VPNGateway
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, { Ref: "AWS::Region" }, vpn ] ] }
+          Value: !Join [ -, [ !Ref "AWS::StackName", !Ref "AWS::Region", vpn ] ]
 
     VPNConnectionRoute:
       Type: AWS::EC2::VPNConnectionRoute
       Properties:
         DestinationCidrBlock: 10.0.0.0/8
-        VpnConnectionId: { Ref: VPNConnection }
+        VpnConnectionId: !Ref VPNConnection
 
   Outputs:
     VPNGatewayId:
       Description: The VPN gateway to which route tables will be connected via route propagation.
-      Value: { Ref: VPNGateway }
+      Value: !Ref VPNGateway

@@ -59,10 +59,10 @@
       Type: AWS::EC2::SecurityGroup
       Properties:
         GroupDescription: MicroBOSH server security group
-        VpcId: { Ref: VPCId }
+        VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, server-sg ] ] }
+          Value: !Join [ -, [ !Ref "AWS::StackName", server-sg ] ]
         SecurityGroupIngress:
         - IpProtocol: -1
           CidrIp: 10.0.0.0/8
@@ -77,49 +77,48 @@
           config:
             files:
               /etc/cfn/cfn-hup.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/cfn-hup.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-hup.conf ] ]
                 context:
-                  STACK_ID: { Ref: "AWS::StackId" }
-                  REGION: { Ref: "AWS::Region" }
+                  STACK_ID: !Ref "AWS::StackId"
+                  REGION: !Ref "AWS::Region"
                 mode: 000400
                 owner: root
                 group: root
               /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/cfn-auto-reloader.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-auto-reloader.conf ] ]
                 context:
-                  STACK_ID: { Ref: "AWS::StackId" }
-                  REGION: { Ref: "AWS::Region" }
+                  STACK_ID: !Ref "AWS::StackId"
+                  REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: BOSHInitInstance
 
               /etc/dhcp/dhclient.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/dhclient.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/dhclient.conf ] ]
                 context:
-                  FQDN: { "Fn::Join": [ "", [ bosh-init., { Ref: DNSZone }, .,
-                    { Ref: FullyQualifiedInternalParentDNSZone } ] ] }
+                  FQDN: !Join [ "", [ bosh-init., !Ref DNSZone, ., !Ref FullyQualifiedInternalParentDNSZone ] ]
       Properties:
         DisableApiTermination: false
-        ImageId: { "Fn::FindInMap": [ AMIRegionMap, { Ref: "AWS::Region" }, standard ] }
+        ImageId: !FindInMap [ AMIRegionMap, !Ref "AWS::Region", standard ]
         InstanceType: t2.nano
-        KeyName: { Ref: InternalKeyName }
+        KeyName: !Ref InternalKeyName
         Monitoring: false
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: DNSZone }, bosh-init ] ] }
-        PrivateIpAddress: { "Fn::Join": [ ., [ { Ref: ManagementThreeOctetCIDRBlock }, 10 ] ] }
-        SubnetId: { Ref: ManagementSubnetId }
-        SecurityGroupIds: [ { Ref: BOSHInitSecurityGroup } ]
+          Value: !Join [ -, [ !Ref DNSZone, bosh-init ] ]
+        PrivateIpAddress: !Join [ ., [ !Ref ManagementThreeOctetCIDRBlock, 10 ] ]
+        SubnetId: !Ref ManagementSubnetId
+        SecurityGroupIds: [ !Ref BOSHInitSecurityGroup ]
         UserData:
-          "Fn::Base64":
-            "Fn::Join": [ "", [
+          Fn::Base64:
+            !Join [ "", [
               "#!/bin/bash\n",
 
               "set -e -x\n",
 
               "export HOSTNAME=bosh-init\n",
-              "export STACK_NAME=\"", { Ref: "AWS::StackName" }, "\"\n",
+              "export STACK_NAME=\"", !Ref "AWS::StackName", "\"\n",
               "export RESOURCE=BOSHInitInstance\n",
-              "export REGION=\"", { Ref: "AWS::Region" }, "\"\n",
-              "export AWS_MUSINGS_S3_URL=\"", { Ref: "AWSMusingsS3URL" }, "\"\n",
+              "export REGION=\"", !Ref "AWS::Region", "\"\n",
+              "export AWS_MUSINGS_S3_URL=\"", !Ref "AWSMusingsS3URL", "\"\n",
 
               "export EXTRA_PACKAGES=\"build-essential zlibc zlib1g-dev ruby ruby-dev openssl ",
                 "libxslt-dev libxml2-dev libssl-dev libreadline6 libreadline6-dev libyaml-dev ",
@@ -129,14 +128,14 @@
               "source /tmp/bootstrap.sh\n",
               "aws-bootstrap\n",
 
-              "export AVAILABILITY_ZONE=\"", { "Fn::Select": [ "0", { "Fn::GetAZs" } ] }, "\"\n",
-              "export AWS_ACCESS_KEY_ID=\"", { Ref: AWSAccessKeyId }, "\"\n",
-              "export AWS_SECRET_ACCESS_KEY=\"", { Ref: AWSSecretAccessKey }, "\"\n",
-              "export MANAGEMENT_THREE_OCTET_CIDR_BLOCK=\"", { Ref: ManagementThreeOctetCIDRBlock }, "\"\n",
-              "export BOSH_DIRECTOR_SECURITY_GROUP_ID=\"", { Ref: BOSHDirectorSecurityGroupId }, "\"\n",
-              "export PRIVATE_KEY=\"", { Ref: PrivateKey }, "\"\n",
-              "export STACK_PREFIX=\"", { Ref: StackPrefix }, "\"\n",
-              "export SUBNET_ID=\"", { Ref: ManagementSubnetId }, "\"\n",
+              "export AVAILABILITY_ZONE=\"", !Select [ "0", !GetAZs "" ], "\"\n",
+              "export AWS_ACCESS_KEY_ID=\"", !Ref AWSAccessKeyId, "\"\n",
+              "export AWS_SECRET_ACCESS_KEY=\"", !Ref AWSSecretAccessKey, "\"\n",
+              "export MANAGEMENT_THREE_OCTET_CIDR_BLOCK=\"", !Ref ManagementThreeOctetCIDRBlock, "\"\n",
+              "export BOSH_DIRECTOR_SECURITY_GROUP_ID=\"", !Ref BOSHDirectorSecurityGroupId, "\"\n",
+              "export PRIVATE_KEY=\"", !Ref PrivateKey, "\"\n",
+              "export STACK_PREFIX=\"", !Ref StackPrefix, "\"\n",
+              "export SUBNET_ID=\"", !Ref ManagementSubnetId, "\"\n",
 
               "mkdir -p /usr/local/bosh-init\n",
               "cd /usr/local/bosh-init\n",
@@ -175,4 +174,4 @@
   Outputs:
     BOSHInitPrivateIPAddress:
       Description: The private IP address of the newly created bosh init server.
-      Value: { "Fn::GetAtt": [ BOSHInitInstance, PrivateIp ] }
+      Value: !GetAtt BOSHInitInstance.PrivateIp

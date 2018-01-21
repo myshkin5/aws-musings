@@ -15,15 +15,15 @@
     VPC:
       Type: AWS::EC2::VPC
       Properties:
-        CidrBlock: { "Fn::Join": [ ., [ 10, { Ref: SecondOctet }, 0.0/16 ] ] }
+        CidrBlock: !Join [ ., [ 10, !Ref SecondOctet, 0.0/16 ] ]
         InstanceTenancy: default
         EnableDnsSupport: true
         EnableDnsHostnames: true
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, { Ref: "AWS::Region" }, vpc ] ] }
+          Value: !Join [ -, [ !Ref "AWS::StackName", !Ref "AWS::Region", vpc ] ]
 
   Outputs:
     VPCId:
       Description: The id of the VPC in which the resources will be created.
-      Value: { Ref: VPC }
+      Value: !Ref VPC

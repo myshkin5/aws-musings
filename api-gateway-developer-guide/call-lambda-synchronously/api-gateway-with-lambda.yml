@@ -17,16 +17,16 @@
         Description: "Returns {\"Hello\":\"World\"}"
         Runtime: nodejs
         Handler: index.handler
-        Role: { "Fn::Join": [ "", [ "arn:aws:iam::", { Ref: "AWS::AccountId" }, ":role/", { Ref: LambdaIAMRole } ] ] }
+        Role: !Join [ "", [ "arn:aws:iam::", !Ref "AWS::AccountId", ":role/", !Ref LambdaIAMRole ] ]
         Code:
-          ZipFile: { "Fn::Join": [ "\n", [
+          ZipFile: !Join [ "\n", [
             "'use strict';",
             "console.log('Loading event');",
 
             "exports.handler = function(event, context) {",
             "  console.log('\"Hello\":\"World\"');",
             "  context.done(null, {\"Hello\":\"World\"});  // SUCCESS with message",
-            "};" ] ] }
+            "};" ] ]
 
     GetHelloWithNameFunction:
       Type: AWS::Lambda::Function
@@ -35,9 +35,9 @@
         Description: "Returns {\"Hello\":\", a user-provided string, and \"}"
         Runtime: nodejs
         Handler: index.handler
-        Role: { "Fn::Join": [ "", [ "arn:aws:iam::", { Ref: "AWS::AccountId" }, ":role/", { Ref: LambdaIAMRole } ] ] }
+        Role: !Join [ "", [ "arn:aws:iam::", !Ref "AWS::AccountId", ":role/", !Ref LambdaIAMRole ] ]
         Code:
-          ZipFile: { "Fn::Join": [ "\n", [
+          ZipFile: !Join [ "\n", [
             "'use strict';",
             "console.log('Loading event');",
 
@@ -45,7 +45,7 @@
             "  var name = (event.name === undefined ? 'No-Name' : event.name);",
             "  console.log('\"Hello\":\"' + name + '\"');",
             "  context.done(null, {\"Hello\":name}); // SUCCESS with message",
-            "};" ] ] }
+            "};" ] ]
 
     MyDemoAPI:
       Type: AWS::ApiGateway::RestApi
@@ -56,9 +56,9 @@
     MyDemoResource:
       Type: AWS::ApiGateway::Resource
       Properties:
-        ParentId: { "Fn::GetAtt": [ MyDemoAPI, RootResourceId ] }
+        ParentId: !GetAtt MyDemoAPI.RootResourceId
         PathPart: mydemoresource
-        RestApiId: { Ref: MyDemoAPI }
+        RestApiId: !Ref MyDemoAPI
       DependsOn: [ MyDemoAPI ]
 
     GetHelloWorldGETMethod:
@@ -66,13 +66,13 @@
       Properties:
         HttpMethod: GET
         AuthorizationType: NONE
-        ResourceId: { Ref: MyDemoResource }
-        RestApiId: { Ref: MyDemoAPI }
+        ResourceId: !Ref MyDemoResource
+        RestApiId: !Ref MyDemoAPI
         Integration:
           Type: AWS
-          Uri: { "Fn::Join": [ "", [ "arn:aws:apigateway:", { Ref: "AWS::Region" },
-            ":lambda:path/2015-03-31/functions/arn:aws:lambda:", { Ref: "AWS::Region" }, ":", { Ref: "AWS::AccountId" },
-            ":function:GetHelloWorld/invocations" ] ] }
+          Uri: !Join [ "", [ "arn:aws:apigateway:", !Ref "AWS::Region",
+            ":lambda:path/2015-03-31/functions/arn:aws:lambda:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId",
+            ":function:GetHelloWorld/invocations" ] ]
           IntegrationHttpMethod: GET
           IntegrationResponses:
           - StatusCode: 200
@@ -88,10 +88,10 @@
       Type: AWS::Lambda::Permission
       Properties:
         Action: lambda:InvokeFunction
-        FunctionName: { "Fn::GetAtt": [ GetHelloWorldFunction, Arn ] }
+        FunctionName: !GetAtt GetHelloWorldFunction.Arn
         Principal: apigateway.amazonaws.com
-        SourceArn: { "Fn::Join": [ "", [ "arn:aws:execute-api:", { Ref: "AWS::Region" }, ":", { Ref: "AWS::AccountId" },
-          ":", { Ref: MyDemoAPI }, "/*/GET/mydemoresource" ] ] }
+        SourceArn: !Join [ "", [ "arn:aws:execute-api:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId",
+          ":", !Ref MyDemoAPI, "/*/GET/mydemoresource" ] ]
       DependsOn: [ GetHelloWorldGETMethod ]
 
     GetHelloWithNamePOSTMethod:
@@ -99,13 +99,13 @@
       Properties:
         HttpMethod: POST
         AuthorizationType: NONE
-        ResourceId: { Ref: MyDemoResource }
-        RestApiId: { Ref: MyDemoAPI }
+        ResourceId: !Ref MyDemoResource
+        RestApiId: !Ref MyDemoAPI
         Integration:
           Type: AWS
-          Uri: { "Fn::Join": [ "", [ "arn:aws:apigateway:", { Ref: "AWS::Region" },
-            ":lambda:path/2015-03-31/functions/arn:aws:lambda:", { Ref: "AWS::Region" }, ":", { Ref: "AWS::AccountId" },
-            ":function:GetHelloWithName/invocations" ] ] }
+          Uri: !Join [ "", [ "arn:aws:apigateway:", !Ref "AWS::Region",
+            ":lambda:path/2015-03-31/functions/arn:aws:lambda:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId",
+            ":function:GetHelloWithName/invocations" ] ]
           IntegrationHttpMethod: GET
           IntegrationResponses:
           - StatusCode: 200
@@ -121,10 +121,10 @@
       Type: AWS::Lambda::Permission
       Properties:
         Action: lambda:InvokeFunction
-        FunctionName: { "Fn::GetAtt": [ GetHelloWithNameFunction, Arn ] }
+        FunctionName: !GetAtt GetHelloWithNameFunction.Arn
         Principal: apigateway.amazonaws.com
-        SourceArn: { "Fn::Join": [ "", [ "arn:aws:execute-api:", { Ref: "AWS::Region" }, ":", { Ref: "AWS::AccountId" },
-          ":", { Ref: MyDemoAPI }, "/*/POST/mydemoresource" ] ] }
+        SourceArn: !Join [ "", [ "arn:aws:execute-api:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId",
+          ":", !Ref MyDemoAPI, "/*/POST/mydemoresource" ] ]
       DependsOn: [ GetHelloWithNamePOSTMethod ]
 
     # TODO: Because the previous two TODOs left the API in a bad state this deployment doesn't work. Moving the
@@ -132,7 +132,7 @@
     MyDemoDeployment:
       Type: AWS::ApiGateway::Deployment
       Properties:
-        RestApiId: { Ref: MyDemoAPI }
+        RestApiId: !Ref MyDemoAPI
         Description: Calling Lambda functions walkthrough
         StageName: test
         StageDescription:

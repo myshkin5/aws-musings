@@ -37,55 +37,55 @@
     BOSHLitePublicSubnet:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: { "Fn::Join": [ ., [ { Ref: BOSHLitePublicThreeOctetCIDRBlock }, 0/24 ] ] }
-        AvailabilityZone: { "Fn::Select" : [ "0", { "Fn::GetAZs" : "" } ] }
-        VpcId: { Ref: VPCId }
+        CidrBlock: !Join [ ., [ !Ref BOSHLitePublicThreeOctetCIDRBlock, 0/24 ] ]
+        AvailabilityZone: !Select [ "0", !GetAZs "" ]
+        VpcId: !Ref VPCId
         Tags:
           -
             Key: Name
-            Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, public-subnet ] ] }
+            Value: !Join [ -, [ !Ref "AWS::StackName", public-subnet ] ]
     BOSHLitePrivateSubnet:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: { "Fn::Join": [ ., [ { Ref: BOSHLitePrivateThreeOctetCIDRBlock }, 0/24 ] ] }
-        AvailabilityZone: { "Fn::Select" : [ "0", { "Fn::GetAZs" : "" } ] }
-        VpcId: { Ref: VPCId }
+        CidrBlock: !Join [ ., [ !Ref BOSHLitePrivateThreeOctetCIDRBlock, 0/24 ] ]
+        AvailabilityZone: !Select [ "0", !GetAZs "" ]
+        VpcId: !Ref VPCId
         Tags:
           -
             Key: Name
-            Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, private-subnet ] ] }
+            Value: !Join [ -, [ !Ref "AWS::StackName", private-subnet ] ]
 
     BOSHLitePublicSubnetRouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
       Properties:
-        RouteTableId: { Ref: PublicRouteTableId }
-        SubnetId: { Ref: BOSHLitePublicSubnet }
+        RouteTableId: !Ref PublicRouteTableId
+        SubnetId: !Ref BOSHLitePublicSubnet
     BOSHLitePrivateSubnetRouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
       Properties:
-        RouteTableId: { Ref: PrivateRouteTableId }
-        SubnetId: { Ref: BOSHLitePrivateSubnet }
+        RouteTableId: !Ref PrivateRouteTableId
+        SubnetId: !Ref BOSHLitePrivateSubnet
 
     BOSHLitePublicSubnetNetworkACLAssociation:
       Type: AWS::EC2::SubnetNetworkAclAssociation
       Properties:
-        NetworkAclId: { Ref: NetworkACLId }
-        SubnetId: { Ref: BOSHLitePublicSubnet }
+        NetworkAclId: !Ref NetworkACLId
+        SubnetId: !Ref BOSHLitePublicSubnet
     BOSHLitePrivateSubnetNetworkACLAssociation:
       Type: AWS::EC2::SubnetNetworkAclAssociation
       Properties:
-        NetworkAclId: { Ref: NetworkACLId }
-        SubnetId: { Ref: BOSHLitePrivateSubnet }
+        NetworkAclId: !Ref NetworkACLId
+        SubnetId: !Ref BOSHLitePrivateSubnet
 
     BOSHLiteInstanceSecurityGroup:
       Type: AWS::EC2::SecurityGroup
       Properties:
         GroupDescription: bosh-lite instance security group
-        VpcId: { Ref: VPCId }
+        VpcId: !Ref VPCId
         Tags:
           -
             Key: Name
-            Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, instance-sg ] ] }
+            Value: !Join [ -, [ !Ref "AWS::StackName", instance-sg ] ]
         SecurityGroupIngress:
           -
             IpProtocol: -1
@@ -98,11 +98,11 @@
       Type: AWS::EC2::SecurityGroup
       Properties:
         GroupDescription: bosh-lite ELB security group
-        VpcId: { Ref: VPCId }
+        VpcId: !Ref VPCId
         Tags:
           -
             Key: Name
-            Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, elb-sg ] ] }
+            Value: !Join [ -, [ !Ref "AWS::StackName", elb-sg ] ]
         SecurityGroupIngress:
           -
             IpProtocol: tcp
@@ -117,13 +117,13 @@
   Outputs:
     BOSHLitePublicSubnetId:
       Description: The id of the bosh-lite public subnet.
-      Value: { Ref: BOSHLitePublicSubnet }
+      Value: !Ref BOSHLitePublicSubnet
     BOSHLitePrivateSubnetId:
       Description: The id of the bosh-lite private subnet.
-      Value: { Ref: BOSHLitePrivateSubnet }
+      Value: !Ref BOSHLitePrivateSubnet
     BOSHLiteInstanceSecurityGroupId:
       Description: The id of the bosh-lite instance security group.
-      Value: { Ref: BOSHLiteInstanceSecurityGroup }
+      Value: !Ref BOSHLiteInstanceSecurityGroup
     BOSHLiteELBSecurityGroupId:
       Description: The id of the bosh-lite ELB security group.
-      Value: { Ref: BOSHLiteELBSecurityGroup }
+      Value: !Ref BOSHLiteELBSecurityGroup

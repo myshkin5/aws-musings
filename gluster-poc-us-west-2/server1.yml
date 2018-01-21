@@ -35,32 +35,32 @@
           config:
             files:
               /etc/cfn/cfn-hup.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/cfn-hup.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-hup.conf ] ]
                 context:
-                  STACK_ID: { Ref: "AWS::StackId" }
-                  REGION: { Ref: "AWS::Region" }
+                  STACK_ID: !Ref "AWS::StackId"
+                  REGION: !Ref "AWS::Region"
                 mode: 000400
                 owner: root
                 group: root
               /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/cfn-auto-reloader.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-auto-reloader.conf ] ]
                 context:
-                  STACK_ID: { Ref: "AWS::StackId" }
-                  REGION: { Ref: "AWS::Region" }
+                  STACK_ID: !Ref "AWS::StackId"
+                  REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: Instance1
 
               /etc/dhcp/dhclient.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/dhclient.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/dhclient.conf ] ]
                 context:
-                  FQDN: { "Fn::Join": [ "", [ { Ref: NamePrefix }, 1., { Ref: Domain } ] ] }
+                  FQDN: !Join [ "", [ !Ref NamePrefix, 1., !Ref Domain ] ]
 
               /home/ec2-user/.bashrc:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/bashrc.sh ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/bashrc.sh ] ]
                 mode: 000644
                 owner: ec2-user
                 group: ec2-user
               /root/.bashrc:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/bashrc.sh ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/bashrc.sh ] ]
                 mode: 000644
                 owner: root
                 group: root
@@ -68,32 +68,32 @@
         DisableApiTermination: false
         ImageId: ami-b5a7ea85
         InstanceType: t2.micro
-        KeyName: { Ref: KeyName }
+        KeyName: !Ref KeyName
         Monitoring: false
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ "", [ { Ref: NamePrefix }, 1 ] ] }
+          Value: !Join [ "", [ !Ref NamePrefix, 1 ] ]
         Volumes:
-        - { VolumeId: { Ref: Volume }, Device: /dev/sdb }
+        - { VolumeId: !Ref Volume, Device: /dev/sdb }
         NetworkInterfaces:
         - AssociatePublicIpAddress: false
           DeleteOnTermination: true
           Description: Primary network interface
           DeviceIndex: 0
-          SubnetId: { Ref: SubnetId }
-          GroupSet: [ { Ref: SecurityGroupId } ]
+          SubnetId: !Ref SubnetId
+          GroupSet: [ !Ref SecurityGroupId ]
         UserData:
-          "Fn::Base64":
-            "Fn::Join": [ "", [
+          Fn::Base64:
+            !Join [ "", [
               "#!/bin/bash\n",
 
               "set -e -x\n",
 
-              "export HOSTNAME=", { Ref: NamePrefix }, "1\n",
-              "export STACK_NAME=\"", { Ref: "AWS::StackName" }, "\"\n",
+              "export HOSTNAME=", !Ref NamePrefix, "1\n",
+              "export STACK_NAME=\"", !Ref "AWS::StackName", "\"\n",
               "export RESOURCE=NATInstance\n",
-              "export REGION=\"", { Ref: "AWS::Region" }, "\"\n",
-              "export AWS_MUSINGS_S3_URL=\"", { Ref: AWSMusingsS3URL }, "\"\n",
+              "export REGION=\"", !Ref "AWS::Region", "\"\n",
+              "export AWS_MUSINGS_S3_URL=\"", !Ref AWSMusingsS3URL, "\"\n",
 
               "curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh\n",
               "source /tmp/bootstrap.sh\n",
@@ -112,10 +112,10 @@
               "chkconfig glusterd on\n",
 
               "# Gluster configuration for server1 only\n",
-              "gluster peer probe ", { Ref: NamePrefix }, "2 || aws-error-exit 'gluster peer probe failed'\n",
+              "gluster peer probe ", !Ref NamePrefix, "2 || aws-error-exit 'gluster peer probe failed'\n",
               "gluster volume create gluster replica 2 transport tcp ",
-                { Ref: NamePrefix }, "1:/mnt/brick1/brick1 ",
-                { Ref: NamePrefix }, "2:/mnt/brick1/brick1 ",
+                !Ref NamePrefix, "1:/mnt/brick1/brick1 ",
+                !Ref NamePrefix, "2:/mnt/brick1/brick1 ",
                   "|| aws-error-exit 'gluster volume create failed'\n",
 
               "# All done so signal success\n",
@@ -129,9 +129,9 @@
     Volume:
       Type: AWS::EC2::Volume
       Properties:
-        AvailabilityZone: { Ref: AvailabilityZone }
+        AvailabilityZone: !Ref AvailabilityZone
         Size: 10
         VolumeType: gp2
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ "", [ { Ref: NamePrefix }, 1-volume ] ] }
+          Value: !Join [ "", [ !Ref NamePrefix, 1-volume ] ]

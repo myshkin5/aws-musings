@@ -55,24 +55,24 @@
           config:
             files:
               /etc/cfn/cfn-hup.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/cfn-hup.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-hup.conf ] ]
                 context:
-                  STACK_ID: { Ref: "AWS::StackId" }
-                  REGION: { Ref: "AWS::Region" }
+                  STACK_ID: !Ref "AWS::StackId"
+                  REGION: !Ref "AWS::Region"
                 mode: 000400
                 owner: root
                 group: root
               /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/cfn-auto-reloader.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-auto-reloader.conf ] ]
                 context:
-                  STACK_ID: { Ref: "AWS::StackId" }
-                  REGION: { Ref: "AWS::Region" }
+                  STACK_ID: !Ref "AWS::StackId"
+                  REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: ElasticsearchInstance
               /etc/dhcp/dhclient.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/dhclient.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/dhclient.conf ] ]
                 context:
-                  FQDN: { "Fn::Join": [ "", [ { Ref: ElasticsearchInstanceName },
-                    { Ref: DNSZone }, ., { Ref: FullyQualifiedInternalParentDNSZone } ] ] }
+                  FQDN: !Join [ "", [ !Ref ElasticsearchInstanceName,
+                    !Ref DNSZone, ., !Ref FullyQualifiedInternalParentDNSZone ] ]
       Properties:
         AssociatePublicIpAddress: false
         BlockDeviceMappings:
@@ -82,23 +82,23 @@
             VolumeSize: 30
         - DeviceName: /dev/sdb
           VirtualName: ephemeral0
-        ImageId: { Ref: ElasticsearchImageId }
-        InstanceType: { Ref: ElasticsearchInstanceType }
-        KeyName: { Ref: InternalKeyName }
-        SecurityGroups: [ { Ref: ElasticsearchInstanceSecurityGroupId } ]
-        SpotPrice: { Ref: ElasticsearchSpotPrice }
+        ImageId: !Ref ElasticsearchImageId
+        InstanceType: !Ref ElasticsearchInstanceType
+        KeyName: !Ref InternalKeyName
+        SecurityGroups: [ !Ref ElasticsearchInstanceSecurityGroupId ]
+        SpotPrice: !Ref ElasticsearchSpotPrice
         UserData:
-          "Fn::Base64":
-            "Fn::Join": [ "", [
+          Fn::Base64:
+            !Join [ "", [
               "#!/bin/bash\n",
 
               "set -e -x\n",
 
-              "export HOSTNAME=", { Ref: ElasticsearchInstanceName}, "\n",
-              "export STACK_NAME=\"", { Ref: "AWS::StackName" }, "\"\n",
+              "export HOSTNAME=", !Ref ElasticsearchInstanceName, "\n",
+              "export STACK_NAME=\"", !Ref "AWS::StackName", "\"\n",
               "export RESOURCE=ElasticsearchLaunchConfig\n",
-              "export REGION=\"", { Ref: "AWS::Region" }, "\"\n",
-              "export AWS_MUSINGS_S3_URL=\"", { Ref: AWSMusingsS3URL }, "\"\n",
+              "export REGION=\"", !Ref "AWS::Region", "\"\n",
+              "export AWS_MUSINGS_S3_URL=\"", !Ref AWSMusingsS3URL, "\"\n",
 
               "export EXTRA_PACKAGES=\"openjdk-7-jre\"\n",
               "export AUTO_SCALING_GROUP=ElasticsearchAutoScalingGroup\n",
@@ -121,14 +121,14 @@
     ElasticsearchAutoScalingGroup:
       Type: AWS::AutoScaling::AutoScalingGroup
       Properties:
-        LaunchConfigurationName: { Ref: ElasticsearchLaunchConfig }
+        LaunchConfigurationName: !Ref ElasticsearchLaunchConfig
         MaxSize: 1
         MinSize: 1
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: DNSZone }, { Ref: ElasticsearchInstanceName }, asg ] ] }
+          Value: !Join [ -, [ !Ref DNSZone, !Ref ElasticsearchInstanceName, asg ] ]
           PropagateAtLaunch: true
-        VPCZoneIdentifier: [ { Ref: ElasticsearchPrivateSubnetId } ]
+        VPCZoneIdentifier: [ !Ref ElasticsearchPrivateSubnetId ]
       CreationPolicy:
         ResourceSignal:
           Timeout: PT10M

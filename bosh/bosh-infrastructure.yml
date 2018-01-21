@@ -42,90 +42,90 @@
     ManagementSubnet:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: { "Fn::Join": [ ., [ { Ref: ManagementThreeOctetCIDRBlock }, 0/24 ] ] }
-        AvailabilityZone: { "Fn::Select" : [ "0", { "Fn::GetAZs" : "" } ] }
-        VpcId: { Ref: VPCId }
+        CidrBlock: !Join [ ., [ !Ref ManagementThreeOctetCIDRBlock, 0/24 ] ]
+        AvailabilityZone: !Select [ "0", !GetAZs "" ]
+        VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, management-subnet ] ] }
+          Value: !Join [ -, [ !Ref "AWS::StackName", management-subnet ] ]
     SubnetA:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: { "Fn::Join": [ ., [ { Ref: ThreeOctetCIDRBlockA }, 0/24 ] ] }
-        AvailabilityZone: { "Fn::Select" : [ "0", { "Fn::GetAZs" : "" } ] }
-        VpcId: { Ref: VPCId }
+        CidrBlock: !Join [ ., [ !Ref ThreeOctetCIDRBlockA, 0/24 ] ]
+        AvailabilityZone: !Select [ "0", !GetAZs "" ]
+        VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, a-subnet ] ] }
+          Value: !Join [ -, [ !Ref "AWS::StackName", a-subnet ] ]
     SubnetB:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: { "Fn::Join": [ ., [ { Ref: ThreeOctetCIDRBlockB }, 0/24 ] ] }
-        AvailabilityZone: { "Fn::Select" : [ "1", { "Fn::GetAZs" : "" } ] }
-        VpcId: { Ref: VPCId }
+        CidrBlock: !Join [ ., [ !Ref ThreeOctetCIDRBlockB, 0/24 ] ]
+        AvailabilityZone: !Select [ "1", !GetAZs "" ]
+        VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, b-subnet ] ] }
+          Value: !Join [ -, [ !Ref "AWS::StackName", b-subnet ] ]
     SubnetC:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: { "Fn::Join": [ ., [ { Ref: ThreeOctetCIDRBlockC }, 0/24 ] ] }
-        AvailabilityZone: { "Fn::Select" : [ "2", { "Fn::GetAZs" : "" } ] }
-        VpcId: { Ref: VPCId }
+        CidrBlock: !Join [ ., [ !Ref ThreeOctetCIDRBlockC, 0/24 ] ]
+        AvailabilityZone: !Select [ "2", !GetAZs "" ]
+        VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, c-subnet ] ] }
+          Value: !Join [ -, [ !Ref "AWS::StackName", c-subnet ] ]
 
     ManagementSubnetRouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
       Properties:
-        RouteTableId: { Ref: PrivateRouteTableId }
-        SubnetId: { Ref: ManagementSubnet }
+        RouteTableId: !Ref PrivateRouteTableId
+        SubnetId: !Ref ManagementSubnet
     SubnetARouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
       Properties:
-        RouteTableId: { Ref: PrivateRouteTableId }
-        SubnetId: { Ref: SubnetA }
+        RouteTableId: !Ref PrivateRouteTableId
+        SubnetId: !Ref SubnetA
     SubnetBRouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
       Properties:
-        RouteTableId: { Ref: PrivateRouteTableId }
-        SubnetId: { Ref: SubnetB }
+        RouteTableId: !Ref PrivateRouteTableId
+        SubnetId: !Ref SubnetB
     SubnetCRouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
       Properties:
-        RouteTableId: { Ref: PrivateRouteTableId }
-        SubnetId: { Ref: SubnetC }
+        RouteTableId: !Ref PrivateRouteTableId
+        SubnetId: !Ref SubnetC
 
     ManagementSubnetNetworkACLAssociation:
       Type: AWS::EC2::SubnetNetworkAclAssociation
       Properties:
-        NetworkAclId: { Ref: NetworkACLId }
-        SubnetId: { Ref: ManagementSubnet }
+        NetworkAclId: !Ref NetworkACLId
+        SubnetId: !Ref ManagementSubnet
     SubnetANetworkACLAssociation:
       Type: AWS::EC2::SubnetNetworkAclAssociation
       Properties:
-        NetworkAclId: { Ref: NetworkACLId }
-        SubnetId: { Ref: SubnetA }
+        NetworkAclId: !Ref NetworkACLId
+        SubnetId: !Ref SubnetA
     SubnetBNetworkACLAssociation:
       Type: AWS::EC2::SubnetNetworkAclAssociation
       Properties:
-        NetworkAclId: { Ref: NetworkACLId }
-        SubnetId: { Ref: SubnetB }
+        NetworkAclId: !Ref NetworkACLId
+        SubnetId: !Ref SubnetB
     SubnetCNetworkACLAssociation:
       Type: AWS::EC2::SubnetNetworkAclAssociation
       Properties:
-        NetworkAclId: { Ref: NetworkACLId }
-        SubnetId: { Ref: SubnetC }
+        NetworkAclId: !Ref NetworkACLId
+        SubnetId: !Ref SubnetC
 
     BOSHDirectorSecurityGroup:
       Type: AWS::EC2::SecurityGroup
       Properties:
         GroupDescription: BOSH director security group
-        VpcId: { Ref: VPCId }
+        VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, bosh-director-sg ] ] }
+          Value: !Join [ -, [ !Ref "AWS::StackName", bosh-director-sg ] ]
         SecurityGroupIngress:
         - IpProtocol: -1
           CidrIp: 10.0.0.0/8
@@ -136,7 +136,7 @@
   Outputs:
     ManagementSubnetId:
       Description: The id of the bosh management subnet.
-      Value: { Ref: ManagementSubnet }
+      Value: !Ref ManagementSubnet
     BOSHDirectorSecurityGroupId:
       Description: The id of the bosh director security group.
-      Value: { Ref: BOSHDirectorSecurityGroup }
+      Value: !Ref BOSHDirectorSecurityGroup

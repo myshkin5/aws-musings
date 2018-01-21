@@ -13,9 +13,9 @@
     PetsResource:
       Type: AWS::ApiGateway::Resource
       Properties:
-        ParentId: { "Fn::GetAtt": [ MyAPI, RootResourceId ] }
+        ParentId: !GetAtt MyAPI.RootResourceId
         PathPart: pets
-        RestApiId: { Ref: MyAPI }
+        RestApiId: !Ref MyAPI
       DependsOn: [ MyAPI ]
 
     PetsGETMethod:
@@ -23,8 +23,8 @@
       Properties:
         HttpMethod: GET
         AuthorizationType: AWS_IAM
-        ResourceId: { Ref: PetsResource }
-        RestApiId: { Ref: MyAPI }
+        ResourceId: !Ref PetsResource
+        RestApiId: !Ref MyAPI
         RequestParameters:
           method.request.querystring.type: integration.request.querystring.type
           method.request.querystring.page: integration.request.querystring.page
@@ -45,7 +45,7 @@
     PetsGETDeployment:
       Type: AWS::ApiGateway::Deployment
       Properties:
-        RestApiId: { Ref: MyAPI }
+        RestApiId: !Ref MyAPI
         Description: Initial deployment
         StageName: test
         StageDescription:

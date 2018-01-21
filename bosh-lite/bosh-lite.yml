@@ -74,24 +74,24 @@
           config:
             files:
               /etc/cfn/cfn-hup.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/cfn-hup.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-hup.conf ] ]
                 context:
-                  STACK_ID: { Ref: "AWS::StackId" }
-                  REGION: { Ref: "AWS::Region" }
+                  STACK_ID: !Ref "AWS::StackId"
+                  REGION: !Ref "AWS::Region"
                 mode: 000400
                 owner: root
                 group: root
               /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/cfn-auto-reloader.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-auto-reloader.conf ] ]
                 context:
-                  STACK_ID: { Ref: "AWS::StackId" }
-                  REGION: { Ref: "AWS::Region" }
+                  STACK_ID: !Ref "AWS::StackId"
+                  REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: BOSHLiteInstance
               /etc/dhcp/dhclient.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/dhclient.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/dhclient.conf ] ]
                 context:
-                  FQDN: { "Fn::Join": [ "", [ { Ref: BOSHLiteInstanceName },
-                    { Ref: DNSZone }, ., { Ref: FullyQualifiedInternalParentDNSZone } ] ] }
+                  FQDN: !Join [ "", [ !Ref BOSHLiteInstanceName,
+                    !Ref DNSZone, ., !Ref FullyQualifiedInternalParentDNSZone ] ]
       Properties:
         AssociatePublicIpAddress: false
         BlockDeviceMappings:
@@ -101,23 +101,23 @@
             VolumeSize: 30
         - DeviceName: /dev/sdb
           VirtualName: ephemeral0
-        ImageId: { Ref: BOSHLiteImageId }
-        InstanceType: { Ref: BOSHLiteInstanceType }
-        KeyName: { Ref: InternalKeyName }
-        SecurityGroups: [ { Ref: BOSHLiteInstanceSecurityGroupId } ]
-        SpotPrice: { Ref: BOSHLiteSpotPrice }
+        ImageId: !Ref BOSHLiteImageId
+        InstanceType: !Ref BOSHLiteInstanceType
+        KeyName: !Ref InternalKeyName
+        SecurityGroups: [ !Ref BOSHLiteInstanceSecurityGroupId ]
+        SpotPrice: !Ref BOSHLiteSpotPrice
         UserData:
-          "Fn::Base64":
-            "Fn::Join": [ "", [
+          Fn::Base64:
+            !Join [ "", [
               "#!/bin/bash\n",
 
               "set -e -x\n",
 
-              "export HOSTNAME=", { Ref: BOSHLiteInstanceName }, "\n",
-              "export STACK_NAME=\"", { Ref: "AWS::StackName" }, "\"\n",
+              "export HOSTNAME=", !Ref BOSHLiteInstanceName, "\n",
+              "export STACK_NAME=\"", !Ref "AWS::StackName", "\"\n",
               "export RESOURCE=BOSHLiteLaunchConfig\n",
-              "export REGION=\"", { Ref: "AWS::Region" }, "\"\n",
-              "export AWS_MUSINGS_S3_URL=\"", { Ref: AWSMusingsS3URL }, "\"\n",
+              "export REGION=\"", !Ref "AWS::Region", "\"\n",
+              "export AWS_MUSINGS_S3_URL=\"", !Ref AWSMusingsS3URL, "\"\n",
 
               "export EXTRA_PACKAGES=\"bundler\"\n",
               "export AUTO_SCALING_GROUP=BOSHLiteAutoScalingGroup\n",
@@ -126,9 +126,9 @@
               "source /tmp/bootstrap.sh\n",
               "aws-bootstrap\n",
 
-              "export BOSH_LITE_URL=\"", { "Fn::Join": [ ., [ { Ref: DNSZone},
-                { Ref: FullyQualifiedExternalParentDNSZone } ] ] }, "\"\n",
-              "export BOSH_LITE_CF_ADMIN_PASSWORD=\"", { Ref: BOSHLiteCFAdminPassword }, "\"\n",
+              "export BOSH_LITE_URL=\"", !Join [ ., [ !Ref DNSZone,
+                !Ref FullyQualifiedExternalParentDNSZone ] ], "\"\n",
+              "export BOSH_LITE_CF_ADMIN_PASSWORD=\"", !Ref BOSHLiteCFAdminPassword, "\"\n",
 
               "curl --output /etc/init.d/bosh-lite-run-once --silent ",
                 "$AWS_MUSINGS_S3_URL/bosh-lite/run-once.sh\n",
@@ -151,15 +151,15 @@
     BOSHLiteAutoScalingGroup:
       Type: AWS::AutoScaling::AutoScalingGroup
       Properties:
-        LaunchConfigurationName: { Ref: BOSHLiteLaunchConfig }
-        LoadBalancerNames: [ { Ref: BOSHLiteLoadBalancer } ]
+        LaunchConfigurationName: !Ref BOSHLiteLaunchConfig
+        LoadBalancerNames: [ !Ref BOSHLiteLoadBalancer ]
         MaxSize: 1
         MinSize: 1
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: DNSZone }, { Ref: BOSHLiteInstanceName }, asg ] ] }
+          Value: !Join [ -, [ !Ref DNSZone, !Ref BOSHLiteInstanceName, asg ] ]
           PropagateAtLaunch: true
-        VPCZoneIdentifier: [ { Ref: BOSHLitePrivateSubnetId } ]
+        VPCZoneIdentifier: [ !Ref BOSHLitePrivateSubnetId ]
       CreationPolicy:
         ResourceSignal:
           Timeout: PT1H
@@ -168,10 +168,10 @@
     BOSHLiteLoadBalancer:
       Type: AWS::ElasticLoadBalancing::LoadBalancer
       Properties:
-        LoadBalancerName: { "Fn::Join": [ -, [ { Ref: DNSZone }, { Ref: BOSHLiteInstanceName }, elb ] ] }
+        LoadBalancerName: !Join [ -, [ !Ref DNSZone, !Ref BOSHLiteInstanceName, elb ] ]
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: DNSZone }, { Ref: BOSHLiteInstanceName }, elb ] ] }
+          Value: !Join [ -, [ !Ref DNSZone, !Ref BOSHLiteInstanceName, elb ] ]
         HealthCheck:
           Target: TCP:443
           HealthyThreshold: 3
@@ -183,16 +183,16 @@
           Protocol: TCP
           InstancePort: 443
           InstanceProtocol: TCP
-        SecurityGroups: [ { Ref: BOSHLiteELBSecurityGroupId } ]
-        Subnets: [ { Ref: BOSHLitePublicSubnetId } ]
+        SecurityGroups: [ !Ref BOSHLiteELBSecurityGroupId ]
+        Subnets: [ !Ref BOSHLitePublicSubnetId ]
 
     BOSHLiteLoadBalancerRecordSet:
       Type: AWS::Route53::RecordSet
       Properties:
-        HostedZoneName: { "Fn::Join": [ "", [ { Ref: FullyQualifiedExternalParentDNSZone }, . ] ] }
-        Name: { "Fn::Join": [ ., [ *, { Ref: DNSZone }, { Ref: FullyQualifiedExternalParentDNSZone }, "" ] ] }
+        HostedZoneName: !Join [ "", [ !Ref FullyQualifiedExternalParentDNSZone, . ] ]
+        Name: !Join [ ., [ *, !Ref DNSZone, !Ref FullyQualifiedExternalParentDNSZone, "" ] ]
         AliasTarget:
-          DNSName: { "Fn::GetAtt": [ BOSHLiteLoadBalancer, CanonicalHostedZoneName ] }
-          HostedZoneId: { "Fn::GetAtt": [ BOSHLiteLoadBalancer, CanonicalHostedZoneNameID ] }
+          DNSName: !GetAtt BOSHLiteLoadBalancer.CanonicalHostedZoneName
+          HostedZoneId: !GetAtt BOSHLiteLoadBalancer.CanonicalHostedZoneNameID
         Type: A
       DependsOn: BOSHLiteLoadBalancer

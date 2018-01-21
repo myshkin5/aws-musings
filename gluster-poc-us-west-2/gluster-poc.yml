@@ -44,52 +44,52 @@
     PrivateSubnetA:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: { "Fn::Join": [ ., [ { Ref: ThreeOctetCIDRBlockA }, 0/24 ] ] }
+        CidrBlock: !Join [ ., [ !Ref ThreeOctetCIDRBlockA, 0/24 ] ]
         AvailabilityZone: us-west-2a
-        VpcId: { Ref: VPCId }
+        VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, us-west-2a-private-subnet ] ] }
+          Value: !Join [ -, [ !Ref "AWS::StackName", us-west-2a-private-subnet ] ]
     PrivateSubnetB:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: { "Fn::Join": [ ., [ { Ref: ThreeOctetCIDRBlockB }, 0/24 ] ] }
+        CidrBlock: !Join [ ., [ !Ref ThreeOctetCIDRBlockB, 0/24 ] ]
         AvailabilityZone: us-west-2b
-        VpcId: { Ref: VPCId }
+        VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, us-west-2b-private-subnet ] ] }
+          Value: !Join [ -, [ !Ref "AWS::StackName", us-west-2b-private-subnet ] ]
 
     PrivateSubnetARouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
       Properties:
-        RouteTableId: { Ref: PrivateRouteTableId }
-        SubnetId: { Ref: PrivateSubnetA }
+        RouteTableId: !Ref PrivateRouteTableId
+        SubnetId: !Ref PrivateSubnetA
     PrivateSubnetBRouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
       Properties:
-        RouteTableId: { Ref: PrivateRouteTableId }
-        SubnetId: { Ref: PrivateSubnetB }
+        RouteTableId: !Ref PrivateRouteTableId
+        SubnetId: !Ref PrivateSubnetB
 
     PrivateSubnetANetworkACLAssociation:
       Type: AWS::EC2::SubnetNetworkAclAssociation
       Properties:
-        NetworkAclId: { Ref: NetworkACLId }
-        SubnetId: { Ref: PrivateSubnetA }
+        NetworkAclId: !Ref NetworkACLId
+        SubnetId: !Ref PrivateSubnetA
     PrivateSubnetBNetworkACLAssociation:
       Type: AWS::EC2::SubnetNetworkAclAssociation
       Properties:
-        NetworkAclId: { Ref: NetworkACLId }
-        SubnetId: { Ref: PrivateSubnetB }
+        NetworkAclId: !Ref NetworkACLId
+        SubnetId: !Ref PrivateSubnetB
 
     SecurityGroup:
       Type: AWS::EC2::SecurityGroup
       Properties:
         GroupDescription: Server security group
-        VpcId: { Ref: VPCId }
+        VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: "AWS::StackName" }, server-sg ] ] }
+          Value: !Join [ -, [ !Ref "AWS::StackName", server-sg ] ]
         SecurityGroupIngress:
         - IpProtocol: -1
           CidrIp: 10.0.0.0/8
@@ -100,25 +100,25 @@
     Server1InstanceStack:
       Type: AWS::CloudFormation::Stack
       Properties:
-        TemplateURL: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, gluster-poc-us-west-2/server1.yml ] ] }
+        TemplateURL: !Join [ /, [ !Ref AWSMusingsS3URL, gluster-poc-us-west-2/server1.yml ] ]
         Parameters:
-          NamePrefix: { Ref: NamePrefix }
-          Domain: { Ref: Domain }
-          KeyName: { Ref: InternalKeyName }
-          AWSMusingsS3URL: { Ref: AWSMusingsS3URL }
+          NamePrefix: !Ref NamePrefix
+          Domain: !Ref Domain
+          KeyName: !Ref InternalKeyName
+          AWSMusingsS3URL: !Ref AWSMusingsS3URL
           AvailabilityZone: us-west-2a
-          SubnetId: { Ref: PrivateSubnetA }
-          SecurityGroupId: { Ref: SecurityGroup }
+          SubnetId: !Ref PrivateSubnetA
+          SecurityGroupId: !Ref SecurityGroup
       DependsOn: Server2InstanceStack
     Server2InstanceStack:
       Type: AWS::CloudFormation::Stack
       Properties:
-        TemplateURL: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, gluster-poc-us-west-2/server2.yml ] ] }
+        TemplateURL: !Join [ /, [ !Ref AWSMusingsS3URL, gluster-poc-us-west-2/server2.yml ] ]
         Parameters:
-          NamePrefix: { Ref: NamePrefix }
-          Domain: { Ref: Domain }
-          KeyName: { Ref: InternalKeyName }
-          AWSMusingsS3URL: { Ref: AWSMusingsS3URL }
+          NamePrefix: !Ref NamePrefix
+          Domain: !Ref Domain
+          KeyName: !Ref InternalKeyName
+          AWSMusingsS3URL: !Ref AWSMusingsS3URL
           AvailabilityZone: us-west-2b
-          SubnetId: { Ref: PrivateSubnetB }
-          SecurityGroupId: { Ref: SecurityGroup }
+          SubnetId: !Ref PrivateSubnetB
+          SecurityGroupId: !Ref SecurityGroup

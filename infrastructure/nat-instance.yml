@@ -38,54 +38,53 @@
           config:
             files:
               /etc/cfn/cfn-hup.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/cfn-hup.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-hup.conf ] ]
                 context:
-                  STACK_ID: { Ref: "AWS::StackId" }
-                  REGION: { Ref: "AWS::Region" }
+                  STACK_ID: !Ref "AWS::StackId"
+                  REGION: !Ref "AWS::Region"
                 mode: 000400
                 owner: root
                 group: root
               /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/cfn-auto-reloader.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-auto-reloader.conf ] ]
                 context:
-                  STACK_ID: { Ref: "AWS::StackId" }
-                  REGION: { Ref: "AWS::Region" }
+                  STACK_ID: !Ref "AWS::StackId"
+                  REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: NATInstance
 
               /etc/dhcp/dhclient.conf:
-                source: { "Fn::Join": [ /, [ { Ref: AWSMusingsS3URL }, common/dhclient.conf ] ] }
+                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/dhclient.conf ] ]
                 context:
-                  FQDN: { "Fn::Join": [ "", [ nat., { Ref: DNSZone }, .,
-                    { Ref: FullyQualifiedInternalParentDNSZone } ] ] }
+                  FQDN: !Join [ "", [ nat., !Ref DNSZone, ., !Ref FullyQualifiedInternalParentDNSZone ] ]
       Properties:
         DisableApiTermination: false
         SourceDestCheck: false
-        ImageId: { Ref: ImageId }
+        ImageId: !Ref ImageId
         InstanceType: t2.nano
-        KeyName: { Ref: KeyName }
+        KeyName: !Ref KeyName
         Monitoring: false
         Tags:
         - Key: Name
-          Value: { "Fn::Join": [ -, [ { Ref: DNSZone }, nat ] ] }
+          Value: !Join [ -, [ !Ref DNSZone, nat ] ]
         NetworkInterfaces:
         - AssociatePublicIpAddress: true
           DeleteOnTermination: true
           Description: Primary network interface
           DeviceIndex: 0
-          SubnetId: { Ref: SubnetId }
-          GroupSet: [ { Ref: SecurityGroupId } ]
+          SubnetId: !Ref SubnetId
+          GroupSet: [ !Ref SecurityGroupId ]
         UserData:
-          "Fn::Base64":
-            "Fn::Join": [ "", [
+          Fn::Base64:
+            !Join [ "", [
               "#!/bin/bash\n",
 
               "set -e -x\n",
 
               "export HOSTNAME=nat\n",
-              "export STACK_NAME=\"", { Ref: "AWS::StackName" }, "\"\n",
+              "export STACK_NAME=\"", !Ref "AWS::StackName", "\"\n",
               "export RESOURCE=NATInstance\n",
-              "export REGION=\"", { Ref: "AWS::Region" }, "\"\n",
-              "export AWS_MUSINGS_S3_URL=\"", { Ref: AWSMusingsS3URL }, "\"\n",
+              "export REGION=\"", !Ref "AWS::Region", "\"\n",
+              "export AWS_MUSINGS_S3_URL=\"", !Ref AWSMusingsS3URL, "\"\n",
 
               "curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh\n",
               "source /tmp/bootstrap.sh\n",
@@ -102,4 +101,4 @@
   Outputs:
     NATInstanceId:
       Description: This id of the NAT instance to be added to private route tables.
-      Value: { Ref: NATInstance }
+      Value: !Ref NATInstance
