@@ -10,8 +10,10 @@ aws cloudformation create-stack --stack-name $STACK_NAME \
     --template-url $AWS_MUSINGS_S3_URL/infrastructure/private-infrastructure.yml \
     --parameters ParameterKey=NetworkACLId,ParameterValue=$NETWORK_ACL_ID \
         ParameterKey=NATInstanceId,ParameterValue=$NAT_INSTANCE_ID \
+        ParameterKey=EgressOnlyInternetGatewayId,ParameterValue=$EGRESS_ONLY_INTERNET_GATEWAY_ID \
         ParameterKey=SecondOctet,ParameterValue=$SECOND_OCTET \
         ParameterKey=VPCId,ParameterValue=$VPC_ID \
+        ParameterKey=VPCIPv656CIDRPrefix,ParameterValue=$VPC_IPV6_56_CIDR_PREFIX \
         ParameterKey=VPNGatewayId,ParameterValue=$VPN_GATEWAY_ID \
     --disable-rollback --profile $PROFILE > /dev/null
 

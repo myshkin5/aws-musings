@@ -10,6 +10,9 @@
     NATInstanceId:
       Type: String
       Description: The id of the NAT instance to be added to private route tables.
+    EgressOnlyInternetGatewayId:
+      Type: String
+      Description: The id of the egress-only internet gateway for IPv6 traffic.
     SecondOctet:
       Type: Number
       MinValue: 0
@@ -18,12 +21,18 @@
     VPCId:
       Type: AWS::EC2::VPC::Id
       Description: The id of the VPC in which the resources will be created.
+    VPCIPv656CIDRPrefix:
+      Type: String
+      Description: The IPv6 /56 CIDR prefix of the VPC. Optional, no IPv6 configuration will be used if not specified.
+      AllowedPattern: "(\\p{XDigit}{1,4})\\:(\\p{XDigit}{1,4})\\:(\\p{XDigit}{1,4})\\:(\\p{XDigit}{0,2})|(^$)"
+      ConstraintDescription: must contain the first three quartets and half of the fourth quartet, optional
     VPNGatewayId:
       Type: String
       Description: The VPN gateway to which route tables will be connected via route propagation. Optional, no
         propagation occurs if not specified.
 
   Conditions:
+    AddIPv6: !Not [ !Equals [ !Ref VPCIPv656CIDRPrefix, "" ] ]
     VPNGatewayIdDefined: !Not [ !Equals [ !Ref VPNGatewayId, "" ] ]
 
   Resources:
@@ -33,6 +42,8 @@
         CidrBlock: !Sub "10.${SecondOctet}.50.0/24"
         AvailabilityZone: !Select [ "0", !GetAZs "" ]
         VpcId: !Ref VPCId
+        AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
+        Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}30::/64", !Ref "AWS::NoValue" ]
         Tags:
         - Key: Name
           Value: !Sub "${AWS::StackName}-${AWS::Region}-a-private-subnet"
@@ -42,6 +53,8 @@
         CidrBlock: !Sub "10.${SecondOctet}.51.0/24"
         AvailabilityZone: !Select [ "1", !GetAZs "" ]
         VpcId: !Ref VPCId
+        AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
+        Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}31::/64", !Ref "AWS::NoValue" ]
         Tags:
         - Key: Name
           Value: !Sub "${AWS::StackName}-${AWS::Region}-b-private-subnet"
@@ -51,6 +64,8 @@
         CidrBlock: !Sub "10.${SecondOctet}.52.0/24"
         AvailabilityZone: !Select [ "2", !GetAZs "" ]
         VpcId: !Ref VPCId
+        AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
+        Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}32::/64", !Ref "AWS::NoValue" ]
         Tags:
         - Key: Name
           Value: !Sub "${AWS::StackName}-${AWS::Region}-c-private-subnet"
@@ -62,12 +77,19 @@
         Tags:
         - Key: Name
           Value: !Sub "${AWS::StackName}-${AWS::Region}-private-rtb"
-    PrivateDefaultRoute:
+    IPv4PrivateDefaultRoute:
       Type: AWS::EC2::Route
       Properties:
         DestinationCidrBlock: 0.0.0.0/0
         RouteTableId: !Ref PrivateRouteTable
         InstanceId: !Ref NATInstanceId
+    IPv6PrivateDefaultRoute:
+      Type: AWS::EC2::Route
+      Condition: AddIPv6
+      Properties:
+        DestinationIpv6CidrBlock: ::/0
+        RouteTableId: !Ref PrivateRouteTable
+        EgressOnlyInternetGatewayId: !Ref EgressOnlyInternetGatewayId
     PrivateSubnetARouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
       Properties:

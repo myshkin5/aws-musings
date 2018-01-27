@@ -103,6 +103,7 @@ Creates network routing artifacts for public subnets along with jump box and NAT
  `JumpBoxInstanceType` | `JUMP_BOX_INSTANCE_TYPE` | No / `t2.nano` | The EC2 instance type of the jump box.
  `SecondOctet` | `SECOND_OCTET` | No / `0` | See the [VPC stack](#vpc) above.
  `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
+ `VPCIPv656CIDRPrefix` | `VPC_IPV6_56_CIDR_PREFIX` | No | The IPv6 /56 CIDR prefix of the VPC including the first three quartets and half of the fourth quartet (e.g.: `2600:1f18:457e:16`). Optional, if not specified, no IPv6 capabilities will be configured.
  `VPNGatewayId` | `VPN_GATEWAY_ID` | No | See the [VPN stack](#vpn) above. Optional, if not specified, a VPN gateway will not be included in the public routing table.
 
 ### Outputs
@@ -112,6 +113,7 @@ Creates network routing artifacts for public subnets along with jump box and NAT
  `JumpBoxPublicIPAddress` | `JUMP_BOX_PUBLIC_IP_ADDRESS` | The public IP address of the jump box.
  `NetworkACLId` | `NETWORK_ACL_ID` | The id of the network access control list.
  `NATInstanceId` | `NAT_INSTANCE_ID` | The id of the NAT instance to be used in the private route table.
+ `EgressOnlyInternetGatewayId` | `EGRESS_ONLY_INTERNET_GATEWAY_ID` | The id of the IPv6 egress-only internet gateway.
  `PublicRouteTableId` | `PUBLIC_ROUTE_TABLE_ID` | The id of the public routing table to be used in public subnets.
 
 ## Private Infrastructure
@@ -131,8 +133,10 @@ Creates network routing artifacts for private subnets.
 ---|---|---|---
  `NetworkACLId` | `NETWORK_ACL_ID` | Yes | See the [public infrastructure stack](#public-infrastructure) above.
  `NATInstanceId` | `NAT_INSTANCE_ID` | Yes | See the [public infrastructure stack](#public-infrastructure) above.
+ `EgressOnlyInternetGatewayId` | `EGRESS_ONLY_INTERNET_GATEWAY_ID` | Yes | See the [public infrastructure stack](#public-infrastructure) above.
  `SecondOctet` | `SECOND_OCTET` | No / `0` | See the [VPC stack](#vpc) above.
  `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
+ `VPCIPv656CIDRPrefix` | `VPC_IPV6_56_CIDR_PREFIX` | No | The IPv6 /56 CIDR prefix of the VPC including the first three quartets and half of the fourth quartet (e.g.: `2600:1f18:457e:16`). Optional, if not specified, no IPv6 capabilities will be configured.
  `VPNGatewayId` | `VPN_GATEWAY_ID` | No | See the [VPN stack](#vpn) above. Optional, if not specified, a VPN gateway will not be included in the private routing table.
 
 ### Outputs
