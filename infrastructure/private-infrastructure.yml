@@ -4,12 +4,12 @@
   Description: The private resources of a VPC.
 
   Parameters:
-    NATInstanceId:
-      Type: String
-      Description: This id of the NAT instance to be added to private route tables.
     NetworkACLId:
       Type: String
       Description: The id of the network access control list used to protect instances in the VPC.
+    NATInstanceId:
+      Type: String
+      Description: The id of the NAT instance to be added to private route tables.
     SecondOctet:
       Type: Number
       MinValue: 0

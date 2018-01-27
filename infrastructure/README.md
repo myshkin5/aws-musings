@@ -44,9 +44,10 @@ Just creates a VPC.
 
  Name | Environment Variable | Required/Default | Description
 ---|---|---|---
- `SecondOctet` | `SECOND_OCTET` | Yes / `0` | <a name="second-octet">The</a> second octet of CIDR of the entire VPC. The first octet is always `10` for a full CIDR of `10.0.0.0/16` (assuming `SecondOctet` is set to `0`).
+ `SecondOctet` | `SECOND_OCTET` | No / `0` | <a name="second-octet">The</a> second octet of CIDR of the entire VPC. The first octet is always `10` for a full CIDR of `10.0.0.0/16` (assuming `SecondOctet` is set to `0`).
 
 ### Outputs
+
  Name | Environment Variable | Description
 ---|---|---
  `VPCId` | `VPC_ID` | The id of the freshly created VPC.
@@ -66,11 +67,12 @@ Creates network artifacts to route traffic through a VPN.
 
  Name | Environment Variable | Required/Default | Description
 ---|---|---|---
- `BGPASNumber` | `BGP_AS_NUMBER` | Yes / `65000` | The Border Gateway Protocol Autonomous System Number.
+ `BGPASNumber` | `BGP_AS_NUMBER` | No / `65000` | The Border Gateway Protocol Autonomous System Number.
  `CustomerGatewayIPAddress` | `CUSTOMER_GATEWAY_IP_ADDRESS` | Yes | The public IP address of the customer gateway. **REQUIRED, NO DEFAULT AND NOT SUPPLIED BY A PREVIOUS STACK**
  `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
 
 ### Outputs
+
  Name | Environment Variable | Description
 ---|---|---
  `VPNGatewayId` | `VPN_GATEWAY_ID` | The VPN gateway to which route tables will be connected via route propagation.
@@ -90,19 +92,21 @@ Creates network routing artifacts for public subnets along with jump box and NAT
 
  Name | Environment Variable | Required/Default | Description
 ---|---|---|---
- `AWSMusingsS3URL` | `AWS_MUSINGS_S3_URL` | Yes / (see [README](../README.md#environment-variables)) | The URL of the uploaded `aws-musings` artifacts on S3.
- `DNSZone` | `DNS_ZONE` | Yes / `dev` | <a name="dns-zone">The</a> DNS zone within the external and internal DNS zones (i.e.: with an external DNS of `example.com`, the full external zone would be `dev.example.com`.
+ `AWSMusingsS3URL` | `AWS_MUSINGS_S3_URL` | No / (see [README](../README.md#environment-variables)) | The URL of the uploaded `aws-musings` artifacts on S3.
+ `DNSZone` | `DNS_ZONE` | No / `dev` | <a name="dns-zone">The</a> DNS zone within the external and internal DNS zones (i.e.: with an external DNS of `example.com`, the full external zone would be `dev.example.com`.
  `FullyQualifiedExternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_EXTERNAL _PARENT_DNS_ZONE` (without space) | No | <a name="fully-qualified-external-parent-dns-zone">The</a> public DNS zone configured in Route 53. If not specified, no public DNS record will be created for the jump box.
- `FullyQualifiedInternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_INTERNAL _PARENT_DNS_ZONE` (without space) | Yes / `compute.local` | The private DNS zone (parent zone to the `DNSZone` specified above.
- `InternalKeyName` | `INTERNAL_KEY_NAME` | Yes / `internal` | <a name="internal-key-name">The</a> SSH key pair used to connect to internal EC2 instances.
+ `FullyQualifiedInternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_INTERNAL _PARENT_DNS_ZONE` (without space) | No / `compute.local` | The private DNS zone (parent zone to the `DNSZone` specified above.
+ `InternalKeyName` | `INTERNAL_KEY_NAME` | No / `internal` | <a name="internal-key-name">The</a> SSH key pair used to connect to internal EC2 instances.
  `JumpBoxEIPAddress` | `JUMP_BOX_EIP_ADDRESS` | No | The Elastic IP address that will be assigned to the jump box instance. If not specified, a new EIP address will be allocated. By pre-allocating an EIP and specifying it via this parameter, the jump box will be accessible with the same address even though the infrastructure may have been rebuilt repeatedly.
- `JumpBoxKeyName` | `JUMP_BOX_KEY_NAME` | Yes / `jump-box` | <a name="jump-box-key-name">The</a> SSH key pair used to connect to the jump box EC2 instances.
- `JumpBoxSSHCIDRIP` | `JUMP_BOX_SSH_CIDR_IP` | Yes / `0.0.0.0/0` | Any IP address included in this CIDR will be able to access the jump box via SSH (client must also use the `JumpBoxKeyName` SSH key pair). It is highly recommended to restrict this CIDR to only IP addresses that need to access the jump box. **DEFAULT VALUE MAY BE A SECURITY CONCERN**
- `SecondOctet` | `SECOND_OCTET` | Yes | See the [VPC stack](#vpc) above.
+ `JumpBoxKeyName` | `JUMP_BOX_KEY_NAME` | No / `jump-box` | <a name="jump-box-key-name">The</a> SSH key pair used to connect to the jump box EC2 instances.
+ `JumpBoxSSHCIDRIP` | `JUMP_BOX_SSH_CIDR_IP` | No / `<current public ip>/32` | Any IP address included in this CIDR will be able to access the jump box via SSH (client must also use the `JumpBoxKeyName` SSH key pair). It is highly recommended to restrict this CIDR to only IP addresses that need to access the jump box. **DEFAULT VALUE MAY BE A SECURITY CONCERN**
+ `JumpBoxInstanceType` | `JUMP_BOX_INSTANCE_TYPE` | No / `t2.nano` | The EC2 instance type of the jump box.
+ `SecondOctet` | `SECOND_OCTET` | No / `0` | See the [VPC stack](#vpc) above.
  `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
  `VPNGatewayId` | `VPN_GATEWAY_ID` | No | See the [VPN stack](#vpn) above. Optional, if not specified, a VPN gateway will not be included in the public routing table.
 
 ### Outputs
+
  Name | Environment Variable | Description
 ---|---|---
  `JumpBoxPublicIPAddress` | `JUMP_BOX_PUBLIC_IP_ADDRESS` | The public IP address of the jump box.
@@ -125,13 +129,14 @@ Creates network routing artifacts for private subnets.
 
  Name | Environment Variable | Required/Default | Description
 ---|---|---|---
- `NATInstanceId` | `NAT_INSTANCE_ID` | Yes | See the [public infrastructure stack](#public-infrastructure) above. 
  `NetworkACLId` | `NETWORK_ACL_ID` | Yes | See the [public infrastructure stack](#public-infrastructure) above.
- `SecondOctet` | `SECOND_OCTET` | Yes | See the [VPC stack](#vpc) above.
+ `NATInstanceId` | `NAT_INSTANCE_ID` | Yes | See the [public infrastructure stack](#public-infrastructure) above.
+ `SecondOctet` | `SECOND_OCTET` | No / `0` | See the [VPC stack](#vpc) above.
  `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
  `VPNGatewayId` | `VPN_GATEWAY_ID` | No | See the [VPN stack](#vpn) above. Optional, if not specified, a VPN gateway will not be included in the private routing table.
 
 ### Outputs
+
  Name | Environment Variable | Description
 ---|---|---
  `PrivateRouteTableId` | `PRIVATE_ROUTE_TABLE_ID` | The id of the private routing table to be used in private subnets.
