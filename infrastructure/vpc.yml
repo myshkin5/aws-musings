@@ -15,13 +15,13 @@
     VPC:
       Type: AWS::EC2::VPC
       Properties:
-        CidrBlock: !Join [ ., [ 10, !Ref SecondOctet, 0.0/16 ] ]
+        CidrBlock: !Sub "10.${SecondOctet}.0.0/16"
         InstanceTenancy: default
         EnableDnsSupport: true
         EnableDnsHostnames: true
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", !Ref "AWS::Region", vpc ] ]
+          Value: !Sub "${AWS::StackName}-${AWS::Region}-vpc"
 
   Outputs:
     VPCId:

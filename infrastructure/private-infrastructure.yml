@@ -30,30 +30,30 @@
     PrivateSubnetA:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: !Join [ ., [ 10, !Ref SecondOctet, 50.0/24 ] ]
+        CidrBlock: !Sub "10.${SecondOctet}.50.0/24"
         AvailabilityZone: !Select [ "0", !GetAZs "" ]
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", !Join [ "", [ !Ref "AWS::Region", a-private-subnet ] ] ] ]
+          Value: !Sub "${AWS::StackName}-${AWS::Region}-a-private-subnet"
     PrivateSubnetB:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: !Join [ ., [ 10, !Ref SecondOctet, 51.0/24 ] ]
+        CidrBlock: !Sub "10.${SecondOctet}.51.0/24"
         AvailabilityZone: !Select [ "1", !GetAZs "" ]
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", !Join [ "", [ !Ref "AWS::Region", b-private-subnet ] ] ] ]
+          Value: !Sub "${AWS::StackName}-${AWS::Region}-b-private-subnet"
     PrivateSubnetC:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: !Join [ ., [ 10, !Ref SecondOctet, 52.0/24 ] ]
+        CidrBlock: !Sub "10.${SecondOctet}.52.0/24"
         AvailabilityZone: !Select [ "2", !GetAZs "" ]
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", !Join [ "", [ !Ref "AWS::Region", c-private-subnet ] ] ] ]
+          Value: !Sub "${AWS::StackName}-${AWS::Region}-c-private-subnet"
 
     PrivateRouteTable:
       Type: AWS::EC2::RouteTable
@@ -61,7 +61,7 @@
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", !Ref "AWS::Region", private-rtb ] ]
+          Value: !Sub "${AWS::StackName}-${AWS::Region}-private-rtb"
     PrivateDefaultRoute:
       Type: AWS::EC2::Route
       Properties:

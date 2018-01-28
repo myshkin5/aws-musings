@@ -24,7 +24,7 @@
         IpAddress: !Ref CustomerGatewayIPAddress
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", !Ref "AWS::Region", cgw ] ]
+          Value: !Sub "${AWS::StackName}-${AWS::Region}-cgw"
 
     VPNGateway:
       Type: AWS::EC2::VPNGateway
@@ -32,7 +32,7 @@
         Type: ipsec.1
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", !Ref "AWS::Region", vgw ] ]
+          Value: !Sub "${AWS::StackName}-${AWS::Region}-vgw"
 
     VPCGatewayAttachment:
       Type: AWS::EC2::VPCGatewayAttachment
@@ -49,7 +49,7 @@
         VpnGatewayId: !Ref VPNGateway
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", !Ref "AWS::Region", vpn ] ]
+          Value: !Sub "${AWS::StackName}-${AWS::Region}-vpn"
 
     VPNConnectionRoute:
       Type: AWS::EC2::VPNConnectionRoute

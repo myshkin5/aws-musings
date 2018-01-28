@@ -42,39 +42,39 @@
     ManagementSubnet:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: !Join [ ., [ !Ref ManagementThreeOctetCIDRBlock, 0/24 ] ]
+        CidrBlock: !Sub "${ManagementThreeOctetCIDRBlock}.0/24"
         AvailabilityZone: !Select [ "0", !GetAZs "" ]
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", management-subnet ] ]
+          Value: !Sub "${AWS::StackName}-management-subnet"
     SubnetA:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: !Join [ ., [ !Ref ThreeOctetCIDRBlockA, 0/24 ] ]
+        CidrBlock: !Sub "${ThreeOctetCIDRBlockA}.0/24"
         AvailabilityZone: !Select [ "0", !GetAZs "" ]
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", a-subnet ] ]
+          Value: !Sub "${AWS::StackName}-a-subnet"
     SubnetB:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: !Join [ ., [ !Ref ThreeOctetCIDRBlockB, 0/24 ] ]
+        CidrBlock: !Sub "${ThreeOctetCIDRBlockB}.0/24"
         AvailabilityZone: !Select [ "1", !GetAZs "" ]
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", b-subnet ] ]
+          Value: !Sub "${AWS::StackName}-b-subnet"
     SubnetC:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: !Join [ ., [ !Ref ThreeOctetCIDRBlockC, 0/24 ] ]
+        CidrBlock: !Sub "${ThreeOctetCIDRBlockC}.0/24"
         AvailabilityZone: !Select [ "2", !GetAZs "" ]
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", c-subnet ] ]
+          Value: !Sub "${AWS::StackName}-c-subnet"
 
     ManagementSubnetRouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
@@ -125,7 +125,7 @@
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", bosh-director-sg ] ]
+          Value: !Sub "${AWS::StackName}-bosh-director-sg"
         SecurityGroupIngress:
         - IpProtocol: -1
           CidrIp: 10.0.0.0/8

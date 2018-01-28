@@ -35,7 +35,7 @@
           config:
             files:
               /etc/cfn/cfn-hup.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-hup.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/cfn-hup.conf"
                 context:
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
@@ -43,24 +43,24 @@
                 owner: root
                 group: root
               /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-auto-reloader.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/cfn-auto-reloader.conf"
                 context:
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: Instance2
 
               /etc/dhcp/dhclient.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/dhclient.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/dhclient.conf"
                 context:
-                  FQDN: !Join [ "", [ !Ref NamePrefix, 2., !Ref Domain ] ]
+                  FQDN: !Sub "${NamePrefix}2.${Domain}"
 
               /home/ec2-user/.bashrc:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/bashrc.sh ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/bashrc.sh"
                 mode: 000644
                 owner: ec2-user
                 group: ec2-user
               /root/.bashrc:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/bashrc.sh ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/bashrc.sh"
                 mode: 000644
                 owner: root
                 group: root
@@ -72,7 +72,7 @@
         Monitoring: false
         Tags:
         - Key: Name
-          Value: !Join [ "", [ !Ref NamePrefix, 2 ] ]
+          Value: !Sub "${NamePrefix}2"
         Volumes:
         - { VolumeId: !Ref Volume, Device: /dev/sdb }
         NetworkInterfaces:
@@ -84,37 +84,36 @@
           GroupSet: [ !Ref SecurityGroupId ]
         UserData:
           Fn::Base64:
-            !Join [ "", [
-              "#!/bin/bash\n",
+            !Sub |
+              #!/bin/bash
 
-              "set -e -x\n",
+              set -e -x
 
-              "export HOSTNAME=", !Ref NamePrefix, "2\n",
-              "export STACK_NAME=\"", !Ref "AWS::StackName", "\"\n",
-              "export RESOURCE=NATInstance\n",
-              "export REGION=\"", !Ref "AWS::Region", "\"\n",
-              "export AWS_MUSINGS_S3_URL=\"", !Ref "AWSMusingsS3URL", "\"\n",
+              export HOSTNAME=${NamePrefix}2
+              export STACK_NAME="${AWS::StackName}"
+              export RESOURCE=NATInstance
+              export REGION="${AWS::Region}"
+              export AWS_MUSINGS_S3_URL="${AWSMusingsS3URL}"
 
-              "curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh\n",
-              "source /tmp/bootstrap.sh\n",
-              "aws-bootstrap\n",
+              curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh
+              source /tmp/bootstrap.sh
+              aws-bootstrap
 
-              "# Gluster configuration common to both servers\n",
-              "echo -e \"n\n\n\n\n\nw\" | fdisk /dev/xvdb || aws-error-exit 'Failed fdisk'\n",
-              "mkfs.ext4 /dev/xvdb1 || aws-error-exit 'Failed mkfs'\n",
-              "mkdir /mnt/brick1 || aws-error-exit 'Failed mkdir'\n",
-              "echo \"/dev/xvdb1 /mnt/brick1 ext4 defaults 1 2\" >> /etc/fstab\n",
-              "wget -P /etc/yum.repos.d ",
-                "http://download.gluster.org/pub/gluster/glusterfs/LATEST/EPEL.repo/glusterfs-epel.repo ",
-                  " || aws-error-exit 'Failed gluster repo wget'\n",
-              "sed -i 's/$releasever/6/g' /etc/yum.repos.d/glusterfs-epel.repo\n",
-              "yum -y install glusterfs{-fuse,-server}\n",
-              "chkconfig glusterd on\n",
+              # Gluster configuration common to both servers
+              echo -e "n\n\n\n\n\nw" | fdisk /dev/xvdb || aws-error-exit 'Failed fdisk'
+              mkfs.ext4 /dev/xvdb1 || aws-error-exit 'Failed mkfs'
+              mkdir /mnt/brick1 || aws-error-exit 'Failed mkdir'
+              echo "/dev/xvdb1 /mnt/brick1 ext4 defaults 1 2" >> /etc/fstab
+              wget -P /etc/yum.repos.d \
+                http://download.gluster.org/pub/gluster/glusterfs/LATEST/EPEL.repo/glusterfs-epel.repo \
+                  || aws-error-exit 'Failed gluster repo wget'
+              sed -i 's/$releasever/6/g' /etc/yum.repos.d/glusterfs-epel.repo
+              yum -y install glusterfs{-fuse,-server}
+              chkconfig glusterd on
 
-              "# All done so signal success\n",
-              "aws-signal-success\n",
-              "reboot\n"
-            ] ]
+              # All done so signal success
+              aws-signal-success
+              reboot
       CreationPolicy:
         ResourceSignal:
           Timeout: PT10M
@@ -127,4 +126,4 @@
         VolumeType: gp2
         Tags:
         - Key: Name
-          Value: !Join [ "", [ !Ref NamePrefix, 2-volume ] ]
+          Value: !Sub "${NamePrefix}2-volume"

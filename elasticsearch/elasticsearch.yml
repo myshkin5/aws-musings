@@ -55,7 +55,7 @@
           config:
             files:
               /etc/cfn/cfn-hup.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-hup.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/cfn-hup.conf"
                 context:
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
@@ -63,16 +63,15 @@
                 owner: root
                 group: root
               /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-auto-reloader.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/cfn-auto-reloader.conf"
                 context:
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: ElasticsearchInstance
               /etc/dhcp/dhclient.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/dhclient.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/dhclient.conf"
                 context:
-                  FQDN: !Join [ "", [ !Ref ElasticsearchInstanceName,
-                    !Ref DNSZone, ., !Ref FullyQualifiedInternalParentDNSZone ] ]
+                  FQDN: !Sub "${ElasticsearchInstanceName}${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
       Properties:
         AssociatePublicIpAddress: false
         BlockDeviceMappings:
@@ -89,35 +88,33 @@
         SpotPrice: !Ref ElasticsearchSpotPrice
         UserData:
           Fn::Base64:
-            !Join [ "", [
-              "#!/bin/bash\n",
+            !Sub |
+              #!/bin/bash
 
-              "set -e -x\n",
+              set -e -x
 
-              "export HOSTNAME=", !Ref ElasticsearchInstanceName, "\n",
-              "export STACK_NAME=\"", !Ref "AWS::StackName", "\"\n",
-              "export RESOURCE=ElasticsearchLaunchConfig\n",
-              "export REGION=\"", !Ref "AWS::Region", "\"\n",
-              "export AWS_MUSINGS_S3_URL=\"", !Ref AWSMusingsS3URL, "\"\n",
+              export HOSTNAME=${ElasticsearchInstanceName}
+              export STACK_NAME="${AWS::StackName}"
+              export RESOURCE=ElasticsearchLaunchConfig
+              export REGION=${AWS::Region}"
+              export AWS_MUSINGS_S3_URL="${AWSMusingsS3URL}"
 
-              "export EXTRA_PACKAGES=\"openjdk-7-jre\"\n",
-              "export AUTO_SCALING_GROUP=ElasticsearchAutoScalingGroup\n",
+              export EXTRA_PACKAGES="openjdk-7-jre"
+              export AUTO_SCALING_GROUP=ElasticsearchAutoScalingGroup
 
-              "curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh\n",
-              "source /tmp/bootstrap.sh\n",
-              "aws-bootstrap\n",
+              curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh
+              source /tmp/bootstrap.sh
+              aws-bootstrap
 
-              "curl --output /tmp/elastic.deb --silent https://download.elastic.co/elasticsearch/release/",
-                "org/elasticsearch/distribution/deb/elasticsearch/2.3.2/elasticsearch-2.3.2.deb\n",
-              "dpkg --install /tmp/elastic.deb\n",
-              "update-rc.d elasticsearch defaults 95 10\n",
-              "echo 'network.bind_host: \"0.0.0.0\"' >> /etc/elasticsearch/elasticsearch.yml\n",
-              "echo 'network.publish_host: _non_loopback:ipv4_' >> /etc/elasticsearch/elasticsearch.yml\n",
+              curl --output /tmp/elastic.deb --silent https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.3.2/elasticsearch-2.3.2.deb
+              dpkg --install /tmp/elastic.deb
+              update-rc.d elasticsearch defaults 95 10
+              echo 'network.bind_host: "0.0.0.0"' >> /etc/elasticsearch/elasticsearch.yml
+              echo 'network.publish_host: _non_loopback:ipv4_' >> /etc/elasticsearch/elasticsearch.yml
 
-              "# All done so signal success\n",
-              "aws-signal-success\n",
-              "reboot\n"
-            ] ]
+              # All done so signal success
+              aws-signal-success
+              reboot
     ElasticsearchAutoScalingGroup:
       Type: AWS::AutoScaling::AutoScalingGroup
       Properties:
@@ -126,7 +123,7 @@
         MinSize: 1
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref DNSZone, !Ref ElasticsearchInstanceName, asg ] ]
+          Value: !Sub "${DNSZone}-${ElasticsearchInstanceName}-asg"
           PropagateAtLaunch: true
         VPCZoneIdentifier: [ !Ref ElasticsearchPrivateSubnetId ]
       CreationPolicy:

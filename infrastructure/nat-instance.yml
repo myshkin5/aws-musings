@@ -38,7 +38,7 @@
           config:
             files:
               /etc/cfn/cfn-hup.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-hup.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/cfn-hup.conf"
                 context:
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
@@ -46,16 +46,16 @@
                 owner: root
                 group: root
               /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-auto-reloader.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/cfn-auto-reloader.conf"
                 context:
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: NATInstance
 
               /etc/dhcp/dhclient.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/dhclient.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/dhclient.conf"
                 context:
-                  FQDN: !Join [ "", [ nat., !Ref DNSZone, ., !Ref FullyQualifiedInternalParentDNSZone ] ]
+                  FQDN: !Sub "nat.${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
       Properties:
         DisableApiTermination: false
         SourceDestCheck: false
@@ -65,7 +65,7 @@
         Monitoring: false
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref DNSZone, nat ] ]
+          Value: !Sub "${DNSZone}-nat"
         NetworkInterfaces:
         - AssociatePublicIpAddress: true
           DeleteOnTermination: true
@@ -75,25 +75,24 @@
           GroupSet: [ !Ref SecurityGroupId ]
         UserData:
           Fn::Base64:
-            !Join [ "", [
-              "#!/bin/bash\n",
+            !Sub |
+              #!/bin/bash
 
-              "set -e -x\n",
+              set -e -x
 
-              "export HOSTNAME=nat\n",
-              "export STACK_NAME=\"", !Ref "AWS::StackName", "\"\n",
-              "export RESOURCE=NATInstance\n",
-              "export REGION=\"", !Ref "AWS::Region", "\"\n",
-              "export AWS_MUSINGS_S3_URL=\"", !Ref AWSMusingsS3URL, "\"\n",
+              export HOSTNAME=nat
+              export STACK_NAME="${AWS::StackName}"
+              export RESOURCE=NATInstance
+              export REGION="${AWS::Region}"
+              export AWS_MUSINGS_S3_URL="${AWSMusingsS3URL}"
 
-              "curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh\n",
-              "source /tmp/bootstrap.sh\n",
-              "aws-bootstrap\n",
+              curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh
+              source /tmp/bootstrap.sh
+              aws-bootstrap
 
-              "# All done so signal success\n",
-              "aws-signal-success\n",
-              "reboot\n"
-            ] ]
+              # All done so signal success
+              aws-signal-success
+              reboot
       CreationPolicy:
         ResourceSignal:
           Timeout: PT10M

@@ -37,23 +37,23 @@
     BOSHLitePublicSubnet:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: !Join [ ., [ !Ref BOSHLitePublicThreeOctetCIDRBlock, 0/24 ] ]
+        CidrBlock: !Sub "${BOSHLitePublicThreeOctetCIDRBlock}.0/24"
         AvailabilityZone: !Select [ "0", !GetAZs "" ]
         VpcId: !Ref VPCId
         Tags:
           -
             Key: Name
-            Value: !Join [ -, [ !Ref "AWS::StackName", public-subnet ] ]
+            Value: !Sub "${AWS::StackName}-public-subnet"
     BOSHLitePrivateSubnet:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: !Join [ ., [ !Ref BOSHLitePrivateThreeOctetCIDRBlock, 0/24 ] ]
+        CidrBlock: !Sub "${BOSHLitePrivateThreeOctetCIDRBlock}.0/24"
         AvailabilityZone: !Select [ "0", !GetAZs "" ]
         VpcId: !Ref VPCId
         Tags:
           -
             Key: Name
-            Value: !Join [ -, [ !Ref "AWS::StackName", private-subnet ] ]
+            Value: !Sub "${AWS::StackName}-private-subnet"
 
     BOSHLitePublicSubnetRouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
@@ -85,7 +85,7 @@
         Tags:
           -
             Key: Name
-            Value: !Join [ -, [ !Ref "AWS::StackName", instance-sg ] ]
+            Value: !Sub "${AWS::StackName}-instance-sg"
         SecurityGroupIngress:
           -
             IpProtocol: -1
@@ -102,7 +102,7 @@
         Tags:
           -
             Key: Name
-            Value: !Join [ -, [ !Ref "AWS::StackName", elb-sg ] ]
+            Value: !Sub "${AWS::StackName}-elb-sg"
         SecurityGroupIngress:
           -
             IpProtocol: tcp

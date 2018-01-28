@@ -44,21 +44,21 @@
     PrivateSubnetA:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: !Join [ ., [ !Ref ThreeOctetCIDRBlockA, 0/24 ] ]
+        CidrBlock: !Sub "${ThreeOctetCIDRBlockA}.0/24"
         AvailabilityZone: us-west-2a
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", us-west-2a-private-subnet ] ]
+          Value: !Sub "${AWS::StackName}-us-west-2a-private-subnet"
     PrivateSubnetB:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: !Join [ ., [ !Ref ThreeOctetCIDRBlockB, 0/24 ] ]
+        CidrBlock: !Sub "${ThreeOctetCIDRBlockB}.0/24"
         AvailabilityZone: us-west-2b
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", us-west-2b-private-subnet ] ]
+          Value: !Sub "${AWS::StackName}-us-west-2b-private-subnet"
 
     PrivateSubnetARouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
@@ -89,7 +89,7 @@
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", server-sg ] ]
+          Value: !Sub "${AWS::StackName}-server-sg"
         SecurityGroupIngress:
         - IpProtocol: -1
           CidrIp: 10.0.0.0/8
@@ -100,7 +100,7 @@
     Server1InstanceStack:
       Type: AWS::CloudFormation::Stack
       Properties:
-        TemplateURL: !Join [ /, [ !Ref AWSMusingsS3URL, gluster-poc-us-west-2/server1.yml ] ]
+        TemplateURL: !Sub "${AWSMusingsS3URL}/gluster-poc-us-west-2/server1.yml"
         Parameters:
           NamePrefix: !Ref NamePrefix
           Domain: !Ref Domain
@@ -113,7 +113,7 @@
     Server2InstanceStack:
       Type: AWS::CloudFormation::Stack
       Properties:
-        TemplateURL: !Join [ /, [ !Ref AWSMusingsS3URL, gluster-poc-us-west-2/server2.yml ] ]
+        TemplateURL: !Sub "${AWSMusingsS3URL}/gluster-poc-us-west-2/server2.yml"
         Parameters:
           NamePrefix: !Ref NamePrefix
           Domain: !Ref Domain

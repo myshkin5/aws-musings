@@ -28,12 +28,12 @@
     ElasticsearchPrivateSubnet:
       Type: AWS::EC2::Subnet
       Properties:
-        CidrBlock: !Join [ ., [ !Ref ElasticsearchPrivateThreeOctetCIDRBlock, 0/24 ] ]
+        CidrBlock: !Sub "${ElasticsearchPrivateThreeOctetCIDRBlock}.0/24"
         AvailabilityZone: !Select [ "0", !GetAZs "" ]
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", private-subnet ] ]
+          Value: !Sub "${AWS::StackName}-private-subnet"
 
     ElasticsearchPrivateSubnetRouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
@@ -54,7 +54,7 @@
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", instance-sg ] ]
+          Value: !Sub "${AWS::StackName}-instance-sg"
         SecurityGroupIngress:
         - IpProtocol: -1
           CidrIp: 10.0.0.0/8

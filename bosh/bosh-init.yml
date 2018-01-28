@@ -62,7 +62,7 @@
         VpcId: !Ref VPCId
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref "AWS::StackName", server-sg ] ]
+          Value: !Sub "${AWS::StackName}-server-sg"
         SecurityGroupIngress:
         - IpProtocol: -1
           CidrIp: 10.0.0.0/8
@@ -77,7 +77,7 @@
           config:
             files:
               /etc/cfn/cfn-hup.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-hup.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/cfn-hup.conf"
                 context:
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
@@ -85,16 +85,16 @@
                 owner: root
                 group: root
               /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-auto-reloader.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/cfn-auto-reloader.conf"
                 context:
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: BOSHInitInstance
 
               /etc/dhcp/dhclient.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/dhclient.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/dhclient.conf"
                 context:
-                  FQDN: !Join [ "", [ bosh-init., !Ref DNSZone, ., !Ref FullyQualifiedInternalParentDNSZone ] ]
+                  FQDN: !Sub "bosh-init.${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
       Properties:
         DisableApiTermination: false
         ImageId: !FindInMap [ AMIRegionMap, !Ref "AWS::Region", standard ]
@@ -103,70 +103,71 @@
         Monitoring: false
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref DNSZone, bosh-init ] ]
-        PrivateIpAddress: !Join [ ., [ !Ref ManagementThreeOctetCIDRBlock, 10 ] ]
+          Value: !Sub "${DNSZone}-bosh-init"
+        PrivateIpAddress: !Sub "${ManagementThreeOctetCIDRBlock}.10"
         SubnetId: !Ref ManagementSubnetId
         SecurityGroupIds: [ !Ref BOSHInitSecurityGroup ]
         UserData:
           Fn::Base64:
-            !Join [ "", [
-              "#!/bin/bash\n",
+            Fn::Sub:
+              - |
+                #!/bin/bash
 
-              "set -e -x\n",
+                set -e -x
 
-              "export HOSTNAME=bosh-init\n",
-              "export STACK_NAME=\"", !Ref "AWS::StackName", "\"\n",
-              "export RESOURCE=BOSHInitInstance\n",
-              "export REGION=\"", !Ref "AWS::Region", "\"\n",
-              "export AWS_MUSINGS_S3_URL=\"", !Ref "AWSMusingsS3URL", "\"\n",
+                export HOSTNAME=bosh-init
+                export STACK_NAME="${AWS::StackName}"
+                export RESOURCE=BOSHInitInstance
+                export REGION="${AWS::Region}
+                export AWS_MUSINGS_S3_URL="${AWSMusingsS3URL}"
 
-              "export EXTRA_PACKAGES=\"build-essential zlibc zlib1g-dev ruby ruby-dev openssl ",
-                "libxslt-dev libxml2-dev libssl-dev libreadline6 libreadline6-dev libyaml-dev ",
-                "libsqlite3-dev sqlite3 libpq-dev libmysqlclient-dev\"\n",
+                export EXTRA_PACKAGES="build-essential zlibc zlib1g-dev ruby ruby-dev openssl libxslt-dev libxml2-dev libssl-dev libreadline6 libreadline6-dev libyaml-dev libsqlite3-dev sqlite3 libpq-dev libmysqlclient-dev"
 
-              "curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh\n",
-              "source /tmp/bootstrap.sh\n",
-              "aws-bootstrap\n",
+                curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh
+                source /tmp/bootstrap.sh
+                aws-bootstrap
 
-              "export AVAILABILITY_ZONE=\"", !Select [ "0", !GetAZs "" ], "\"\n",
-              "export AWS_ACCESS_KEY_ID=\"", !Ref AWSAccessKeyId, "\"\n",
-              "export AWS_SECRET_ACCESS_KEY=\"", !Ref AWSSecretAccessKey, "\"\n",
-              "export MANAGEMENT_THREE_OCTET_CIDR_BLOCK=\"", !Ref ManagementThreeOctetCIDRBlock, "\"\n",
-              "export BOSH_DIRECTOR_SECURITY_GROUP_ID=\"", !Ref BOSHDirectorSecurityGroupId, "\"\n",
-              "export PRIVATE_KEY=\"", !Ref PrivateKey, "\"\n",
-              "export STACK_PREFIX=\"", !Ref StackPrefix, "\"\n",
-              "export SUBNET_ID=\"", !Ref ManagementSubnetId, "\"\n",
+                export AVAILABILITY_ZONE="${availabilityZone}"
+                export AWS_ACCESS_KEY_ID="${AWSAccessKeyId}"
+                export AWS_SECRET_ACCESS_KEY="${AWSSecretAccessKey}"
+                export MANAGEMENT_THREE_OCTET_CIDR_BLOCK="${ManagementThreeOctetCIDRBlock}"
+                export BOSH_DIRECTOR_SECURITY_GROUP_ID="${BOSHDirectorSecurityGroupId}"
+                export PRIVATE_KEY="${PrivateKey}"
+                export STACK_PREFIX="${StackPrefix}"
+                export SUBNET_ID="${ManagementSubnetId}"
 
-              "mkdir -p /usr/local/bosh-init\n",
-              "cd /usr/local/bosh-init\n",
+                mkdir -p /usr/local/bosh-init
+                cd /usr/local/bosh-init
 
-              "curl --output bosh.yml --silent $AWS_MUSINGS_S3_URL/bosh/bosh.yml\n",
-              "sed -i -e \"s/AVAILABILITY_ZONE/$AVAILABILITY_ZONE/g\" bosh.yml\n",
-              "sed -i -e \"s/AWS_ACCESS_KEY_ID/$AWS_ACCESS_KEY_ID/g\" bosh.yml\n",
-              "sed -i -e \"s#AWS_SECRET_ACCESS_KEY#$AWS_SECRET_ACCESS_KEY#g\" bosh.yml\n",
-              "sed -i -e \"s/BOSH_DIRECTOR_SECURITY_GROUP_ID/$BOSH_DIRECTOR_SECURITY_GROUP_ID/g\" bosh.yml\n",
-              "sed -i -e \"s/MANAGEMENT_THREE_OCTET_CIDR_BLOCK/$MANAGEMENT_THREE_OCTET_CIDR_BLOCK/g\" bosh.yml\n",
-              "sed -i -e \"s/REGION/$REGION/g\" bosh.yml\n",
-              "sed -i -e \"s/STACK_PREFIX/$STACK_PREFIX/g\" bosh.yml\n",
-              "sed -i -e \"s/SUBNET_ID/$SUBNET_ID/g\" bosh.yml\n",
-              "echo \"$PRIVATE_KEY\" > bosh.pem\n",
+                curl --output bosh.yml --silent $AWS_MUSINGS_S3_URL/bosh/bosh.yml
+                sed -i -e "s/AVAILABILITY_ZONE/$AVAILABILITY_ZONE/g" bosh.yml
+                sed -i -e "s/AWS_ACCESS_KEY_ID/$AWS_ACCESS_KEY_ID/g\" bosh.yml
+                sed -i -e "s#AWS_SECRET_ACCESS_KEY#$AWS_SECRET_ACCESS_KEY#g\" bosh.yml
+                sed -i -e "s/BOSH_DIRECTOR_SECURITY_GROUP_ID/$BOSH_DIRECTOR_SECURITY_GROUP_ID/g" bosh.yml
+                sed -i -e "s/MANAGEMENT_THREE_OCTET_CIDR_BLOCK/$MANAGEMENT_THREE_OCTET_CIDR_BLOCK/g" bosh.yml
+                sed -i -e "s/REGION/$REGION/g" bosh.yml
+                sed -i -e "s/STACK_PREFIX/$STACK_PREFIX/g" bosh.yml
+                sed -i -e "s/SUBNET_ID/$SUBNET_ID/g" bosh.yml
+                echo "$PRIVATE_KEY" > bosh.pem
 
-              "curl --output bosh-init --silent ",
-                "https://s3.amazonaws.com/bosh-init-artifacts/bosh-init-0.0.81-linux-amd64\n",
-              "chmod +x bosh-init\n",
+                curl --output bosh-init --silent \
+                  https://s3.amazonaws.com/bosh-init-artifacts/bosh-init-0.0.81-linux-amd64
+                chmod +x bosh-init
 
-              "gem install bosh_cli --no-ri --no-rdoc\n",
+                gem install bosh_cli --no-ri --no-rdoc
 
-              "curl --output /etc/init.d/bosh-init-run-once --silent $AWS_MUSINGS_S3_URL/bosh/bosh-init-run-once.sh\n",
-              "chmod +x /etc/init.d/bosh-init-run-once\n",
-              "sed -i -e \"s/STACK_NAME/$STACK_NAME/g\" /etc/init.d/bosh-init-run-once\n",
-              "sed -i -e \"s/RESOURCE/$RESOURCE/g\" /etc/init.d/bosh-init-run-once\n",
-              "sed -i -e \"s/REGION/$REGION/g\" /etc/init.d/bosh-init-run-once\n",
-              "update-rc.d bosh-init-run-once defaults 99\n",
+                curl --output /etc/init.d/bosh-init-run-once --silent $AWS_MUSINGS_S3_URL/bosh/bosh-init-run-once.sh
+                chmod +x /etc/init.d/bosh-init-run-once
+                sed -i -e "s/STACK_NAME/$STACK_NAME/g" /etc/init.d/bosh-init-run-once
+                sed -i -e "s/RESOURCE/$RESOURCE/g" /etc/init.d/bosh-init-run-once
+                sed -i -e "s/REGION/$REGION/g" /etc/init.d/bosh-init-run-once
+                update-rc.d bosh-init-run-once defaults 99
 
-              "# Success (aws-signal-success) is signalled from the run-once script\n",
-              "reboot\n"
-            ] ]
+                # Success (aws-signal-success) is signalled from the run-once script
+                reboot
+              - {
+                availabilityZone: !Select [ "0", !GetAZs "" ]
+              }
       CreationPolicy:
         ResourceSignal:
           Timeout: PT40M

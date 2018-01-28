@@ -17,16 +17,16 @@
         Description: "Returns {\"Hello\":\"World\"}"
         Runtime: nodejs
         Handler: index.handler
-        Role: !Join [ "", [ "arn:aws:iam::", !Ref "AWS::AccountId", ":role/", !Ref LambdaIAMRole ] ]
+        Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/${LambdaIAMRole}"
         Code:
-          ZipFile: !Join [ "\n", [
-            "'use strict';",
-            "console.log('Loading event');",
+          ZipFile: !Sub |
+            'use strict';
+            console.log('Loading event');
 
-            "exports.handler = function(event, context) {",
-            "  console.log('\"Hello\":\"World\"');",
-            "  context.done(null, {\"Hello\":\"World\"});  // SUCCESS with message",
-            "};" ] ]
+            exports.handler = function(event, context) {
+              console.log('\"Hello\":\"World\"');
+              context.done(null, {\"Hello\":\"World\"});  // SUCCESS with message
+            };
 
     GetHelloWithNameFunction:
       Type: AWS::Lambda::Function
@@ -35,17 +35,17 @@
         Description: "Returns {\"Hello\":\", a user-provided string, and \"}"
         Runtime: nodejs
         Handler: index.handler
-        Role: !Join [ "", [ "arn:aws:iam::", !Ref "AWS::AccountId", ":role/", !Ref LambdaIAMRole ] ]
+        Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/${LambdaIAMRole}"
         Code:
-          ZipFile: !Join [ "\n", [
-            "'use strict';",
-            "console.log('Loading event');",
+          ZipFile: !Sub |
+            'use strict';
+            console.log('Loading event');
 
-            "exports.handler = function(event, context) {",
-            "  var name = (event.name === undefined ? 'No-Name' : event.name);",
-            "  console.log('\"Hello\":\"' + name + '\"');",
-            "  context.done(null, {\"Hello\":name}); // SUCCESS with message",
-            "};" ] ]
+            exports.handler = function(event, context) {
+              var name = (event.name === undefined ? 'No-Name' : event.name);
+              console.log('\"Hello\":\"' + name + '\"');
+              context.done(null, {\"Hello\":name}); // SUCCESS with message
+            };
 
     MyDemoAPI:
       Type: AWS::ApiGateway::RestApi
@@ -70,9 +70,7 @@
         RestApiId: !Ref MyDemoAPI
         Integration:
           Type: AWS
-          Uri: !Join [ "", [ "arn:aws:apigateway:", !Ref "AWS::Region",
-            ":lambda:path/2015-03-31/functions/arn:aws:lambda:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId",
-            ":function:GetHelloWorld/invocations" ] ]
+          Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:GetHelloWorld/invocations"
           IntegrationHttpMethod: GET
           IntegrationResponses:
           - StatusCode: 200
@@ -90,8 +88,7 @@
         Action: lambda:InvokeFunction
         FunctionName: !GetAtt GetHelloWorldFunction.Arn
         Principal: apigateway.amazonaws.com
-        SourceArn: !Join [ "", [ "arn:aws:execute-api:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId",
-          ":", !Ref MyDemoAPI, "/*/GET/mydemoresource" ] ]
+        SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${MyDemoAPI}/*/GET/mydemoresource"
       DependsOn: [ GetHelloWorldGETMethod ]
 
     GetHelloWithNamePOSTMethod:
@@ -103,9 +100,7 @@
         RestApiId: !Ref MyDemoAPI
         Integration:
           Type: AWS
-          Uri: !Join [ "", [ "arn:aws:apigateway:", !Ref "AWS::Region",
-            ":lambda:path/2015-03-31/functions/arn:aws:lambda:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId",
-            ":function:GetHelloWithName/invocations" ] ]
+          Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:GetHelloWithName/invocations"
           IntegrationHttpMethod: GET
           IntegrationResponses:
           - StatusCode: 200
@@ -123,8 +118,7 @@
         Action: lambda:InvokeFunction
         FunctionName: !GetAtt GetHelloWithNameFunction.Arn
         Principal: apigateway.amazonaws.com
-        SourceArn: !Join [ "", [ "arn:aws:execute-api:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId",
-          ":", !Ref MyDemoAPI, "/*/POST/mydemoresource" ] ]
+        SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${MyDemoAPI}/*/POST/mydemoresource"
       DependsOn: [ GetHelloWithNamePOSTMethod ]
 
     # TODO: Because the previous two TODOs left the API in a bad state this deployment doesn't work. Moving the

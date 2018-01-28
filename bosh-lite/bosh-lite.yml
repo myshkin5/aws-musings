@@ -74,7 +74,7 @@
           config:
             files:
               /etc/cfn/cfn-hup.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-hup.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/cfn-hup.conf"
                 context:
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
@@ -82,16 +82,15 @@
                 owner: root
                 group: root
               /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/cfn-auto-reloader.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/cfn-auto-reloader.conf"
                 context:
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: BOSHLiteInstance
               /etc/dhcp/dhclient.conf:
-                source: !Join [ /, [ !Ref AWSMusingsS3URL, common/dhclient.conf ] ]
+                source: !Sub "${AWSMusingsS3URL}/common/dhclient.conf"
                 context:
-                  FQDN: !Join [ "", [ !Ref BOSHLiteInstanceName,
-                    !Ref DNSZone, ., !Ref FullyQualifiedInternalParentDNSZone ] ]
+                  FQDN: !Sub "${BOSHLiteInstanceName}${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
       Properties:
         AssociatePublicIpAddress: false
         BlockDeviceMappings:
@@ -108,46 +107,42 @@
         SpotPrice: !Ref BOSHLiteSpotPrice
         UserData:
           Fn::Base64:
-            !Join [ "", [
-              "#!/bin/bash\n",
+            !Sub |
+              #!/bin/bash
 
-              "set -e -x\n",
+              set -e -x
 
-              "export HOSTNAME=", !Ref BOSHLiteInstanceName, "\n",
-              "export STACK_NAME=\"", !Ref "AWS::StackName", "\"\n",
-              "export RESOURCE=BOSHLiteLaunchConfig\n",
-              "export REGION=\"", !Ref "AWS::Region", "\"\n",
-              "export AWS_MUSINGS_S3_URL=\"", !Ref AWSMusingsS3URL, "\"\n",
+              export HOSTNAME=${BOSHLiteInstanceName}
+              export STACK_NAME="${AWS::StackName}"
+              export RESOURCE=BOSHLiteLaunchConfig
+              export REGION="${AWS::Region}"
+              export AWS_MUSINGS_S3_URL="${AWSMusingsS3URL}"
 
-              "export EXTRA_PACKAGES=\"bundler\"\n",
-              "export AUTO_SCALING_GROUP=BOSHLiteAutoScalingGroup\n",
+              export EXTRA_PACKAGES="bundler"
+              export AUTO_SCALING_GROUP=BOSHLiteAutoScalingGroup
 
-              "curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh\n",
-              "source /tmp/bootstrap.sh\n",
-              "aws-bootstrap\n",
+              curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh
+              source /tmp/bootstrap.sh
+              aws-bootstrap
 
-              "export BOSH_LITE_URL=\"", !Join [ ., [ !Ref DNSZone,
-                !Ref FullyQualifiedExternalParentDNSZone ] ], "\"\n",
-              "export BOSH_LITE_CF_ADMIN_PASSWORD=\"", !Ref BOSHLiteCFAdminPassword, "\"\n",
+              export BOSH_LITE_URL="${DNSZone}.${FullyQualifiedExternalParentDNSZone}"
+              export BOSH_LITE_CF_ADMIN_PASSWORD="${BOSHLiteCFAdminPassword}"
 
-              "curl --output /etc/init.d/bosh-lite-run-once --silent ",
-                "$AWS_MUSINGS_S3_URL/bosh-lite/run-once.sh\n",
-              "chmod +x /etc/init.d/bosh-lite-run-once\n",
-              "sed -i -e \"s/STACK_NAME/$STACK_NAME/g\" /etc/init.d/bosh-lite-run-once\n",
-              "sed -i -e \"s/RESOURCE/$AUTO_SCALING_GROUP/g\" /etc/init.d/bosh-lite-run-once\n",
-              "sed -i -e \"s/REGION/$REGION/g\" /etc/init.d/bosh-lite-run-once\n",
-              "update-rc.d bosh-lite-run-once defaults 99\n",
+              curl --output /etc/init.d/bosh-lite-run-once --silent "$AWS_MUSINGS_S3_URL/bosh-lite/run-once.sh"
+              chmod +x /etc/init.d/bosh-lite-run-once
+              sed -i -e "s/STACK_NAME/$STACK_NAME/g" /etc/init.d/bosh-lite-run-once
+              sed -i -e "s/RESOURCE/$AUTO_SCALING_GROUP/g" /etc/init.d/bosh-lite-run-once
+              sed -i -e "s/REGION/$REGION/g" /etc/init.d/bosh-lite-run-once
+              update-rc.d bosh-lite-run-once defaults 99
 
-              "curl --output /usr/local/bootstrap-bosh-lite.sh ",
-                "--silent $AWS_MUSINGS_S3_URL/bosh-lite/bootstrap.sh\n",
-              "sed -i -e \"s/BOSH_LITE_URL/$BOSH_LITE_URL/g\" /usr/local/bootstrap-bosh-lite.sh\n",
-              "sed -i -e \"s/BOSH_LITE_CF_ADMIN_PASSWORD/$BOSH_LITE_CF_ADMIN_PASSWORD/g\" ",
-                "/usr/local/bootstrap-bosh-lite.sh\n",
-              "chmod +x /usr/local/bootstrap-bosh-lite.sh\n",
+              curl --output /usr/local/bootstrap-bosh-lite.sh --silent "$AWS_MUSINGS_S3_URL/bosh-lite/bootstrap.sh"
+              sed -i -e "s/BOSH_LITE_URL/$BOSH_LITE_URL/g" /usr/local/bootstrap-bosh-lite.sh
+              sed -i -e "s/BOSH_LITE_CF_ADMIN_PASSWORD/$BOSH_LITE_CF_ADMIN_PASSWORD/g" \
+                /usr/local/bootstrap-bosh-lite.sh
+              chmod +x /usr/local/bootstrap-bosh-lite.sh
 
-              "# Success (aws-signal-success) is signalled from the run-once script\n",
-              "reboot\n"
-            ] ]
+              # Success (aws-signal-success) is signalled from the run-once script
+              reboot
     BOSHLiteAutoScalingGroup:
       Type: AWS::AutoScaling::AutoScalingGroup
       Properties:
@@ -157,7 +152,7 @@
         MinSize: 1
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref DNSZone, !Ref BOSHLiteInstanceName, asg ] ]
+          Value: !Sub "${DNSZone}-${BOSHLiteInstanceName}-asg"
           PropagateAtLaunch: true
         VPCZoneIdentifier: [ !Ref BOSHLitePrivateSubnetId ]
       CreationPolicy:
@@ -168,10 +163,10 @@
     BOSHLiteLoadBalancer:
       Type: AWS::ElasticLoadBalancing::LoadBalancer
       Properties:
-        LoadBalancerName: !Join [ -, [ !Ref DNSZone, !Ref BOSHLiteInstanceName, elb ] ]
+        LoadBalancerName: !Sub "${DNSZone}-${BOSHLiteInstanceName}-elb"
         Tags:
         - Key: Name
-          Value: !Join [ -, [ !Ref DNSZone, !Ref BOSHLiteInstanceName, elb ] ]
+          Value: !Sub "${DNSZone}-${BOSHLiteInstanceName}-elb"
         HealthCheck:
           Target: TCP:443
           HealthyThreshold: 3
@@ -189,8 +184,8 @@
     BOSHLiteLoadBalancerRecordSet:
       Type: AWS::Route53::RecordSet
       Properties:
-        HostedZoneName: !Join [ "", [ !Ref FullyQualifiedExternalParentDNSZone, . ] ]
-        Name: !Join [ ., [ *, !Ref DNSZone, !Ref FullyQualifiedExternalParentDNSZone, "" ] ]
+        HostedZoneName: !Sub "${FullyQualifiedExternalParentDNSZone}."
+        Name: !Sub "*.${DNSZone}.${FullyQualifiedExternalParentDNSZone}"
         AliasTarget:
           DNSName: !GetAtt BOSHLiteLoadBalancer.CanonicalHostedZoneName
           HostedZoneId: !GetAtt BOSHLiteLoadBalancer.CanonicalHostedZoneNameID
