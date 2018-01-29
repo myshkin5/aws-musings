@@ -13,7 +13,7 @@ Outputs from the [infrastructure sub-project](../infrastructure) are required in
 
 Creates a private subnet and security groups used by elasticsearch instances.
 
- | |
+| | |
 ---|---
  Definition | [`elasticsearch-infrastructure.yml`](./elasticsearch-infrastructure.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/elasticsearch/elasticsearch-infrastructure.yml
@@ -40,7 +40,7 @@ Creates a private subnet and security groups used by elasticsearch instances.
 
 Creates a single elasticsearch instance.
 
- | |
+| | |
 ---|---
  Definition | [`elasticsearch.yml`](./elasticsearch.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/elasticsearch/elasticsearch.yml

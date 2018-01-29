@@ -9,7 +9,7 @@ Playing around with the [AWS API Gateway](https://aws.amazon.com/api-gateway/). 
 
 Creates my API.
 
- | |
+| | |
 ---|---
  Definition | [`my-api.yml`](./my-api.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/my-api/my-api.yml

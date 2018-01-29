@@ -33,7 +33,9 @@ Creates the core constructs starting with the VPC. This project is a prerequisit
 
 Just creates a VPC.
 
- | |
+Note that because CloudFormation currently can't create a VPC with IPv6, this stack can't be used with the subsequent stacks if IPv6 support is required. Instead of using this stack, manually create a VPC with IPv6 support (via the console or CLI) then pass `VPCId` and `VPCIPv656CIDRPrefix` parameters to the lower stacks.
+
+| | |
 ---|---
  Definition | [`vpc.yml`](./vpc.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpc.yml
@@ -56,7 +58,7 @@ Just creates a VPC.
 
 Creates network artifacts to route traffic through a VPN.
 
- | |
+| | |
 ---|---
  Definition | [`vpn.yml`](./vpn.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpn.yml
@@ -81,7 +83,7 @@ Creates network artifacts to route traffic through a VPN.
 
 Creates network routing artifacts for public subnets along with jump box and NAT instances.
 
- | |
+| | |
 ---|---
  Definition | [`public-infrastructure.yml`](./public-infrastructure.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public-infrastructure.yml
@@ -120,7 +122,7 @@ Creates network routing artifacts for public subnets along with jump box and NAT
 
 Creates network routing artifacts for private subnets.
 
- | |
+| | |
 ---|---
  Definition | [`private-infrastructure.yml`](./private-infrastructure.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private-infrastructure.yml
@@ -149,7 +151,9 @@ Creates network routing artifacts for private subnets.
 
 The full stack isn't really a stack but a set of convenience shell scripts for creating and deleting the [VPC](#vpc), [public infrastructure](#public-infrastructure), and [private infrastructure](#private-infrastructure) stacks in the proper order. Note that create script outputs several sets of environment variables that all need to be exported for use in other stacks. The create script itself handles passing the environment variables from one sub-script to another.
 
- | |
+See [VPC](#vpc) above if IPv6 support is required (do not use these scripts for IPv6 support).
+
+| | |
 ---|---
  Create Script | [`scripts/create-full-stack.sh`](scripts/create-full-stack.sh)
  Delete Script | [`scripts/delete-full-stack.sh`](scripts/delete-full-stack.sh)

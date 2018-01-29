@@ -9,7 +9,7 @@ Playing around with the [AWS API Gateway](https://aws.amazon.com/api-gateway/). 
 
 Creates Lambda functions and API.
 
- | |
+| | |
 ---|---
  Definition | [`api-gateway-with-lambda.yml`](./api-gateway-with-lambda.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/call-lambda-synchronously/api-gateway-with-lambda.yml

@@ -13,7 +13,7 @@ Outputs from the [infrastructure sub-project](../infrastructure) are required in
 
 Creates a public subnet, a private subnet and security groups all used by bosh-lite instances and ELBs.
 
- | |
+| | |
 ---|---
  Definition | [`bosh-lite-infrastructure.yml`](./bosh-lite-infrastructure.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/bosh-lite/bosh-lite-infrastructure.yml
@@ -44,7 +44,7 @@ Creates a public subnet, a private subnet and security groups all used by bosh-l
 
 Creates a single bosh-lite instance.
 
- | |
+| | |
 ---|---
  Definition | [`bosh-lite.yml`](./bosh-lite.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/bosh-lite/bosh-lite.yml
