@@ -10,22 +10,33 @@
       Description: S3 path to aws-musings.
     DNSZone:
       Type: String
-      Description: The DNS zone name of the VPC (should not end in 'vpc', .FullyQualifiedInternalParentDNSZone will be
+      Description: |
+        The DNS zone name of the VPC (should not end in 'vpc', The fully qualified external and internal zones will be
         appended).
       AllowedPattern: "[a-z0-9\\-]*"
       ConstraintDescription: must contain only lowercase letters, numbers and dashes
+    ExternalHostedZoneId:
+      Type: String
+      Description: |
+        The external DNS zone to which external DNS records will be added. Optional, external records will be created
+        if specified.
     FullyQualifiedExternalParentDNSZone:
       Type: String
-      Description: The external parent DNS zone (should not start or end with .). Optional, Route 53 resources will be
+      Description: |
+        The public DNS zone configured in Route 53 (should not start or end with .). Optional, external records will be
         created if specified.
       AllowedPattern: "([a-z][a-z0-9\\-.]*[a-z0-9])|(^$)"
       ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots, optional
     FullyQualifiedInternalParentDNSZone:
       Type: String
-      Default: compute.local
-      Description: The internal parent DNS zone (should not start or end with .).
+      Description: |
+        The internal parent DNS zone (should not start or end with .). Note since this is a private zone and only used
+        internally, this DNS zone can be any valid DNS domain (e.g.: example.com).
       AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
       ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
+    InternalHostedZoneId:
+      Type: AWS::Route53::HostedZone::Id
+      Description: The internal DNS zone to which internal DNS records will be added.
     InternalKeyName:
       Type: AWS::EC2::KeyPair::KeyName
       Default: internal
@@ -61,8 +72,9 @@
       ConstraintDescription: must contain the first three quartets and half of the fourth quartet, optional
     VPNGatewayId:
       Type: String
-      Description: The VPN gateway to which route tables will be connected via route propagation. Optional, no
-        propagation occurs if not specified.
+      Description: |
+        The VPN gateway to which route tables will be connected via route propagation. Optional, no propagation occurs
+        if not specified.
 
   Mappings:
     AMIRegionMap:
@@ -285,9 +297,11 @@
           AWSMusingsS3URL: !Ref AWSMusingsS3URL
           DNSZone: !Ref DNSZone
           EIPAddress: !Ref JumpBoxEIPAddress
+          ExternalHostedZoneId: !Ref ExternalHostedZoneId
           FullyQualifiedExternalParentDNSZone: !Ref FullyQualifiedExternalParentDNSZone
           FullyQualifiedInternalParentDNSZone: !Ref FullyQualifiedInternalParentDNSZone
           ImageId: !FindInMap [ AMIRegionMap, !Ref "AWS::Region", standard ]
+          InternalHostedZoneId: !Ref InternalHostedZoneId
           KeyName: !Ref JumpBoxKeyName
           SecurityGroupId: !Ref JumpBoxSecurityGroup
           SubnetId: !Ref PublicSubnetA
@@ -301,6 +315,7 @@
           DNSZone: !Ref DNSZone
           FullyQualifiedInternalParentDNSZone: !Ref FullyQualifiedInternalParentDNSZone
           ImageId: !FindInMap [ AMIRegionMap, !Ref "AWS::Region", nat ]
+          InternalHostedZoneId: !Ref InternalHostedZoneId
           KeyName: !Ref InternalKeyName
           SecurityGroupId: !Ref NATSecurityGroup
           SubnetId: !Ref PublicSubnetB

@@ -15,8 +15,8 @@
       Description: The id of the bosh-lite ELB security group.
     BOSHLiteELBSSLCertificateId:
       Type: String
-      Description: TODO: Not currently used. The ARN id of the SSL/TLS certificate used by the ELB to communicate with
-        clients.
+      Description: |
+        TODO: Not currently used. The ARN id of the SSL/TLS certificate used by the ELB to communicate with clients.
     BOSHLiteImageId:
       Type: AWS::EC2::Image::Id
       Description: The image id of the bosh-lite instance.
@@ -87,10 +87,6 @@
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: BOSHLiteInstance
-              /etc/dhcp/dhclient.conf:
-                source: !Sub "${AWSMusingsS3URL}/common/dhclient.conf"
-                context:
-                  FQDN: !Sub "${BOSHLiteInstanceName}${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
       Properties:
         AssociatePublicIpAddress: false
         BlockDeviceMappings:

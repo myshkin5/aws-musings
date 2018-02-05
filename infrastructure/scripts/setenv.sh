@@ -8,10 +8,6 @@ fi
 if [[ $DNS_ZONE == "" ]] ; then
     DNS_ZONE=dev
 fi
-if [[ $FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE == "" ]] ; then
-    FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE=$(yq r $(dirname $0)/../public-infrastructure.yml \
-        Parameters.FullyQualifiedInternalParentDNSZone.Default)
-fi
 if [[ $INTERNAL_KEY_NAME == "" ]] ; then
     INTERNAL_KEY_NAME=$(yq r $(dirname $0)/../public-infrastructure.yml Parameters.InternalKeyName.Default)
 fi

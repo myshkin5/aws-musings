@@ -23,11 +23,17 @@
         created if specified.
       AllowedPattern: "([a-z][a-z0-9\\-.]*[a-z0-9])|(^$)"
       ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots, optional
+    ExternalHostedZoneId:
+      Type: String
+      Description: The external DNS zone to which an external DNS A record will be added for the jump box.
     FullyQualifiedInternalParentDNSZone:
       Type: String
       Description: The internal parent DNS zone (should not start or end with .).
       AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
       ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
+    InternalHostedZoneId:
+      Type: AWS::Route53::HostedZone::Id
+      Description: The internal DNS zone to which an internal DNS A record will be added for the jump box.
     ImageId:
       Type: AWS::EC2::Image::Id
       Description: The AMI used to create the instance.
@@ -46,7 +52,9 @@
 
   Conditions:
     EIPAddressDefined: !Not [ !Equals [ !Ref EIPAddress, "" ] ]
-    FullyQualifiedExternalParentDNSZoneDefined: !Not [ !Equals [ !Ref FullyQualifiedExternalParentDNSZone, "" ] ]
+    FullyQualifiedExternalParentDNSZoneDefined: !And
+      - !Not [ !Equals [ !Ref FullyQualifiedExternalParentDNSZone, "" ] ]
+      - !Not [ !Equals [ !Ref ExternalHostedZoneId, "" ] ]
 
   Resources:
     JumpBoxInstance:
@@ -69,11 +77,6 @@
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: JumpBoxInstance
-
-              /etc/dhcp/dhclient.conf:
-                source: !Sub "${AWSMusingsS3URL}/common/dhclient.conf"
-                context:
-                  FQDN: !Sub "jump-box.${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
       Properties:
         DisableApiTermination: false
         ImageId: !Ref ImageId
@@ -112,7 +115,7 @@
               reboot
       CreationPolicy:
         ResourceSignal:
-          Timeout: PT20M
+          Timeout: PT10M
 
     JumpBoxEIPAssociation:
       Type: AWS::EC2::EIPAssociation
@@ -122,14 +125,25 @@
         InstanceId: !Ref JumpBoxInstance
       DependsOn: JumpBoxInstance
 
-    JumpBoxRecordSet:
+    PublicJumpBoxRecordSet:
       Type: AWS::Route53::RecordSet
       Condition: FullyQualifiedExternalParentDNSZoneDefined
       Properties:
-        HostedZoneName: !Sub "${FullyQualifiedExternalParentDNSZone}."
+        HostedZoneId: !Ref ExternalHostedZoneId
         Name: !Sub "jump-box.${DNSZone}.${FullyQualifiedExternalParentDNSZone}"
         ResourceRecords:
         - !GetAtt JumpBoxInstance.PublicIp
+        TTL: 300
+        Type: A
+      DependsOn: JumpBoxInstance
+
+    PrivateJumpBoxRecordSet:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneId: !Ref InternalHostedZoneId
+        Name: !Sub "jump-box.${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
+        ResourceRecords:
+        - !GetAtt JumpBoxInstance.PrivateIp
         TTL: 300
         Type: A
       DependsOn: JumpBoxInstance

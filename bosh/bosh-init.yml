@@ -90,11 +90,6 @@
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: BOSHInitInstance
-
-              /etc/dhcp/dhclient.conf:
-                source: !Sub "${AWSMusingsS3URL}/common/dhclient.conf"
-                context:
-                  FQDN: !Sub "bosh-init.${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
       Properties:
         DisableApiTermination: false
         ImageId: !FindInMap [ AMIRegionMap, !Ref "AWS::Region", standard ]

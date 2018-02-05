@@ -22,6 +22,7 @@ run-and-check() {
 >&2 echo -e "\033[1m\033[42m Starting...   \033[0m"
 
 eval $(run-and-check $SCRIPTS_DIR/create-vpc.sh $@)
+eval $(run-and-check $SCRIPTS_DIR/create-internal-dns.sh $@)
 eval $(run-and-check $SCRIPTS_DIR/create-public-infrastructure.sh $@)
 eval $(run-and-check $SCRIPTS_DIR/create-private-infrastructure.sh $@)
 

@@ -22,8 +22,10 @@ aws cloudformation create-stack --stack-name $STACK_NAME \
     --template-url $AWS_MUSINGS_S3_URL/infrastructure/public-infrastructure.yml \
     --parameters ParameterKey=AWSMusingsS3URL,ParameterValue=$AWS_MUSINGS_S3_URL \
         ParameterKey=DNSZone,ParameterValue=$DNS_ZONE \
+        ParameterKey=ExternalHostedZoneId,ParameterValue=$EXTERNAL_HOSTED_ZONE_ID \
         ParameterKey=FullyQualifiedExternalParentDNSZone,ParameterValue=$FULLY_QUALIFIED_EXTERNAL_PARENT_DNS_ZONE \
         ParameterKey=FullyQualifiedInternalParentDNSZone,ParameterValue=$FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE \
+        ParameterKey=InternalHostedZoneId,ParameterValue=$INTERNAL_HOSTED_ZONE_ID \
         ParameterKey=InternalKeyName,ParameterValue=$INTERNAL_KEY_NAME \
         ParameterKey=JumpBoxEIPAddress,ParameterValue=$JUMP_BOX_EIP_ADDRESS \
         ParameterKey=JumpBoxKeyName,ParameterValue=$JUMP_BOX_KEY_NAME \

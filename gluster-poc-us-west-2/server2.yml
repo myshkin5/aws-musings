@@ -49,11 +49,6 @@
                   REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: Instance2
 
-              /etc/dhcp/dhclient.conf:
-                source: !Sub "${AWSMusingsS3URL}/common/dhclient.conf"
-                context:
-                  FQDN: !Sub "${NamePrefix}2.${Domain}"
-
               /home/ec2-user/.bashrc:
                 source: !Sub "${AWSMusingsS3URL}/common/bashrc.sh"
                 mode: 000644

@@ -17,6 +17,9 @@
       Description: The internal parent DNS zone (should not start or end with .).
       AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
       ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
+    InternalHostedZoneId:
+      Type: AWS::Route53::HostedZone::Id
+      Description: The internal DNS zone to which an internal DNS A record will be added for the NAT server.
     ImageId:
       Type: AWS::EC2::Image::Id
       Description: The AMI used to create the instance.
@@ -51,11 +54,6 @@
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: NATInstance
-
-              /etc/dhcp/dhclient.conf:
-                source: !Sub "${AWSMusingsS3URL}/common/dhclient.conf"
-                context:
-                  FQDN: !Sub "nat.${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
       Properties:
         DisableApiTermination: false
         SourceDestCheck: false
@@ -96,6 +94,17 @@
       CreationPolicy:
         ResourceSignal:
           Timeout: PT10M
+
+    PrivateNATRecordSet:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneId: !Ref InternalHostedZoneId
+        Name: !Sub "nat.${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
+        ResourceRecords:
+        - !GetAtt NATInstance.PrivateIp
+        TTL: 300
+        Type: A
+      DependsOn: NATInstance
 
   Outputs:
     NATInstanceId:

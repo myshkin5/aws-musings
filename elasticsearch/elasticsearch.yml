@@ -68,10 +68,6 @@
                   STACK_ID: !Ref "AWS::StackId"
                   REGION: !Ref "AWS::Region"
                   INSTANCE_NAME: ElasticsearchInstance
-              /etc/dhcp/dhclient.conf:
-                source: !Sub "${AWSMusingsS3URL}/common/dhclient.conf"
-                context:
-                  FQDN: !Sub "${ElasticsearchInstanceName}${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
       Properties:
         AssociatePublicIpAddress: false
         BlockDeviceMappings:

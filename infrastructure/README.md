@@ -23,7 +23,7 @@ Creates the core constructs starting with the VPC. This project is a prerequisit
     ssh-add $HOME/.ssh/id_rsa_internal
     ```
 
-3. **DNS Hosted Zone (optional):** Create a publicly accessible DNS hosted zone via the Route 53 console. The infrastructure project only uses this zone to create a DNS `A` record pointing to the `jump-box` instance (i.e.: `jump-box.prod.example.com` if [`DNSZone`](#dns-zone) is set to `prod` and [`FullyQualifiedExternalParentDNSZone`](#fully-qualified-external-parent-dns-zone) is set to `example.com`).
+3. **Public DNS Hosted Zone (optional):** Create a publicly accessible DNS hosted zone via the Route 53 console. The infrastructure project only uses this zone to create a DNS `A` record pointing to the `jump-box` instance (i.e.: `jump-box.prod.example.com` if [`DNSZone`](#dns-zone) is set to `prod` and [`FullyQualifiedExternalParentDNSZone`](#fully-qualified-external-parent-dns-zone) is set to `example.com`). Also set `ExternalHostedZoneId` (TODO).
 
 4. **Virtual Private Network (optional):** Deploy either an [AWS-compatible hardware or software VPN](https://aws.amazon.com/vpc/faqs/#C9). By doing so, the site of the VPN will have direct connectivity to your VPC without having to use the jump box.
 
@@ -79,6 +79,30 @@ Creates network artifacts to route traffic through a VPN.
 ---|---|---
  `VPNGatewayId` | `VPN_GATEWAY_ID` | The VPN gateway to which route tables will be connected via route propagation.
 
+## Internal DNS
+
+Creates an internal DNS hosted zone. Note this is a separate stack as the private zone it creates can be shared among several full infrastructure stacks.
+
+| | |
+---|---
+ Definition | [`internal-dns.yml`](./internal-dns.yml)
+ S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/internal-dns.yml
+ Create Script | [`scripts/create-internal-dns.sh`](scripts/create-internal-dns.sh)
+ Delete Script | [`scripts/delete-internal-dns.sh`](scripts/delete-internal-dns.sh)
+
+### Parameters
+
+ Name | Environment Variable | Required/Default | Description
+---|---|---|---
+ `FullyQualifiedInternalParentDNSZone` | `FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE` | Yes | The internal parent DNS zone (should not start or end with .). Note since this is a private zone and only used internally, this DNS zone can be any valid DNS domain (e.g.: `example.com`). **REQUIRED, NO DEFAULT AND NOT SUPPLIED BY A PREVIOUS STACK**
+ `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
+
+### Outputs
+
+ Name | Environment Variable | Description
+---|---|---
+ `InternalHostedZoneId` | `INTERNAL_HOSTED_ZONE_ID` | The id of the internal DNS hosted zone.
+
 ## Public Infrastructure
 
 Creates network routing artifacts for public subnets along with jump box and NAT instances.
@@ -96,8 +120,10 @@ Creates network routing artifacts for public subnets along with jump box and NAT
 ---|---|---|---
  `AWSMusingsS3URL` | `AWS_MUSINGS_S3_URL` | No / (see [README](../README.md#environment-variables)) | The URL of the uploaded `aws-musings` artifacts on S3.
  `DNSZone` | `DNS_ZONE` | No / `dev` | <a name="dns-zone">The</a> DNS zone within the external and internal DNS zones (i.e.: with an external DNS of `example.com`, the full external zone would be `dev.example.com`.
- `FullyQualifiedExternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_EXTERNAL _PARENT_DNS_ZONE` (without space) | No | <a name="fully-qualified-external-parent-dns-zone">The</a> public DNS zone configured in Route 53. If not specified, no public DNS record will be created for the jump box.
- `FullyQualifiedInternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_INTERNAL _PARENT_DNS_ZONE` (without space) | No / `compute.local` | The private DNS zone (parent zone to the `DNSZone` specified above.
+ `ExternalHostedZoneId` | `EXTERNAL_HOSTED_ZONE_ID` | No | <a name="external-hosted-zone-id">The</a> external DNS zone to which external DNS records will be added. Optional, external records will be created if specified.
+ `FullyQualifiedExternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_EXTERNAL _PARENT_DNS_ZONE` (without space) | No | <a name="fully-qualified-external-parent-dns-zone">The</a> public DNS zone configured in Route 53 (should not start or end with .). Optional, external records will be created if specified.
+ `FullyQualifiedInternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_INTERNAL _PARENT_DNS_ZONE` (without space) | Yes | See the [Internal DNS stack](#internal-dns) above.
+ `InternalHostedZoneId` | `INTERNAL_HOSTED_ZONE_ID` | Yes | See the [Internal DNS stack](#internal-dns) above.
  `InternalKeyName` | `INTERNAL_KEY_NAME` | No / `internal` | <a name="internal-key-name">The</a> SSH key pair used to connect to internal EC2 instances.
  `JumpBoxEIPAddress` | `JUMP_BOX_EIP_ADDRESS` | No | The Elastic IP address that will be assigned to the jump box instance. If not specified, a new EIP address will be allocated. By pre-allocating an EIP and specifying it via this parameter, the jump box will be accessible with the same address even though the infrastructure may have been rebuilt repeatedly.
  `JumpBoxKeyName` | `JUMP_BOX_KEY_NAME` | No / `jump-box` | <a name="jump-box-key-name">The</a> SSH key pair used to connect to the jump box EC2 instances.
@@ -157,35 +183,3 @@ See [VPC](#vpc) above if IPv6 support is required (do not use these scripts for 
 ---|---
  Create Script | [`scripts/create-full-stack.sh`](scripts/create-full-stack.sh)
  Delete Script | [`scripts/delete-full-stack.sh`](scripts/delete-full-stack.sh)
-
-<!---
-DNS Notes (something here may be useful when resurrecting the DNS functionality)
-1. Create VPC stack [`vpc.yml`](./vpc.yml) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpc.yml).
-
-2. Create VPN stack [`vpn.yml`](./vpn.yml) (optional, S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpn.yml).
-
-3. Create Public Infrastructure stack [`public-infrastructure.yml`](./public-infrastructure.yml) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public-infrastructure.yml).
-
-  NOTE: IF THE STACK IN STEP 3 IS BURNED DOWN, THE STACK IN STEP 1 WILL BE IN A BAD STATE.
-  RESET THE VPC'S DHCP OPTIONS BEFORE ATTEMPTING TO REBUILD THE STACK IN STEP 3!!!!!!!!!!!
-
-  Burning down the step 3 stack sets the DHCP options to 'default' which probably doesn't
-  really exist. Set the DHCP options back to the DHCP options created by AWS (one with
-  domain-name-servers = AmazonProvidedDNS).
-
-4. Connect to DNS instance and execute the following:
-
-  ```bash
-  sudo chown named:named /var/log/named
-  ```
-
-  TODO: CF init should be able to resolve the chown issue eventually.
-
-5. Restarting is only necessary to make the previous change take effect.
-
-  ```bash
-  sudo /etc/init.d/named restart
-  ```
-
-6. Create Private Infrastructure stack [`private-infrastructure.yml`](./private-infrastructure.yml) (S3 URL [here](https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private-infrastructure.yml).
---->

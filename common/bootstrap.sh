@@ -48,7 +48,7 @@ aws-bootstrap() {
         # Can't use aws-error-exit here since AWS CLI hasn't been installed yet
         export DEBIAN_FRONTEND=noninteractive
         apt-get update
-        apt-get --yes upgrade
+        apt-get --yes dist-upgrade
         apt-get --yes install python-pip python-dev libffi-dev libssl-dev git $EXTRA_PACKAGES
         pip install 'requests[security]' --upgrade
         pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
