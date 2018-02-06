@@ -9,5 +9,5 @@ if [[ $DNS_ZONE == "" ]] ; then
     DNS_ZONE=dev
 fi
 if [[ $INTERNAL_KEY_NAME == "" ]] ; then
-    INTERNAL_KEY_NAME=$(yq r $(dirname $0)/../public-infrastructure.yml Parameters.InternalKeyName.Default)
+    INTERNAL_KEY_NAME=$(yq r $(dirname $0)/../public.yml Parameters.InternalKeyName.Default)
 fi

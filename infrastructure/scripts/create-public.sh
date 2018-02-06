@@ -4,10 +4,10 @@ set -e
 
 source $(dirname $0)/setenv.sh $@
 
-STACK_NAME=$STACK_PREFIX-public
+STACK_NAME=$STACK_PREFIX-infrastructure-public
 
 if [[ $JUMP_BOX_KEY_NAME == "" ]] ; then
-    JUMP_BOX_KEY_NAME=$(yq r $(dirname $0)/../public-infrastructure.yml Parameters.JumpBoxKeyName.Default)
+    JUMP_BOX_KEY_NAME=$(yq r $(dirname $0)/../public.yml Parameters.JumpBoxKeyName.Default)
 fi
 if [[ $JUMP_BOX_SSH_CIDR_IP == "" ]] ; then
     JUMP_BOX_SSH_CIDR_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)/32
@@ -15,11 +15,11 @@ if [[ $JUMP_BOX_SSH_CIDR_IP == "" ]] ; then
     >&2 echo "  Set JUMP_BOX_SSH_CIDR_IP to restrict access."
 fi
 if [[ $JUMP_BOX_INSTANCE_TYPE == "" ]] ; then
-    JUMP_BOX_INSTANCE_TYPE=$(yq r $(dirname $0)/../public-infrastructure.yml Parameters.JumpBoxInstanceType.Default)
+    JUMP_BOX_INSTANCE_TYPE=$(yq r $(dirname $0)/../public.yml Parameters.JumpBoxInstanceType.Default)
 fi
 
 aws cloudformation create-stack --stack-name $STACK_NAME \
-    --template-url $AWS_MUSINGS_S3_URL/infrastructure/public-infrastructure.yml \
+    --template-url $AWS_MUSINGS_S3_URL/infrastructure/public.yml \
     --parameters ParameterKey=AWSMusingsS3URL,ParameterValue=$AWS_MUSINGS_S3_URL \
         ParameterKey=DNSZone,ParameterValue=$DNS_ZONE \
         ParameterKey=ExternalHostedZoneId,ParameterValue=$EXTERNAL_HOSTED_ZONE_ID \

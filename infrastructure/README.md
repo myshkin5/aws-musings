@@ -40,7 +40,6 @@ Note that because CloudFormation currently can't create a VPC with IPv6, this st
  Definition | [`vpc.yml`](./vpc.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpc.yml
  Create Script | [`scripts/create-vpc.sh`](scripts/create-vpc.sh) (also see [full stack](#full-stack))
- Delete Script | [`scripts/delete-vpc.sh`](scripts/delete-vpc.sh) (also see [full stack](#full-stack))
 
 ### Parameters
 
@@ -63,7 +62,6 @@ Creates network artifacts to route traffic through a VPN.
  Definition | [`vpn.yml`](./vpn.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpn.yml
  Create Script | [`scripts/create-vpn.sh`](scripts/create-vpn.sh)
- Delete Script | [`scripts/delete-vpn.sh`](scripts/delete-vpn.sh)
 
 ### Parameters
 
@@ -88,7 +86,6 @@ Creates an internal DNS hosted zone. Note this is a separate stack as the privat
  Definition | [`internal-dns.yml`](./internal-dns.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/internal-dns.yml
  Create Script | [`scripts/create-internal-dns.sh`](scripts/create-internal-dns.sh)
- Delete Script | [`scripts/delete-internal-dns.sh`](scripts/delete-internal-dns.sh)
 
 ### Parameters
 
@@ -109,10 +106,9 @@ Creates network routing artifacts for public subnets along with jump box and NAT
 
 | | |
 ---|---
- Definition | [`public-infrastructure.yml`](./public-infrastructure.yml)
- S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public-infrastructure.yml
- Create Script | [`scripts/create-public-infrastructure.sh`](scripts/create-public-infrastructure.sh) (also see [full stack](#full-stack))
- Delete Script | [`scripts/delete-public-infrastructure.sh`](scripts/delete-public-infrastructure.sh) (also see [full stack](#full-stack))
+ Definition | [`public.yml`](public.yml)
+ S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public.yml
+ Create Script | [`scripts/create-public.sh`](scripts/create-public.sh) (also see [full stack](#full-stack))
 
 ### Parameters
 
@@ -150,10 +146,9 @@ Creates network routing artifacts for private subnets.
 
 | | |
 ---|---
- Definition | [`private-infrastructure.yml`](./private-infrastructure.yml)
- S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private-infrastructure.yml
- Create Script | [`scripts/create-private-infrastructure.sh`](scripts/create-private-infrastructure.sh) (also see [full stack](#full-stack))
- Delete Script | [`scripts/delete-private-infrastructure.sh`](scripts/delete-private-infrastructure.sh) (also see [full stack](#full-stack))
+ Definition | [`private.yml`](private.yml)
+ S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private.yml
+ Create Script | [`scripts/create-private.sh`](scripts/create-private.sh) (also see [full stack](#full-stack))
 
 ### Parameters
 

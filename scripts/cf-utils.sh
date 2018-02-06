@@ -28,23 +28,6 @@ wait-for-stack-completion() {
     done
 }
 
-delete-stack() {
-    aws cloudformation delete-stack --stack-name $STACK_NAME --profile $PROFILE > /dev/null
-
-    while $(true) ; do
-        STATUS=$(aws cloudformation describe-stacks --profile $PROFILE | \
-            jq -r ".Stacks[] | select(.StackName == \"$STACK_NAME\") | .StackStatus")
-        if [[ $STATUS == "" ]] ; then
-            break
-        fi
-        if [[ $STATUS != "DELETE_IN_PROGRESS" ]] ; then
-            >&2 echo "Deleting stack returned $STATUS"
-            exit -1
-        fi
-        sleep 10
-    done
-}
-
 describe-stack() {
     aws cloudformation describe-stacks --stack-name $STACK_NAME --profile $PROFILE
 }

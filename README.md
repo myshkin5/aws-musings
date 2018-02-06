@@ -54,9 +54,6 @@ Of the four octets of any IPv4 address, `aws-musings` hardcodes the first to `10
  Name | Description
 ------|-------------
 [infrastructure](./infrastructure) | Lays down the basic framework starting with the VPC
- | **Cloud Foundry Projects**
-[bosh-lite](./bosh-lite) | Deploys a bosh-lite development environment (including Cloud Foundry)
-[bosh](./bosh) | Deploys a production ready BOSH director
  | **Other**
 [Gluster Proof of Concept](./gluster-poc-us-west-2) | Deploys a GlusterFS test framework
 
