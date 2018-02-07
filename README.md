@@ -36,15 +36,15 @@ Several scripts will print out environment variables for use by subsequent scrip
 
 The following shows the output of the script to create a VPC and the subsequent invocation of the private infrastructure script:
 ```bash
-$ ./infrastructure/scripts/create-vpc.sh
+$ ./infrastructure/scripts/vpc.sh create
 export VPC_ID=vpc-12345678
 
 $ export VPC_ID=vpc-12345678
 
-$ ./infrastructure/scripts/create-public-infrastructure.sh
+$ ./infrastructure/scripts/public.sh create
 ...
 ```
-**Note:** The environment variable `VPC_ID` was output by the `create-vpc.sh` script and *_manually_* copied and executed after the `create-vpc.sh` completed. The `create-public-infrastructure.sh` script then was able to use the value when it was subsequently executed.
+**Note:** The environment variable `VPC_ID` was output by the `vpc.sh` script and *_manually_* copied and executed after the `vpc.sh create` completed. The `public.sh create` script then was able to use the value when it was subsequently executed.
 
 # CIDR Addressing Scheme for Private IP Addresses
 
@@ -61,6 +61,6 @@ Of the four octets of any IPv4 address, `aws-musings` hardcodes the first to `10
 
 Whether you are adding new content or forking `aws-musings` into a whole new direction (pull requests are always welcome), you will need to have an S3 bucket to host the CloudFormation scripts. You can upload some of the simple scripts directly into the AWS console but most of the scripts pull down supporting scripts from S3 or have nested CloudFormation scripts (which must be pulled from S3). In most cases you won't have update permissions to the default `aws-musings-us-east-1` S3 bucket.
 
-Simply create your own S3 bucket that you can read and write to, set the path to the bucket via the `AWS_MUSINGS_S3_URL` environment variable, then run the `./scripts/upload.sh` script. Any `create-*` script executed with the same `AWS_MUSINGS_S3_URL` variable will pull all scripts (CloudFormation and otherwise) from the specified S3 bucket.
+Simply create your own S3 bucket that you can read and write to, set the path to the bucket via the `AWS_MUSINGS_S3_URL` environment variable, then run the `./scripts/upload.sh` script. All scripts executed with the same `AWS_MUSINGS_S3_URL` variable will pull all scripts (CloudFormation and otherwise) from the specified S3 bucket.
 
 **NOTE:** Take care not to put sensitive content in your `aws-musings` working directory such as passwords or private keys. All files in your working directory are uploaded to the S3 bucket

@@ -10,15 +10,13 @@ if [[ $BGP_AS_NUMBER == "" ]] ; then
     BGP_AS_NUMBER=$(yq r $(dirname $0)/../vpn.yml Parameters.BGPASNumber.Default)
 fi
 
-aws cloudformation create-stack --stack-name $STACK_NAME \
-    --template-url $AWS_MUSINGS_S3_URL/infrastructure/vpn.yml \
+update-stack $1 --template-url $AWS_MUSINGS_S3_URL/infrastructure/vpn.yml \
     --parameters ParameterKey=BGPASNumber,ParameterValue=$BGP_AS_NUMBER \
         ParameterKey=CustomerGatewayIPAddress,ParameterValue=$CUSTOMER_GATEWAY_IP_ADDRESS \
-        ParameterKey=VPCId,ParameterValue=$VPC_ID \
-    --disable-rollback --profile $PROFILE > /dev/null
+        ParameterKey=VPCId,ParameterValue=$VPC_ID
 
-wait-for-stack-completion
+if [[ $OUTPUT_RESULT == "true" ]] ; then
+    RESULT=$(describe-stack)
 
-RESULT=$(describe-stack)
-
-echo "export VPN_GATEWAY_ID=$(get-output-value VPNGatewayId)"
+    echo "export VPN_GATEWAY_ID=$(get-output-value VPNGatewayId)"
+fi

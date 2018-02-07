@@ -18,8 +18,7 @@ if [[ $JUMP_BOX_INSTANCE_TYPE == "" ]] ; then
     JUMP_BOX_INSTANCE_TYPE=$(yq r $(dirname $0)/../public.yml Parameters.JumpBoxInstanceType.Default)
 fi
 
-aws cloudformation create-stack --stack-name $STACK_NAME \
-    --template-url $AWS_MUSINGS_S3_URL/infrastructure/public.yml \
+update-stack $1 --template-url $AWS_MUSINGS_S3_URL/infrastructure/public.yml \
     --parameters ParameterKey=AWSMusingsS3URL,ParameterValue=$AWS_MUSINGS_S3_URL \
         ParameterKey=DNSZone,ParameterValue=$DNS_ZONE \
         ParameterKey=ExternalHostedZoneId,ParameterValue=$EXTERNAL_HOSTED_ZONE_ID \
@@ -34,15 +33,14 @@ aws cloudformation create-stack --stack-name $STACK_NAME \
         ParameterKey=SecondOctet,ParameterValue=$SECOND_OCTET \
         ParameterKey=VPCId,ParameterValue=$VPC_ID \
         ParameterKey=VPCIPv656CIDRPrefix,ParameterValue=$VPC_IPV6_56_CIDR_PREFIX \
-        ParameterKey=VPNGatewayId,ParameterValue=$VPN_GATEWAY_ID \
-    --disable-rollback --profile $PROFILE > /dev/null
+        ParameterKey=VPNGatewayId,ParameterValue=$VPN_GATEWAY_ID
 
-wait-for-stack-completion
+if [[ $OUTPUT_RESULT == "true" ]] ; then
+    RESULT=$(describe-stack)
 
-RESULT=$(describe-stack)
-
-echo "export JUMP_BOX_PUBLIC_IP_ADDRESS=$(get-output-value JumpBoxPublicIPAddress)"
-echo "export NETWORK_ACL_ID=$(get-output-value NetworkACLId)"
-echo "export NAT_INSTANCE_ID=$(get-output-value NATInstanceId)"
-echo "export EGRESS_ONLY_INTERNET_GATEWAY_ID=$(get-output-value EgressOnlyInternetGatewayId)"
-echo "export PUBLIC_ROUTE_TABLE_ID=$(get-output-value PublicRouteTableId)"
+    echo "export JUMP_BOX_PUBLIC_IP_ADDRESS=$(get-output-value JumpBoxPublicIPAddress)"
+    echo "export NETWORK_ACL_ID=$(get-output-value NetworkACLId)"
+    echo "export NAT_INSTANCE_ID=$(get-output-value NATInstanceId)"
+    echo "export EGRESS_ONLY_INTERNET_GATEWAY_ID=$(get-output-value EgressOnlyInternetGatewayId)"
+    echo "export PUBLIC_ROUTE_TABLE_ID=$(get-output-value PublicRouteTableId)"
+fi

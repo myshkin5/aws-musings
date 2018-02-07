@@ -39,7 +39,7 @@ Note that because CloudFormation currently can't create a VPC with IPv6, this st
 ---|---
  Definition | [`vpc.yml`](./vpc.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpc.yml
- Create Script | [`scripts/create-vpc.sh`](scripts/create-vpc.sh) (also see [full stack](#full-stack))
+ Script | [`scripts/vpc.sh`](scripts/vpc.sh) (also see [full stack](#full-stack))
 
 ### Parameters
 
@@ -61,7 +61,7 @@ Creates network artifacts to route traffic through a VPN.
 ---|---
  Definition | [`vpn.yml`](./vpn.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/vpn.yml
- Create Script | [`scripts/create-vpn.sh`](scripts/create-vpn.sh)
+ Script | [`scripts/vpn.sh`](scripts/vpn.sh)
 
 ### Parameters
 
@@ -85,7 +85,7 @@ Creates an internal DNS hosted zone. Note this is a separate stack as the privat
 ---|---
  Definition | [`internal-dns.yml`](./internal-dns.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/internal-dns.yml
- Create Script | [`scripts/create-internal-dns.sh`](scripts/create-internal-dns.sh)
+ Script | [`scripts/internal-dns.sh`](scripts/internal-dns.sh)
 
 ### Parameters
 
@@ -108,7 +108,7 @@ Creates network routing artifacts for public subnets along with jump box and NAT
 ---|---
  Definition | [`public.yml`](public.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/public.yml
- Create Script | [`scripts/create-public.sh`](scripts/create-public.sh) (also see [full stack](#full-stack))
+ Script | [`scripts/public.sh`](scripts/public.sh) (also see [full stack](#full-stack))
 
 ### Parameters
 
@@ -148,7 +148,7 @@ Creates network routing artifacts for private subnets.
 ---|---
  Definition | [`private.yml`](private.yml)
  S3 URL | https://s3.amazonaws.com/aws-musings-us-east-1/infrastructure/private.yml
- Create Script | [`scripts/create-private.sh`](scripts/create-private.sh) (also see [full stack](#full-stack))
+ Script | [`scripts/private.sh`](scripts/private.sh) (also see [full stack](#full-stack))
 
 ### Parameters
 

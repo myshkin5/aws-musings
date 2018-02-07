@@ -13,6 +13,34 @@ if [[ $STACK_PREFIX == "" ]] ; then
     STACK_PREFIX=vkzone-dev
 fi
 
+update-stack() {
+    if [[ $1 == "create" ]] ; then
+        shift
+        VERB=create-stack
+        PARAMS=$@
+        ROLLBACK=--disable-rollback
+    elif [[ $1 == "update" ]] ; then
+        shift
+        VERB=update-stack
+        PARAMS=$@
+    elif [[ $1 == "delete" ]] ; then
+        VERB=delete-stack
+    else
+        >&2 echo "First parameter to a stack script must be 'create' or 'update'"
+        exit -1
+    fi
+
+    aws cloudformation $VERB --stack-name $STACK_NAME $PARAMS $ROLLBACK --profile $PROFILE > /dev/null
+
+    if [[ $VERB == "delete-stack" ]] ; then
+        wait-for-stack-deletion
+        OUTPUT_RESULT=false
+    else
+        wait-for-stack-completion
+        OUTPUT_RESULT=true
+    fi
+}
+
 wait-for-stack-completion() {
     while $(true) ; do
         STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --profile $PROFILE \
@@ -20,8 +48,23 @@ wait-for-stack-completion() {
         if [[ $STATUS == "CREATE_COMPLETE" || $STATUS == "UPDATE_COMPLETE" ]] ; then
             break
         fi
-        if [[ $STATUS != "CREATE_IN_PROGRESS" && $STATUS != "UPDATE_IN_PROGRESS" ]] ; then
+        if [[ $STATUS != *_IN_PROGRESS ]] ; then
             >&2 echo "Creating/updating stack returned $STATUS"
+            exit -1
+        fi
+        sleep 10
+    done
+}
+
+wait-for-stack-deletion() {
+    while $(true) ; do
+        STATUS=$(aws cloudformation describe-stacks --profile $PROFILE | \
+            jq -r ".Stacks[] | select(.StackName == \"$STACK_NAME\") | .StackStatus")
+        if [[ $STATUS == "" ]] ; then
+            break
+        fi
+        if [[ $STATUS != "DELETE_IN_PROGRESS" ]] ; then
+            >&2 echo "Deleting stack returned $STATUS"
             exit -1
         fi
         sleep 10
