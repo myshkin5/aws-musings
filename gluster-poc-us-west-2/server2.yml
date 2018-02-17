@@ -1,124 +1,123 @@
----
-  AWSTemplateFormatVersion: 2010-09-09
+AWSTemplateFormatVersion: 2010-09-09
 
-  Description: A GlusterFS peer server.
+Description: A GlusterFS peer server.
 
-  Parameters:
-    NamePrefix:
-      Type: String
-      Description: The name prefix of the server.
-    Domain:
-      Type: String
-      Description: The domain containing the server. The name plus the domain, separated by a dot, make up the server's
-        fully qualified domain name.
-    KeyName:
-      Type: AWS::EC2::KeyPair::KeyName
-      Description: SSH key name used to connect to the server.
-    AWSMusingsS3URL:
-      Type: String
-      Description: S3 path to aws-musings.
-    AvailabilityZone:
-      Type: String
-      Description: The availability zone where the server will be created.
-    SubnetId:
-      Type: String
-      Description: The id of the subnet where the server will be added.
-    SecurityGroupId:
-      Type: String
-      Description: The id of the security group protecting the server.
+Parameters:
+  NamePrefix:
+    Type: String
+    Description: The name prefix of the server.
+  Domain:
+    Type: String
+    Description: The domain containing the server. The name plus the domain, separated by a dot, make up the server's
+      fully qualified domain name.
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: SSH key name used to connect to the server.
+  AWSMusingsS3URL:
+    Type: String
+    Description: S3 path to aws-musings.
+  AvailabilityZone:
+    Type: String
+    Description: The availability zone where the server will be created.
+  SubnetId:
+    Type: String
+    Description: The id of the subnet where the server will be added.
+  SecurityGroupId:
+    Type: String
+    Description: The id of the security group protecting the server.
 
-  Resources:
-    Instance2:
-      Type: AWS::EC2::Instance
-      Metadata:
-        "AWS::CloudFormation::Init":
-          config:
-            files:
-              /etc/cfn/cfn-hup.conf:
-                source: !Sub "${AWSMusingsS3URL}/common/cfn-hup.conf"
-                context:
-                  STACK_ID: !Ref "AWS::StackId"
-                  REGION: !Ref "AWS::Region"
-                mode: 000400
-                owner: root
-                group: root
-              /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-                source: !Sub "${AWSMusingsS3URL}/common/cfn-auto-reloader.conf"
-                context:
-                  STACK_ID: !Ref "AWS::StackId"
-                  REGION: !Ref "AWS::Region"
-                  INSTANCE_NAME: Instance2
+Resources:
+  Instance2:
+    Type: AWS::EC2::Instance
+    Metadata:
+      "AWS::CloudFormation::Init":
+        config:
+          files:
+            /etc/cfn/cfn-hup.conf:
+              source: !Sub "${AWSMusingsS3URL}/common/cfn-hup.conf"
+              context:
+                STACK_ID: !Ref "AWS::StackId"
+                REGION: !Ref "AWS::Region"
+              mode: 000400
+              owner: root
+              group: root
+            /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+              source: !Sub "${AWSMusingsS3URL}/common/cfn-auto-reloader.conf"
+              context:
+                STACK_ID: !Ref "AWS::StackId"
+                REGION: !Ref "AWS::Region"
+                INSTANCE_NAME: Instance2
 
-              /home/ec2-user/.bashrc:
-                source: !Sub "${AWSMusingsS3URL}/common/bashrc.sh"
-                mode: 000644
-                owner: ec2-user
-                group: ec2-user
-              /root/.bashrc:
-                source: !Sub "${AWSMusingsS3URL}/common/bashrc.sh"
-                mode: 000644
-                owner: root
-                group: root
-      Properties:
-        DisableApiTermination: false
-        ImageId: ami-b5a7ea85
-        InstanceType: t2.micro
-        KeyName: !Ref KeyName
-        Monitoring: false
-        Tags:
-        - Key: Name
-          Value: !Sub "${NamePrefix}2"
-        Volumes:
-        - { VolumeId: !Ref Volume, Device: /dev/sdb }
-        NetworkInterfaces:
-        - AssociatePublicIpAddress: false
-          DeleteOnTermination: true
-          Description: Primary network interface
-          DeviceIndex: 0
-          SubnetId: !Ref SubnetId
-          GroupSet: [ !Ref SecurityGroupId ]
-        UserData:
-          Fn::Base64:
-            !Sub |
-              #!/bin/bash
+            /home/ec2-user/.bashrc:
+              source: !Sub "${AWSMusingsS3URL}/common/bashrc.sh"
+              mode: 000644
+              owner: ec2-user
+              group: ec2-user
+            /root/.bashrc:
+              source: !Sub "${AWSMusingsS3URL}/common/bashrc.sh"
+              mode: 000644
+              owner: root
+              group: root
+    Properties:
+      DisableApiTermination: false
+      ImageId: ami-b5a7ea85
+      InstanceType: t2.micro
+      KeyName: !Ref KeyName
+      Monitoring: false
+      Tags:
+      - Key: Name
+        Value: !Sub "${NamePrefix}2"
+      Volumes:
+      - { VolumeId: !Ref Volume, Device: /dev/sdb }
+      NetworkInterfaces:
+      - AssociatePublicIpAddress: false
+        DeleteOnTermination: true
+        Description: Primary network interface
+        DeviceIndex: 0
+        SubnetId: !Ref SubnetId
+        GroupSet: [ !Ref SecurityGroupId ]
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
 
-              set -e -x
+            set -e -x
 
-              export HOSTNAME=${NamePrefix}2
-              export STACK_NAME="${AWS::StackName}"
-              export RESOURCE=NATInstance
-              export REGION="${AWS::Region}"
-              export AWS_MUSINGS_S3_URL="${AWSMusingsS3URL}"
+            export HOSTNAME=${NamePrefix}2
+            export STACK_NAME="${AWS::StackName}"
+            export RESOURCE=NATInstance
+            export REGION="${AWS::Region}"
+            export AWS_MUSINGS_S3_URL="${AWSMusingsS3URL}"
 
-              curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh
-              source /tmp/bootstrap.sh
-              aws-bootstrap
+            curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh
+            source /tmp/bootstrap.sh
+            aws-bootstrap
 
-              # Gluster configuration common to both servers
-              echo -e "n\n\n\n\n\nw" | fdisk /dev/xvdb || aws-error-exit 'Failed fdisk'
-              mkfs.ext4 /dev/xvdb1 || aws-error-exit 'Failed mkfs'
-              mkdir /mnt/brick1 || aws-error-exit 'Failed mkdir'
-              echo "/dev/xvdb1 /mnt/brick1 ext4 defaults 1 2" >> /etc/fstab
-              wget -P /etc/yum.repos.d \
-                http://download.gluster.org/pub/gluster/glusterfs/LATEST/EPEL.repo/glusterfs-epel.repo \
-                  || aws-error-exit 'Failed gluster repo wget'
-              sed -i 's/$releasever/6/g' /etc/yum.repos.d/glusterfs-epel.repo
-              yum -y install glusterfs{-fuse,-server}
-              chkconfig glusterd on
+            # Gluster configuration common to both servers
+            echo -e "n\n\n\n\n\nw" | fdisk /dev/xvdb || aws-error-exit 'Failed fdisk'
+            mkfs.ext4 /dev/xvdb1 || aws-error-exit 'Failed mkfs'
+            mkdir /mnt/brick1 || aws-error-exit 'Failed mkdir'
+            echo "/dev/xvdb1 /mnt/brick1 ext4 defaults 1 2" >> /etc/fstab
+            wget -P /etc/yum.repos.d \
+              http://download.gluster.org/pub/gluster/glusterfs/LATEST/EPEL.repo/glusterfs-epel.repo \
+                || aws-error-exit 'Failed gluster repo wget'
+            sed -i 's/$releasever/6/g' /etc/yum.repos.d/glusterfs-epel.repo
+            yum -y install glusterfs{-fuse,-server}
+            chkconfig glusterd on
 
-              # All done so signal success
-              aws-signal-success
-              reboot
-      CreationPolicy:
-        ResourceSignal:
-          Timeout: PT10M
+            # All done so signal success
+            aws-signal-success
+            reboot
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT10M
 
-    Volume:
-      Type: AWS::EC2::Volume
-      Properties:
-        AvailabilityZone: !Ref AvailabilityZone
-        Size: 10
-        VolumeType: gp2
-        Tags:
-        - Key: Name
-          Value: !Sub "${NamePrefix}2-volume"
+  Volume:
+    Type: AWS::EC2::Volume
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone
+      Size: 10
+      VolumeType: gp2
+      Tags:
+      - Key: Name
+        Value: !Sub "${NamePrefix}2-volume"

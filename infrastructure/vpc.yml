@@ -1,29 +1,28 @@
----
-  AWSTemplateFormatVersion: 2010-09-09
+AWSTemplateFormatVersion: 2010-09-09
 
-  Description: A VPC.
+Description: A VPC.
 
-  Parameters:
-    SecondOctet:
-      Type: Number
-      Default: 0
-      MinValue: 0
-      MaxValue: 255
-      Description: The second octet of the CIDR block for the VPC.
+Parameters:
+  SecondOctet:
+    Type: Number
+    Default: 0
+    MinValue: 0
+    MaxValue: 255
+    Description: The second octet of the CIDR block for the VPC.
 
-  Resources:
-    VPC:
-      Type: AWS::EC2::VPC
-      Properties:
-        CidrBlock: !Sub "10.${SecondOctet}.0.0/16"
-        InstanceTenancy: default
-        EnableDnsSupport: true
-        EnableDnsHostnames: true
-        Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-${AWS::Region}-vpc"
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Sub "10.${SecondOctet}.0.0/16"
+      InstanceTenancy: default
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-${AWS::Region}-vpc"
 
-  Outputs:
-    VPCId:
-      Description: The id of the VPC in which the resources will be created.
-      Value: !Ref VPC
+Outputs:
+  VPCId:
+    Description: The id of the VPC in which the resources will be created.
+    Value: !Ref VPC

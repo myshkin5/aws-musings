@@ -1,112 +1,111 @@
----
-  AWSTemplateFormatVersion: 2010-09-09
+AWSTemplateFormatVersion: 2010-09-09
 
-  Description: The VPC's NAT server.
+Description: The VPC's NAT server.
 
-  Parameters:
-    AWSMusingsS3URL:
-      Type: String
-      Description: S3 path to aws-musings.
-    DNSZone:
-      Type: String
-      Description: The DNS zone name of the VPC (should not end in 'vpc', used in naming the instance).
-      AllowedPattern: "[a-z0-9\\-]*"
-      ConstraintDescription: must contain only lowercase letters, numbers and dashes
-    FullyQualifiedInternalParentDNSZone:
-      Type: String
-      Description: The internal parent DNS zone (should not start or end with .).
-      AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
-      ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
-    InternalHostedZoneId:
-      Type: AWS::Route53::HostedZone::Id
-      Description: The internal DNS zone to which an internal DNS A record will be added for the NAT server.
-    ImageId:
-      Type: AWS::EC2::Image::Id
-      Description: The AMI used to create the instance.
-    KeyName:
-      Type: AWS::EC2::KeyPair::KeyName
-      Description: SSH key name used to connect to the NAT server.
-    SecurityGroupId:
-      Type: AWS::EC2::SecurityGroup::Id
-      Description: The id of the security group protecting the NAT server.
-    SubnetId:
-      Type: AWS::EC2::Subnet::Id
-      Description: The id of the subnet where the server will be added.
+Parameters:
+  AWSMusingsS3URL:
+    Type: String
+    Description: S3 path to aws-musings.
+  DNSZone:
+    Type: String
+    Description: The DNS zone name of the VPC (should not end in 'vpc', used in naming the instance).
+    AllowedPattern: "[a-z0-9\\-]*"
+    ConstraintDescription: must contain only lowercase letters, numbers and dashes
+  FullyQualifiedInternalParentDNSZone:
+    Type: String
+    Description: The internal parent DNS zone (should not start or end with .).
+    AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
+    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
+  InternalHostedZoneId:
+    Type: AWS::Route53::HostedZone::Id
+    Description: The internal DNS zone to which an internal DNS A record will be added for the NAT server.
+  ImageId:
+    Type: AWS::EC2::Image::Id
+    Description: The AMI used to create the instance.
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: SSH key name used to connect to the NAT server.
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: The id of the security group protecting the NAT server.
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: The id of the subnet where the server will be added.
 
-  Resources:
-    NATInstance:
-      Type: AWS::EC2::Instance
-      Metadata:
-        "AWS::CloudFormation::Init":
-          config:
-            files:
-              /etc/cfn/cfn-hup.conf:
-                source: !Sub "${AWSMusingsS3URL}/common/cfn-hup.conf"
-                context:
-                  STACK_ID: !Ref "AWS::StackId"
-                  REGION: !Ref "AWS::Region"
-                mode: 000400
-                owner: root
-                group: root
-              /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-                source: !Sub "${AWSMusingsS3URL}/common/cfn-auto-reloader.conf"
-                context:
-                  STACK_ID: !Ref "AWS::StackId"
-                  REGION: !Ref "AWS::Region"
-                  INSTANCE_NAME: NATInstance
-      Properties:
-        DisableApiTermination: false
-        SourceDestCheck: false
-        ImageId: !Ref ImageId
-        InstanceType: t2.nano
-        KeyName: !Ref KeyName
-        Monitoring: false
-        Tags:
-        - Key: Name
-          Value: !Sub "${DNSZone}-nat"
-        NetworkInterfaces:
-        - AssociatePublicIpAddress: true
-          DeleteOnTermination: true
-          Description: Primary network interface
-          DeviceIndex: 0
-          SubnetId: !Ref SubnetId
-          GroupSet: [ !Ref SecurityGroupId ]
-        UserData:
-          Fn::Base64:
-            !Sub |
-              #!/bin/bash
+Resources:
+  NATInstance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      "AWS::CloudFormation::Init":
+        config:
+          files:
+            /etc/cfn/cfn-hup.conf:
+              source: !Sub "${AWSMusingsS3URL}/common/cfn-hup.conf"
+              context:
+                STACK_ID: !Ref "AWS::StackId"
+                REGION: !Ref "AWS::Region"
+              mode: 000400
+              owner: root
+              group: root
+            /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+              source: !Sub "${AWSMusingsS3URL}/common/cfn-auto-reloader.conf"
+              context:
+                STACK_ID: !Ref "AWS::StackId"
+                REGION: !Ref "AWS::Region"
+                INSTANCE_NAME: NATInstance
+    Properties:
+      DisableApiTermination: false
+      SourceDestCheck: false
+      ImageId: !Ref ImageId
+      InstanceType: t2.nano
+      KeyName: !Ref KeyName
+      Monitoring: false
+      Tags:
+      - Key: Name
+        Value: !Sub "${DNSZone}-nat"
+      NetworkInterfaces:
+      - AssociatePublicIpAddress: true
+        DeleteOnTermination: true
+        Description: Primary network interface
+        DeviceIndex: 0
+        SubnetId: !Ref SubnetId
+        GroupSet: [ !Ref SecurityGroupId ]
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
 
-              set -e -x
+            set -e -x
 
-              export HOSTNAME=nat
-              export STACK_NAME="${AWS::StackName}"
-              export RESOURCE=NATInstance
-              export REGION="${AWS::Region}"
-              export AWS_MUSINGS_S3_URL="${AWSMusingsS3URL}"
+            export HOSTNAME=nat
+            export STACK_NAME="${AWS::StackName}"
+            export RESOURCE=NATInstance
+            export REGION="${AWS::Region}"
+            export AWS_MUSINGS_S3_URL="${AWSMusingsS3URL}"
 
-              curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh
-              source /tmp/bootstrap.sh
-              aws-bootstrap
+            curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh
+            source /tmp/bootstrap.sh
+            aws-bootstrap
 
-              # All done so signal success
-              aws-signal-success
-              reboot
-      CreationPolicy:
-        ResourceSignal:
-          Timeout: PT10M
+            # All done so signal success
+            aws-signal-success
+            reboot
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT10M
 
-    PrivateNATRecordSet:
-      Type: AWS::Route53::RecordSet
-      Properties:
-        HostedZoneId: !Ref InternalHostedZoneId
-        Name: !Sub "nat.${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
-        ResourceRecords:
-        - !GetAtt NATInstance.PrivateIp
-        TTL: 300
-        Type: A
-      DependsOn: NATInstance
+  PrivateNATRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref InternalHostedZoneId
+      Name: !Sub "nat.${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
+      ResourceRecords:
+      - !GetAtt NATInstance.PrivateIp
+      TTL: 300
+      Type: A
+    DependsOn: NATInstance
 
-  Outputs:
-    NATInstanceId:
-      Description: This id of the NAT instance to be added to private route tables.
-      Value: !Ref NATInstance
+Outputs:
+  NATInstanceId:
+    Description: This id of the NAT instance to be added to private route tables.
+    Value: !Ref NATInstance

@@ -1,63 +1,62 @@
----
-  AWSTemplateFormatVersion: 2010-09-09
+AWSTemplateFormatVersion: 2010-09-09
 
-  Description: VPN related resources.
+Description: VPN related resources.
 
-  Parameters:
-    BGPASNumber:
-      Type: Number
-      Default: 65000
-      Description: The Border Gateway Protocol Autonomous System Number.
-    CustomerGatewayIPAddress:
-      Type: String
-      Description: The public IP address of the customer gateway.
-    VPCId:
-      Type: AWS::EC2::VPC::Id
-      Description: The id of the VPC in which the resources will be created.
+Parameters:
+  BGPASNumber:
+    Type: Number
+    Default: 65000
+    Description: The Border Gateway Protocol Autonomous System Number.
+  CustomerGatewayIPAddress:
+    Type: String
+    Description: The public IP address of the customer gateway.
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: The id of the VPC in which the resources will be created.
 
-  Resources:
-    CustomerGateway:
-      Type: AWS::EC2::CustomerGateway
-      Properties:
-        Type: ipsec.1
-        BgpAsn: !Ref BGPASNumber
-        IpAddress: !Ref CustomerGatewayIPAddress
-        Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-${AWS::Region}-cgw"
+Resources:
+  CustomerGateway:
+    Type: AWS::EC2::CustomerGateway
+    Properties:
+      Type: ipsec.1
+      BgpAsn: !Ref BGPASNumber
+      IpAddress: !Ref CustomerGatewayIPAddress
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-${AWS::Region}-cgw"
 
-    VPNGateway:
-      Type: AWS::EC2::VPNGateway
-      Properties:
-        Type: ipsec.1
-        Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-${AWS::Region}-vgw"
+  VPNGateway:
+    Type: AWS::EC2::VPNGateway
+    Properties:
+      Type: ipsec.1
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-${AWS::Region}-vgw"
 
-    VPCGatewayAttachment:
-      Type: AWS::EC2::VPCGatewayAttachment
-      Properties:
-        VpcId: !Ref VPCId
-        VpnGatewayId: !Ref VPNGateway
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPCId
+      VpnGatewayId: !Ref VPNGateway
 
-    VPNConnection:
-      Type: AWS::EC2::VPNConnection
-      Properties:
-        Type: ipsec.1
-        StaticRoutesOnly: true
-        CustomerGatewayId: !Ref CustomerGateway
-        VpnGatewayId: !Ref VPNGateway
-        Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-${AWS::Region}-vpn"
+  VPNConnection:
+    Type: AWS::EC2::VPNConnection
+    Properties:
+      Type: ipsec.1
+      StaticRoutesOnly: true
+      CustomerGatewayId: !Ref CustomerGateway
+      VpnGatewayId: !Ref VPNGateway
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-${AWS::Region}-vpn"
 
-    VPNConnectionRoute:
-      Type: AWS::EC2::VPNConnectionRoute
-      Properties:
-        DestinationCidrBlock: 10.0.0.0/8
-        VpnConnectionId: !Ref VPNConnection
+  VPNConnectionRoute:
+    Type: AWS::EC2::VPNConnectionRoute
+    Properties:
+      DestinationCidrBlock: 10.0.0.0/8
+      VpnConnectionId: !Ref VPNConnection
 
-  Outputs:
-    VPNGatewayId:
-      Description: The VPN gateway to which route tables will be connected via route propagation.
-      Value: !Ref VPNGateway
+Outputs:
+  VPNGatewayId:
+    Description: The VPN gateway to which route tables will be connected via route propagation.
+    Value: !Ref VPNGateway

@@ -1,339 +1,338 @@
----
-  AWSTemplateFormatVersion: 2010-09-09
+AWSTemplateFormatVersion: 2010-09-09
 
-  Description: The public resources of a VPC.
+Description: The public resources of a VPC.
 
-  Parameters:
-    AWSMusingsS3URL:
-      Type: String
-      Default: https://s3.amazonaws.com/aws-musings-us-east-1
-      Description: S3 path to aws-musings.
-    DNSZone:
-      Type: String
-      Description: |
-        The DNS zone name of the VPC (should not end in 'vpc', The fully qualified external and internal zones will be
-        appended).
-      AllowedPattern: "[a-z0-9\\-]*"
-      ConstraintDescription: must contain only lowercase letters, numbers and dashes
-    ExternalHostedZoneId:
-      Type: String
-      Description: |
-        The external DNS zone to which external DNS records will be added. Optional, external records will be created
-        if specified.
-    FullyQualifiedExternalParentDNSZone:
-      Type: String
-      Description: |
-        The public DNS zone configured in Route 53 (should not start or end with .). Optional, external records will be
-        created if specified.
-      AllowedPattern: "([a-z][a-z0-9\\-.]*[a-z0-9])|(^$)"
-      ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots, optional
-    FullyQualifiedInternalParentDNSZone:
-      Type: String
-      Description: |
-        The internal parent DNS zone (should not start or end with .). Note since this is a private zone and only used
-        internally, this DNS zone can be any valid DNS domain (e.g.: example.com).
-      AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
-      ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
-    InternalHostedZoneId:
-      Type: AWS::Route53::HostedZone::Id
-      Description: The internal DNS zone to which internal DNS records will be added.
-    InternalKeyName:
-      Type: AWS::EC2::KeyPair::KeyName
-      Default: internal
-      Description: SSH key name used to connect with internal servers.
-    JumpBoxEIPAddress:
-      Type: String
-      Description: An EIP reserved for the jump box. Optional, a public IP address is reserved if not specified.
-      AllowedPattern: "((\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3}))|(^$)"
-      ConstraintDescription: must contain four dot-separated octets, optional
-    JumpBoxKeyName:
-      Type: AWS::EC2::KeyPair::KeyName
-      Default: jump-box
-      Description: SSH key name used to connect with the jump box.
-    JumpBoxSSHCIDRIP:
-      Type: String
-      Description: Range of IP addresses that will be able to connect to the jump box via SSH.
-    JumpBoxInstanceType:
-      Type: String
-      Default: t2.nano
-      Description: The instance type of the jump box.
-    SecondOctet:
-      Type: Number
-      MinValue: 0
-      MaxValue: 255
-      Description: The second octet of the CIDR block for the VPC.
-    VPCId:
-      Type: AWS::EC2::VPC::Id
-      Description: The id of the VPC in which the resources will be created.
-    VPCIPv656CIDRPrefix:
-      Type: String
-      Description: The IPv6 /56 CIDR prefix of the VPC. Optional, no IPv6 configuration will be used if not specified.
-      AllowedPattern: "(\\p{XDigit}{1,4})\\:(\\p{XDigit}{1,4})\\:(\\p{XDigit}{1,4})\\:(\\p{XDigit}{0,2})|(^$)"
-      ConstraintDescription: must contain the first three quartets and half of the fourth quartet, optional
-    VPNGatewayId:
-      Type: String
-      Description: |
-        The VPN gateway to which route tables will be connected via route propagation. Optional, no propagation occurs
-        if not specified.
+Parameters:
+  AWSMusingsS3URL:
+    Type: String
+    Default: https://s3.amazonaws.com/aws-musings-us-east-1
+    Description: S3 path to aws-musings.
+  DNSZone:
+    Type: String
+    Description: |
+      The DNS zone name of the VPC (should not end in 'vpc', The fully qualified external and internal zones will be
+      appended).
+    AllowedPattern: "[a-z0-9\\-]*"
+    ConstraintDescription: must contain only lowercase letters, numbers and dashes
+  ExternalHostedZoneId:
+    Type: String
+    Description: |
+      The external DNS zone to which external DNS records will be added. Optional, external records will be created
+      if specified.
+  FullyQualifiedExternalParentDNSZone:
+    Type: String
+    Description: |
+      The public DNS zone configured in Route 53 (should not start or end with .). Optional, external records will be
+      created if specified.
+    AllowedPattern: "([a-z][a-z0-9\\-.]*[a-z0-9])|(^$)"
+    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots, optional
+  FullyQualifiedInternalParentDNSZone:
+    Type: String
+    Description: |
+      The internal parent DNS zone (should not start or end with .). Note since this is a private zone and only used
+      internally, this DNS zone can be any valid DNS domain (e.g.: example.com).
+    AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
+    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
+  InternalHostedZoneId:
+    Type: AWS::Route53::HostedZone::Id
+    Description: The internal DNS zone to which internal DNS records will be added.
+  InternalKeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: internal
+    Description: SSH key name used to connect with internal servers.
+  JumpBoxEIPAddress:
+    Type: String
+    Description: An EIP reserved for the jump box. Optional, a public IP address is reserved if not specified.
+    AllowedPattern: "((\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3}))|(^$)"
+    ConstraintDescription: must contain four dot-separated octets, optional
+  JumpBoxKeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: jump-box
+    Description: SSH key name used to connect with the jump box.
+  JumpBoxSSHCIDRIP:
+    Type: String
+    Description: Range of IP addresses that will be able to connect to the jump box via SSH.
+  JumpBoxInstanceType:
+    Type: String
+    Default: t2.nano
+    Description: The instance type of the jump box.
+  SecondOctet:
+    Type: Number
+    MinValue: 0
+    MaxValue: 255
+    Description: The second octet of the CIDR block for the VPC.
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: The id of the VPC in which the resources will be created.
+  VPCIPv656CIDRPrefix:
+    Type: String
+    Description: The IPv6 /56 CIDR prefix of the VPC. Optional, no IPv6 configuration will be used if not specified.
+    AllowedPattern: "(\\p{XDigit}{1,4})\\:(\\p{XDigit}{1,4})\\:(\\p{XDigit}{1,4})\\:(\\p{XDigit}{0,2})|(^$)"
+    ConstraintDescription: must contain the first three quartets and half of the fourth quartet, optional
+  VPNGatewayId:
+    Type: String
+    Description: |
+      The VPN gateway to which route tables will be connected via route propagation. Optional, no propagation occurs
+      if not specified.
 
-  Mappings:
-    AMIRegionMap:
-      # standard search: "ubuntu/images/hvm-ssd/ubuntu <year>" Root device type: ebs Virtualization type: hvm
-      # nat search: amzn-ami-vpc-nat-hvm Root device type: ebs Virtualization type: hvm
-      us-east-1: { standard: ami-c4bbe2be, nat: ami-3e83d444 }
-      us-west-2: { standard: ami-de1faba6, nat: ami-0541ea7d }
+Mappings:
+  AMIRegionMap:
+    # standard search: "ubuntu/images/hvm-ssd/ubuntu <year>" Root device type: ebs Virtualization type: hvm
+    # nat search: amzn-ami-vpc-nat-hvm Root device type: ebs Virtualization type: hvm
+    us-east-1: { standard: ami-c4bbe2be, nat: ami-3e83d444 }
+    us-west-2: { standard: ami-de1faba6, nat: ami-0541ea7d }
 
-  Conditions:
-    AddIPv6: !Not [ !Equals [ !Ref VPCIPv656CIDRPrefix, "" ] ]
-    VPNGatewayIdDefined: !Not [ !Equals [ !Ref VPNGatewayId, "" ] ]
+Conditions:
+  AddIPv6: !Not [ !Equals [ !Ref VPCIPv656CIDRPrefix, "" ] ]
+  VPNGatewayIdDefined: !Not [ !Equals [ !Ref VPNGatewayId, "" ] ]
 
-  Resources:
-    PublicSubnetA:
-      Type: AWS::EC2::Subnet
-      Properties:
-        CidrBlock: !Sub "10.${SecondOctet}.0.0/24"
-        AvailabilityZone: !Select [ "0", !GetAZs "" ]
-        VpcId: !Ref VPCId
-        AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
-        Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}00::/64", !Ref "AWS::NoValue" ]
-        Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-${AWS::Region}-a-public-subnet"
-    PublicSubnetB:
-      Type: AWS::EC2::Subnet
-      Properties:
-        CidrBlock: !Sub "10.${SecondOctet}.1.0/24"
-        AvailabilityZone: !Select [ "1", !GetAZs "" ]
-        VpcId: !Ref VPCId
-        AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
-        Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}01::/64", !Ref "AWS::NoValue" ]
-        Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-${AWS::Region}-b-public-subnet"
-    PublicSubnetC:
-      Type: AWS::EC2::Subnet
-      Properties:
-        CidrBlock: !Sub "10.${SecondOctet}.2.0/24"
-        AvailabilityZone: !Select [ "2", !GetAZs "" ]
-        VpcId: !Ref VPCId
-        AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
-        Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}02::/64", !Ref "AWS::NoValue" ]
-        Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-${AWS::Region}-c-public-subnet"
+Resources:
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Sub "10.${SecondOctet}.0.0/24"
+      AvailabilityZone: !Select [ "0", !GetAZs "" ]
+      VpcId: !Ref VPCId
+      AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
+      Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}00::/64", !Ref "AWS::NoValue" ]
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-${AWS::Region}-a-public-subnet"
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Sub "10.${SecondOctet}.1.0/24"
+      AvailabilityZone: !Select [ "1", !GetAZs "" ]
+      VpcId: !Ref VPCId
+      AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
+      Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}01::/64", !Ref "AWS::NoValue" ]
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-${AWS::Region}-b-public-subnet"
+  PublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Sub "10.${SecondOctet}.2.0/24"
+      AvailabilityZone: !Select [ "2", !GetAZs "" ]
+      VpcId: !Ref VPCId
+      AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
+      Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}02::/64", !Ref "AWS::NoValue" ]
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-${AWS::Region}-c-public-subnet"
 
-    InternetGateway:
-      Type: AWS::EC2::InternetGateway
-      Properties:
-        Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-${AWS::Region}-igw"
-    GatewayAttachment:
-      Type: AWS::EC2::VPCGatewayAttachment
-      Properties:
-        VpcId: !Ref VPCId
-        InternetGatewayId: !Ref InternetGateway
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-${AWS::Region}-igw"
+  GatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPCId
+      InternetGatewayId: !Ref InternetGateway
 
-    EgressOnlyInternetGateway:
-      Type: AWS::EC2::EgressOnlyInternetGateway
-      Condition: AddIPv6
-      Properties:
-        VpcId: !Ref VPCId
+  EgressOnlyInternetGateway:
+    Type: AWS::EC2::EgressOnlyInternetGateway
+    Condition: AddIPv6
+    Properties:
+      VpcId: !Ref VPCId
 
-    PublicRouteTable:
-      Type: AWS::EC2::RouteTable
-      Properties:
-        VpcId: !Ref VPCId
-        Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-${AWS::Region}-public-rtb"
-    IPv4PublicDefaultRoute:
-      Type: AWS::EC2::Route
-      Properties:
-        DestinationCidrBlock: 0.0.0.0/0
-        RouteTableId: !Ref PublicRouteTable
-        GatewayId: !Ref InternetGateway
-      DependsOn: GatewayAttachment
-    IPv6PublicDefaultRoute:
-      Type: AWS::EC2::Route
-      Condition: AddIPv6
-      Properties:
-        DestinationIpv6CidrBlock: ::/0
-        RouteTableId: !Ref PublicRouteTable
-        EgressOnlyInternetGatewayId: !Ref EgressOnlyInternetGateway
-      DependsOn: EgressOnlyInternetGateway
-    PublicSubnetARouteTableAssociation:
-      Type: AWS::EC2::SubnetRouteTableAssociation
-      Properties:
-        RouteTableId: !Ref PublicRouteTable
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPCId
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-${AWS::Region}-public-rtb"
+  IPv4PublicDefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref PublicRouteTable
+      GatewayId: !Ref InternetGateway
+    DependsOn: GatewayAttachment
+  IPv6PublicDefaultRoute:
+    Type: AWS::EC2::Route
+    Condition: AddIPv6
+    Properties:
+      DestinationIpv6CidrBlock: ::/0
+      RouteTableId: !Ref PublicRouteTable
+      EgressOnlyInternetGatewayId: !Ref EgressOnlyInternetGateway
+    DependsOn: EgressOnlyInternetGateway
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnetA
+  PublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnetB
+  PublicSubnetCRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnetC
+
+  VPNGatewayRoutePropagation:
+    Type: AWS::EC2::VPNGatewayRoutePropagation
+    Condition: VPNGatewayIdDefined
+    Properties:
+      RouteTableIds: [ !Ref PublicRouteTable ]
+      VpnGatewayId: !Ref VPNGatewayId
+
+  NetworkACL:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPCId
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-${AWS::Region}-acl"
+
+  IPv4EgressACLEntry:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      Protocol: -1
+      RuleAction: allow
+      RuleNumber: 100
+      NetworkAclId: !Ref NetworkACL
+  IPv6EgressACLEntry:
+    Type: AWS::EC2::NetworkAclEntry
+    Condition: AddIPv6
+    Properties:
+      Ipv6CidrBlock: ::/0
+      Egress: true
+      Protocol: -1
+      RuleAction: allow
+      RuleNumber: 101
+      NetworkAclId: !Ref NetworkACL
+  IPv4IngressACLEntry:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: false
+      Protocol: -1
+      RuleAction: allow
+      RuleNumber: 100
+      NetworkAclId: !Ref NetworkACL
+  IPv6IngressACLEntry:
+    Type: AWS::EC2::NetworkAclEntry
+    Condition: AddIPv6
+    Properties:
+      Ipv6CidrBlock: ::/0
+      Egress: false
+      Protocol: -1
+      RuleAction: allow
+      RuleNumber: 101
+      NetworkAclId: !Ref NetworkACL
+
+  PublicSubnetANetworkACLAssociation:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref NetworkACL
+      SubnetId: !Ref PublicSubnetA
+  PublicSubnetBNetworkACLAssociation:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref NetworkACL
+      SubnetId: !Ref PublicSubnetB
+  PublicSubnetCNetworkACLAssociation:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref NetworkACL
+      SubnetId: !Ref PublicSubnetC
+
+  JumpBoxSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: jump box security group
+      VpcId: !Ref VPCId
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-jump-box-sg"
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: !Ref JumpBoxSSHCIDRIP
+      - IpProtocol: -1
+        CidrIp: 10.0.0.0/8
+      - IpProtocol: -1
+        CidrIpv6: !Sub "${VPCIPv656CIDRPrefix}00::/56"
+      SecurityGroupEgress:
+      - IpProtocol: -1
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: -1
+        CidrIpv6: ::/0
+  NATSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: NAT server security group
+      VpcId: !Ref VPCId
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-nat-sg"
+      SecurityGroupIngress:
+      - IpProtocol: -1
+        CidrIp: 10.0.0.0/8
+      - IpProtocol: -1
+        CidrIpv6: !Sub "${VPCIPv656CIDRPrefix}00::/56"
+      SecurityGroupEgress:
+      - IpProtocol: -1
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: -1
+        CidrIpv6: ::/0
+
+  JumpBoxInstanceStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${AWSMusingsS3URL}/infrastructure/jump-box-instance.yml"
+      Parameters:
+        AWSMusingsS3URL: !Ref AWSMusingsS3URL
+        DNSZone: !Ref DNSZone
+        EIPAddress: !Ref JumpBoxEIPAddress
+        ExternalHostedZoneId: !Ref ExternalHostedZoneId
+        FullyQualifiedExternalParentDNSZone: !Ref FullyQualifiedExternalParentDNSZone
+        FullyQualifiedInternalParentDNSZone: !Ref FullyQualifiedInternalParentDNSZone
+        ImageId: !FindInMap [ AMIRegionMap, !Ref "AWS::Region", standard ]
+        InternalHostedZoneId: !Ref InternalHostedZoneId
+        KeyName: !Ref JumpBoxKeyName
+        SecurityGroupId: !Ref JumpBoxSecurityGroup
         SubnetId: !Ref PublicSubnetA
-    PublicSubnetBRouteTableAssociation:
-      Type: AWS::EC2::SubnetRouteTableAssociation
-      Properties:
-        RouteTableId: !Ref PublicRouteTable
+        InstanceType: !Ref JumpBoxInstanceType
+  NATInstanceStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${AWSMusingsS3URL}/infrastructure/nat-instance.yml"
+      Parameters:
+        AWSMusingsS3URL: !Ref AWSMusingsS3URL
+        DNSZone: !Ref DNSZone
+        FullyQualifiedInternalParentDNSZone: !Ref FullyQualifiedInternalParentDNSZone
+        ImageId: !FindInMap [ AMIRegionMap, !Ref "AWS::Region", nat ]
+        InternalHostedZoneId: !Ref InternalHostedZoneId
+        KeyName: !Ref InternalKeyName
+        SecurityGroupId: !Ref NATSecurityGroup
         SubnetId: !Ref PublicSubnetB
-    PublicSubnetCRouteTableAssociation:
-      Type: AWS::EC2::SubnetRouteTableAssociation
-      Properties:
-        RouteTableId: !Ref PublicRouteTable
-        SubnetId: !Ref PublicSubnetC
 
-    VPNGatewayRoutePropagation:
-      Type: AWS::EC2::VPNGatewayRoutePropagation
-      Condition: VPNGatewayIdDefined
-      Properties:
-        RouteTableIds: [ !Ref PublicRouteTable ]
-        VpnGatewayId: !Ref VPNGatewayId
-
-    NetworkACL:
-      Type: AWS::EC2::NetworkAcl
-      Properties:
-        VpcId: !Ref VPCId
-        Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-${AWS::Region}-acl"
-
-    IPv4EgressACLEntry:
-      Type: AWS::EC2::NetworkAclEntry
-      Properties:
-        CidrBlock: 0.0.0.0/0
-        Egress: true
-        Protocol: -1
-        RuleAction: allow
-        RuleNumber: 100
-        NetworkAclId: !Ref NetworkACL
-    IPv6EgressACLEntry:
-      Type: AWS::EC2::NetworkAclEntry
-      Condition: AddIPv6
-      Properties:
-        Ipv6CidrBlock: ::/0
-        Egress: true
-        Protocol: -1
-        RuleAction: allow
-        RuleNumber: 101
-        NetworkAclId: !Ref NetworkACL
-    IPv4IngressACLEntry:
-      Type: AWS::EC2::NetworkAclEntry
-      Properties:
-        CidrBlock: 0.0.0.0/0
-        Egress: false
-        Protocol: -1
-        RuleAction: allow
-        RuleNumber: 100
-        NetworkAclId: !Ref NetworkACL
-    IPv6IngressACLEntry:
-      Type: AWS::EC2::NetworkAclEntry
-      Condition: AddIPv6
-      Properties:
-        Ipv6CidrBlock: ::/0
-        Egress: false
-        Protocol: -1
-        RuleAction: allow
-        RuleNumber: 101
-        NetworkAclId: !Ref NetworkACL
-
-    PublicSubnetANetworkACLAssociation:
-      Type: AWS::EC2::SubnetNetworkAclAssociation
-      Properties:
-        NetworkAclId: !Ref NetworkACL
-        SubnetId: !Ref PublicSubnetA
-    PublicSubnetBNetworkACLAssociation:
-      Type: AWS::EC2::SubnetNetworkAclAssociation
-      Properties:
-        NetworkAclId: !Ref NetworkACL
-        SubnetId: !Ref PublicSubnetB
-    PublicSubnetCNetworkACLAssociation:
-      Type: AWS::EC2::SubnetNetworkAclAssociation
-      Properties:
-        NetworkAclId: !Ref NetworkACL
-        SubnetId: !Ref PublicSubnetC
-
-    JumpBoxSecurityGroup:
-      Type: AWS::EC2::SecurityGroup
-      Properties:
-        GroupDescription: jump box security group
-        VpcId: !Ref VPCId
-        Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-jump-box-sg"
-        SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: !Ref JumpBoxSSHCIDRIP
-        - IpProtocol: -1
-          CidrIp: 10.0.0.0/8
-        - IpProtocol: -1
-          CidrIpv6: !Sub "${VPCIPv656CIDRPrefix}00::/56"
-        SecurityGroupEgress:
-        - IpProtocol: -1
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: -1
-          CidrIpv6: ::/0
-    NATSecurityGroup:
-      Type: AWS::EC2::SecurityGroup
-      Properties:
-        GroupDescription: NAT server security group
-        VpcId: !Ref VPCId
-        Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-nat-sg"
-        SecurityGroupIngress:
-        - IpProtocol: -1
-          CidrIp: 10.0.0.0/8
-        - IpProtocol: -1
-          CidrIpv6: !Sub "${VPCIPv656CIDRPrefix}00::/56"
-        SecurityGroupEgress:
-        - IpProtocol: -1
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: -1
-          CidrIpv6: ::/0
-
-    JumpBoxInstanceStack:
-      Type: AWS::CloudFormation::Stack
-      Properties:
-        TemplateURL: !Sub "${AWSMusingsS3URL}/infrastructure/jump-box-instance.yml"
-        Parameters:
-          AWSMusingsS3URL: !Ref AWSMusingsS3URL
-          DNSZone: !Ref DNSZone
-          EIPAddress: !Ref JumpBoxEIPAddress
-          ExternalHostedZoneId: !Ref ExternalHostedZoneId
-          FullyQualifiedExternalParentDNSZone: !Ref FullyQualifiedExternalParentDNSZone
-          FullyQualifiedInternalParentDNSZone: !Ref FullyQualifiedInternalParentDNSZone
-          ImageId: !FindInMap [ AMIRegionMap, !Ref "AWS::Region", standard ]
-          InternalHostedZoneId: !Ref InternalHostedZoneId
-          KeyName: !Ref JumpBoxKeyName
-          SecurityGroupId: !Ref JumpBoxSecurityGroup
-          SubnetId: !Ref PublicSubnetA
-          InstanceType: !Ref JumpBoxInstanceType
-    NATInstanceStack:
-      Type: AWS::CloudFormation::Stack
-      Properties:
-        TemplateURL: !Sub "${AWSMusingsS3URL}/infrastructure/nat-instance.yml"
-        Parameters:
-          AWSMusingsS3URL: !Ref AWSMusingsS3URL
-          DNSZone: !Ref DNSZone
-          FullyQualifiedInternalParentDNSZone: !Ref FullyQualifiedInternalParentDNSZone
-          ImageId: !FindInMap [ AMIRegionMap, !Ref "AWS::Region", nat ]
-          InternalHostedZoneId: !Ref InternalHostedZoneId
-          KeyName: !Ref InternalKeyName
-          SecurityGroupId: !Ref NATSecurityGroup
-          SubnetId: !Ref PublicSubnetB
-
-  Outputs:
-    JumpBoxPublicIPAddress:
-      Description: The public IP address of the newly created jump box.
-      Value: !GetAtt JumpBoxInstanceStack.Outputs.JumpBoxPublicIPAddress
-    NetworkACLId:
-      Description: The id of the network access control list used to protect instances in the VPC.
-      Value: !Ref NetworkACL
-    NATInstanceId:
-      Description: The id of the NAT instance to be added to private route tables.
-      Value: !GetAtt NATInstanceStack.Outputs.NATInstanceId
-    EgressOnlyInternetGatewayId:
-      Condition: AddIPv6
-      Description: The id of the egress-only internet gateway for IPv6 traffic.
-      Value: !Ref EgressOnlyInternetGateway
-    PublicRouteTableId:
-      Description: The id of the public route table.
-      Value: !Ref PublicRouteTable
+Outputs:
+  JumpBoxPublicIPAddress:
+    Description: The public IP address of the newly created jump box.
+    Value: !GetAtt JumpBoxInstanceStack.Outputs.JumpBoxPublicIPAddress
+  NetworkACLId:
+    Description: The id of the network access control list used to protect instances in the VPC.
+    Value: !Ref NetworkACL
+  NATInstanceId:
+    Description: The id of the NAT instance to be added to private route tables.
+    Value: !GetAtt NATInstanceStack.Outputs.NATInstanceId
+  EgressOnlyInternetGatewayId:
+    Condition: AddIPv6
+    Description: The id of the egress-only internet gateway for IPv6 traffic.
+    Value: !Ref EgressOnlyInternetGateway
+  PublicRouteTableId:
+    Description: The id of the public route table.
+    Value: !Ref PublicRouteTable
