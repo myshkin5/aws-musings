@@ -41,7 +41,9 @@ Parameters:
     ConstraintDescription: must contain four dot-separated octets, a slash, and the network mask bit count
   InternalAccessIPv6CIDRBlock:
     Type: String
-    Description: The IPv6 CIDR block that can access internal interfaces of public resources. Optional
+    Description: |
+      The IPv6 CIDR block that can access internal interfaces of public resources. Optional, if not specified, no
+      internal IPv6 access will be configured.
   InternalHostedZoneId:
     Type: AWS::Route53::HostedZone::Id
     Description: The internal DNS zone to which internal DNS records will be added.

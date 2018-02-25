@@ -92,7 +92,7 @@ Creates an internal DNS hosted zone. Note this is a separate stack as the privat
 
  Name | Environment Variable | Required/Default | Description
 ---|---|---|---
- `FullyQualifiedInternalParentDNSZone` | `FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE` | Yes | The internal parent DNS zone (should not start or end with .). Note since this is a private zone and only used internally, this DNS zone can be any valid DNS domain (e.g.: `example.com`). **REQUIRED, NO DEFAULT AND NOT SUPPLIED BY A PREVIOUS STACK**
+ `FullyQualifiedInternal ParentDNSZone` | `FULLY_QUALIFIED_INTERNAL _PARENT_DNS_ZONE` | Yes | The internal parent DNS zone (should not start or end with .). Note since this is a private zone and only used internally, this DNS zone can be any valid DNS domain (e.g.: `example.com`). **REQUIRED, NO DEFAULT AND NOT SUPPLIED BY A PREVIOUS STACK**
  `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
 
 ### Outputs
@@ -121,7 +121,7 @@ Creates network routing artifacts for public subnets along with jump box and NAT
  `FullyQualifiedExternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_EXTERNAL _PARENT_DNS_ZONE` (without space) | No | <a name="fully-qualified-external-parent-dns-zone">The</a> public DNS zone configured in Route 53 (should not start or end with .). Optional, external records will be created if specified.
  `FullyQualifiedInternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_INTERNAL _PARENT_DNS_ZONE` (without space) | Yes | See the [Internal DNS stack](#internal-dns) above.
  `InternalAccessCIDRBlock` | `INTERNAL_ACCESS_CIDR_BLOCK` | No / `10.0.0.0/8` | The CIDR block that can access internal interfaces of public resources.
- `InternalAccessIPv6CIDRBlock` | `INTERNAL_ACCESS_IPV6_CIDR_BLOCK` | No / (no IPv6 access) * | The IPv6 CIDR block that can access internal interfaces of public resources.
+ `InternalAccessIPv6CIDRBlock` | `INTERNAL_ACCESS_IPV6_CIDR_BLOCK` | No | The IPv6 CIDR block that can access internal interfaces of public resources. Optional, if not specified, no internal IPv6 access will be configured. *
  `InternalHostedZoneId` | `INTERNAL_HOSTED_ZONE_ID` | Yes | See the [Internal DNS stack](#internal-dns) above.
  `InternalKeyName` | `INTERNAL_KEY_NAME` | No / `internal` | <a name="internal-key-name">The</a> SSH key pair used to connect to internal EC2 instances.
  `JumpBoxEIPAddress` | `JUMP_BOX_EIP_ADDRESS` | No | The Elastic IP address that will be assigned to the jump box instance. If not specified, a new EIP address will be allocated. By pre-allocating an EIP and specifying it via this parameter, the jump box will be accessible with the same address even though the infrastructure may have been rebuilt repeatedly.
