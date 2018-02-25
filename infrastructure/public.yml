@@ -33,6 +33,15 @@ Parameters:
       internally, this DNS zone can be any valid DNS domain (e.g.: example.com).
     AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
     ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
+  InternalAccessCIDRBlock:
+    Type: String
+    Description: The CIDR block that can access internal interfaces of public resources.
+    Default: 10.0.0.0/8
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/\\d{1,2}"
+    ConstraintDescription: must contain four dot-separated octets, a slash, and the network mask bit count
+  InternalAccessIPv6CIDRBlock:
+    Type: String
+    Description: The IPv6 CIDR block that can access internal interfaces of public resources. Optional
   InternalHostedZoneId:
     Type: AWS::Route53::HostedZone::Id
     Description: The internal DNS zone to which internal DNS records will be added.
@@ -56,19 +65,36 @@ Parameters:
     Type: String
     Default: t2.nano
     Description: The instance type of the jump box.
-  SecondOctet:
-    Type: Number
-    MinValue: 0
-    MaxValue: 255
-    Description: The second octet of the CIDR block for the VPC.
+  PublicSubnetACIDRBlock:
+    Type: String
+    Description: The CIDR block of the public A subnet.
+    Default: 10.0.0.0/24
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/\\d{1,2}"
+    ConstraintDescription: must contain four dot-separated octets, a slash, and the network mask bit count
+  PublicSubnetBCIDRBlock:
+    Type: String
+    Description: The CIDR block of the public B subnet.
+    Default: 10.0.1.0/24
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/\\d{1,2}"
+    ConstraintDescription: must contain four dot-separated octets, a slash, and the network mask bit count
+  PublicSubnetCCIDRBlock:
+    Type: String
+    Description: The CIDR block of the public C subnet.
+    Default: 10.0.2.0/24
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/\\d{1,2}"
+    ConstraintDescription: must contain four dot-separated octets, a slash, and the network mask bit count
+  PublicSubnetAIPv6CIDRBlock:
+    Type: String
+    Description: The IPv6 CIDR block of the public A subnet. Optional.
+  PublicSubnetBIPv6CIDRBlock:
+    Type: String
+    Description: The IPv6 CIDR block of the public B subnet. Optional.
+  PublicSubnetCIPv6CIDRBlock:
+    Type: String
+    Description: The IPv6 CIDR block of the public C subnet. Optional.
   VPCId:
     Type: AWS::EC2::VPC::Id
     Description: The id of the VPC in which the resources will be created.
-  VPCIPv656CIDRPrefix:
-    Type: String
-    Description: The IPv6 /56 CIDR prefix of the VPC. Optional, no IPv6 configuration will be used if not specified.
-    AllowedPattern: "(\\p{XDigit}{1,4})\\:(\\p{XDigit}{1,4})\\:(\\p{XDigit}{1,4})\\:(\\p{XDigit}{0,2})|(^$)"
-    ConstraintDescription: must contain the first three quartets and half of the fourth quartet, optional
   VPNGatewayId:
     Type: String
     Description: |
@@ -83,50 +109,53 @@ Mappings:
     us-west-2: { standard: ami-de1faba6, nat: ami-0541ea7d }
 
 Conditions:
-  AddIPv6: !Not [ !Equals [ !Ref VPCIPv656CIDRPrefix, "" ] ]
+  AddIPv6SubnetA: !Not [ !Equals [ !Ref PublicSubnetAIPv6CIDRBlock, "" ] ]
+  AddIPv6SubnetB: !Not [ !Equals [ !Ref PublicSubnetBIPv6CIDRBlock, "" ] ]
+  AddIPv6SubnetC: !Not [ !Equals [ !Ref PublicSubnetCIPv6CIDRBlock, "" ] ]
+  AddAnyIPv6: !Or [ Condition: AddIPv6SubnetA, Condition: AddIPv6SubnetB, Condition: AddIPv6SubnetC ]
   VPNGatewayIdDefined: !Not [ !Equals [ !Ref VPNGatewayId, "" ] ]
 
 Resources:
   PublicSubnetA:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: !Sub "10.${SecondOctet}.0.0/24"
+      CidrBlock: !Ref PublicSubnetACIDRBlock
       AvailabilityZone: !Select [ "0", !GetAZs "" ]
       VpcId: !Ref VPCId
-      AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
-      Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}00::/64", !Ref "AWS::NoValue" ]
+      AssignIpv6AddressOnCreation: !If [ AddIPv6SubnetA, true, !Ref "AWS::NoValue" ]
+      Ipv6CidrBlock: !If [ AddIPv6SubnetA, !Ref PublicSubnetAIPv6CIDRBlock, !Ref "AWS::NoValue" ]
       Tags:
       - Key: Name
-        Value: !Sub "${AWS::StackName}-${AWS::Region}-a-public-subnet"
+        Value: !Sub "${AWS::StackName}-a-public-subnet"
   PublicSubnetB:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: !Sub "10.${SecondOctet}.1.0/24"
+      CidrBlock: !Ref PublicSubnetBCIDRBlock
       AvailabilityZone: !Select [ "1", !GetAZs "" ]
       VpcId: !Ref VPCId
-      AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
-      Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}01::/64", !Ref "AWS::NoValue" ]
+      AssignIpv6AddressOnCreation: !If [ AddIPv6SubnetB, true, !Ref "AWS::NoValue" ]
+      Ipv6CidrBlock: !If [ AddIPv6SubnetB, !Ref PublicSubnetBIPv6CIDRBlock, !Ref "AWS::NoValue" ]
       Tags:
       - Key: Name
-        Value: !Sub "${AWS::StackName}-${AWS::Region}-b-public-subnet"
+        Value: !Sub "${AWS::StackName}-b-public-subnet"
   PublicSubnetC:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: !Sub "10.${SecondOctet}.2.0/24"
+      CidrBlock: !Ref PublicSubnetCCIDRBlock
       AvailabilityZone: !Select [ "2", !GetAZs "" ]
       VpcId: !Ref VPCId
-      AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
-      Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}02::/64", !Ref "AWS::NoValue" ]
+      AssignIpv6AddressOnCreation: !If [ AddIPv6SubnetC, true, !Ref "AWS::NoValue" ]
+      Ipv6CidrBlock: !If [ AddIPv6SubnetC, !Ref PublicSubnetCIPv6CIDRBlock, !Ref "AWS::NoValue" ]
       Tags:
       - Key: Name
-        Value: !Sub "${AWS::StackName}-${AWS::Region}-c-public-subnet"
+        Value: !Sub "${AWS::StackName}-c-public-subnet"
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
       - Key: Name
-        Value: !Sub "${AWS::StackName}-${AWS::Region}-igw"
+        Value: !Sub "${AWS::StackName}-igw"
   GatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
@@ -135,7 +164,7 @@ Resources:
 
   EgressOnlyInternetGateway:
     Type: AWS::EC2::EgressOnlyInternetGateway
-    Condition: AddIPv6
+    Condition: AddAnyIPv6
     Properties:
       VpcId: !Ref VPCId
 
@@ -145,7 +174,7 @@ Resources:
       VpcId: !Ref VPCId
       Tags:
       - Key: Name
-        Value: !Sub "${AWS::StackName}-${AWS::Region}-public-rtb"
+        Value: !Sub "${AWS::StackName}-public-rtb"
   IPv4PublicDefaultRoute:
     Type: AWS::EC2::Route
     Properties:
@@ -155,7 +184,7 @@ Resources:
     DependsOn: GatewayAttachment
   IPv6PublicDefaultRoute:
     Type: AWS::EC2::Route
-    Condition: AddIPv6
+    Condition: AddAnyIPv6
     Properties:
       DestinationIpv6CidrBlock: ::/0
       RouteTableId: !Ref PublicRouteTable
@@ -190,7 +219,7 @@ Resources:
       VpcId: !Ref VPCId
       Tags:
       - Key: Name
-        Value: !Sub "${AWS::StackName}-${AWS::Region}-acl"
+        Value: !Sub "${AWS::StackName}-acl"
 
   IPv4EgressACLEntry:
     Type: AWS::EC2::NetworkAclEntry
@@ -203,7 +232,7 @@ Resources:
       NetworkAclId: !Ref NetworkACL
   IPv6EgressACLEntry:
     Type: AWS::EC2::NetworkAclEntry
-    Condition: AddIPv6
+    Condition: AddAnyIPv6
     Properties:
       Ipv6CidrBlock: ::/0
       Egress: true
@@ -222,7 +251,7 @@ Resources:
       NetworkAclId: !Ref NetworkACL
   IPv6IngressACLEntry:
     Type: AWS::EC2::NetworkAclEntry
-    Condition: AddIPv6
+    Condition: AddAnyIPv6
     Properties:
       Ipv6CidrBlock: ::/0
       Egress: false
@@ -261,9 +290,9 @@ Resources:
         ToPort: 22
         CidrIp: !Ref JumpBoxSSHCIDRIP
       - IpProtocol: -1
-        CidrIp: 10.0.0.0/8
+        CidrIp: !Ref InternalAccessCIDRBlock
       - IpProtocol: -1
-        CidrIpv6: !Sub "${VPCIPv656CIDRPrefix}00::/56"
+        CidrIpv6: !Ref InternalAccessIPv6CIDRBlock
       SecurityGroupEgress:
       - IpProtocol: -1
         CidrIp: 0.0.0.0/0
@@ -279,9 +308,9 @@ Resources:
         Value: !Sub "${AWS::StackName}-nat-sg"
       SecurityGroupIngress:
       - IpProtocol: -1
-        CidrIp: 10.0.0.0/8
+        CidrIp: !Ref InternalAccessCIDRBlock
       - IpProtocol: -1
-        CidrIpv6: !Sub "${VPCIPv656CIDRPrefix}00::/56"
+        CidrIpv6: !Ref InternalAccessIPv6CIDRBlock
       SecurityGroupEgress:
       - IpProtocol: -1
         CidrIp: 0.0.0.0/0
@@ -330,7 +359,7 @@ Outputs:
     Description: The id of the NAT instance to be added to private route tables.
     Value: !GetAtt NATInstanceStack.Outputs.NATInstanceId
   EgressOnlyInternetGatewayId:
-    Condition: AddIPv6
+    Condition: AddAnyIPv6
     Description: The id of the egress-only internet gateway for IPv6 traffic.
     Value: !Ref EgressOnlyInternetGateway
   PublicRouteTableId:

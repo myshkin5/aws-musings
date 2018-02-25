@@ -26,7 +26,7 @@ update-stack() {
     elif [[ $1 == "delete" ]] ; then
         VERB=delete-stack
     else
-        >&2 echo "First parameter to a stack script must be 'create' or 'update'"
+        >&2 echo "First parameter to a stack script must be 'create', 'update' or 'delete'"
         exit -1
     fi
 

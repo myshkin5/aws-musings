@@ -3,27 +3,19 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: The private resources of a VPC.
 
 Parameters:
-  NetworkACLId:
-    Type: String
-    Description: The id of the network access control list used to protect instances in the VPC.
   NATInstanceId:
     Type: String
     Description: The id of the NAT instance to be added to private route tables.
   EgressOnlyInternetGatewayId:
     Type: String
     Description: The id of the egress-only internet gateway for IPv6 traffic.
-  SecondOctet:
-    Type: Number
-    MinValue: 0
-    MaxValue: 255
-    Description: The second octet of the CIDR block for the VPC.
   VPCId:
     Type: AWS::EC2::VPC::Id
     Description: The id of the VPC in which the resources will be created.
-  VPCIPv656CIDRPrefix:
+  IPv6CIDRBlock:
     Type: String
-    Description: The IPv6 /56 CIDR prefix of the VPC. Optional, no IPv6 configuration will be used if not specified.
-    AllowedPattern: "(\\p{XDigit}{1,4})\\:(\\p{XDigit}{1,4})\\:(\\p{XDigit}{1,4})\\:(\\p{XDigit}{0,2})|(^$)"
+    Description: The IPv6 CIDR block of the VPC. Optional, if not specified, no IPv6 capabilities will be configured.
+    Type: String
     ConstraintDescription: must contain the first three quartets and half of the fourth quartet, optional
   VPNGatewayId:
     Type: String
@@ -32,51 +24,17 @@ Parameters:
       if not specified.
 
 Conditions:
-  AddIPv6: !Not [ !Equals [ !Ref VPCIPv656CIDRPrefix, "" ] ]
+  AddIPv6: !Not [ !Equals [ !Ref IPv6CIDRBlock, "" ] ]
   VPNGatewayIdDefined: !Not [ !Equals [ !Ref VPNGatewayId, "" ] ]
 
 Resources:
-  PrivateSubnetA:
-    Type: AWS::EC2::Subnet
-    Properties:
-      CidrBlock: !Sub "10.${SecondOctet}.50.0/24"
-      AvailabilityZone: !Select [ "0", !GetAZs "" ]
-      VpcId: !Ref VPCId
-      AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
-      Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}30::/64", !Ref "AWS::NoValue" ]
-      Tags:
-      - Key: Name
-        Value: !Sub "${AWS::StackName}-${AWS::Region}-a-private-subnet"
-  PrivateSubnetB:
-    Type: AWS::EC2::Subnet
-    Properties:
-      CidrBlock: !Sub "10.${SecondOctet}.51.0/24"
-      AvailabilityZone: !Select [ "1", !GetAZs "" ]
-      VpcId: !Ref VPCId
-      AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
-      Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}31::/64", !Ref "AWS::NoValue" ]
-      Tags:
-      - Key: Name
-        Value: !Sub "${AWS::StackName}-${AWS::Region}-b-private-subnet"
-  PrivateSubnetC:
-    Type: AWS::EC2::Subnet
-    Properties:
-      CidrBlock: !Sub "10.${SecondOctet}.52.0/24"
-      AvailabilityZone: !Select [ "2", !GetAZs "" ]
-      VpcId: !Ref VPCId
-      AssignIpv6AddressOnCreation: !If [ AddIPv6, true, !Ref "AWS::NoValue" ]
-      Ipv6CidrBlock: !If [ AddIPv6, !Sub "${VPCIPv656CIDRPrefix}32::/64", !Ref "AWS::NoValue" ]
-      Tags:
-      - Key: Name
-        Value: !Sub "${AWS::StackName}-${AWS::Region}-c-private-subnet"
-
   PrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPCId
       Tags:
       - Key: Name
-        Value: !Sub "${AWS::StackName}-${AWS::Region}-private-rtb"
+        Value: !Sub "${AWS::StackName}-private-rtb"
   IPv4PrivateDefaultRoute:
     Type: AWS::EC2::Route
     Properties:
@@ -90,21 +48,6 @@ Resources:
       DestinationIpv6CidrBlock: ::/0
       RouteTableId: !Ref PrivateRouteTable
       EgressOnlyInternetGatewayId: !Ref EgressOnlyInternetGatewayId
-  PrivateSubnetARouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PrivateRouteTable
-      SubnetId: !Ref PrivateSubnetA
-  PrivateSubnetBRouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PrivateRouteTable
-      SubnetId: !Ref PrivateSubnetB
-  PrivateSubnetCRouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PrivateRouteTable
-      SubnetId: !Ref PrivateSubnetC
 
   VPNGatewayRoutePropagation:
     Type: AWS::EC2::VPNGatewayRoutePropagation
@@ -112,22 +55,6 @@ Resources:
     Properties:
       RouteTableIds: [ !Ref PrivateRouteTable ]
       VpnGatewayId: !Ref VPNGatewayId
-
-  PrivateSubnetANetworkACLAssociation:
-    Type: AWS::EC2::SubnetNetworkAclAssociation
-    Properties:
-      NetworkAclId: !Ref NetworkACLId
-      SubnetId: !Ref PrivateSubnetA
-  PrivateSubnetBNetworkACLAssociation:
-    Type: AWS::EC2::SubnetNetworkAclAssociation
-    Properties:
-      NetworkAclId: !Ref NetworkACLId
-      SubnetId: !Ref PrivateSubnetB
-  PrivateSubnetCNetworkACLAssociation:
-    Type: AWS::EC2::SubnetNetworkAclAssociation
-    Properties:
-      NetworkAclId: !Ref NetworkACLId
-      SubnetId: !Ref PrivateSubnetC
 
 Outputs:
   PrivateRouteTableId:

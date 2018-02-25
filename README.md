@@ -46,9 +46,13 @@ $ ./infrastructure/scripts/public.sh create
 ```
 **Note:** The environment variable `VPC_ID` was output by the `vpc.sh` script and *_manually_* copied and executed after the `vpc.sh create` completed. The `public.sh create` script then was able to use the value when it was subsequently executed.
 
-# CIDR Addressing Scheme for Private IP Addresses
+# CIDR Addressing Scheme for Private IPv4 Addresses
 
-Of the four octets of any IPv4 address, `aws-musings` hardcodes the first to `10` for private IP addresses. The second octet is configurable in the infrastructure sub-project (see [SECOND_OCTET](./infrastructure#second-octet)). The third octet divides public subnets (`0` through `49`) from private subnets (`50` through `255`). The infrastructure sub-project also reserves the first three public and private subnets (`0`, `1`, `2`, `50`, `51` and `52`). Other sub-projects typically allow the third octet to be configurable.
+`aws-musings` attempts to be unassuming about the CIDR addressing scheme for private IPv4 addresses. The only recommendation can be inferred by the default CIDR ranges but these values are completely overridable. The default CIDRs used in `aws-musings` define a `/16` VPC (10.0.0.0/16) with 256 subnets defined by the third octet. The third octet divides public subnets (`0` through `49`) from private subnets (`50` through `255`). The default of the [infrastructure](./infrastructure) sub-project also reserves the first three public subnets (`0`, `1`, and `2`).
+
+# IPv6 CIDR Addressing Scheme
+
+AWS will provide an IPv6 `/56` CIDR for each VPC (when using the AWS console). `aws-musings` uses several `ipv6-defaults.sh` scripts to divvy up the `/56` into 256 `/64` subnets. By default the subnets are partition in a scheme similar to the above IPv4 scheme with subnet `00` through `2f` being reserved for public subnets and `30` through `ff` used for private subnets.
 
 # Sub-Projects
  Name | Description

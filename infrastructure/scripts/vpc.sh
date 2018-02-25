@@ -6,8 +6,12 @@ source $(dirname $0)/setenv.sh $@
 
 STACK_NAME=$STACK_PREFIX-infrastructure-vpc
 
+if [[ $CIDR_BLOCK == "" ]] ; then
+    CIDR_BLOCK=$(yq r $(dirname $0)/../vpc.yml Parameters.CIDRBlock.Default)
+fi
+
 update-stack $1 --template-url $AWS_MUSINGS_S3_URL/infrastructure/vpc.yml \
-    --parameters ParameterKey=SecondOctet,ParameterValue=$SECOND_OCTET
+    --parameters ParameterKey=CIDRBlock,ParameterValue=$CIDR_BLOCK
 
 if [[ $OUTPUT_RESULT == "true" ]] ; then
     RESULT=$(describe-stack)

@@ -18,21 +18,37 @@ if [[ $JUMP_BOX_INSTANCE_TYPE == "" ]] ; then
     JUMP_BOX_INSTANCE_TYPE=$(yq r $(dirname $0)/../public.yml Parameters.JumpBoxInstanceType.Default)
 fi
 
+if [[ $PUBLIC_SUBNET_A_CIDR_BLOCK == "" ]] ; then
+    PUBLIC_SUBNET_A_CIDR_BLOCK=$(yq r $(dirname $0)/../public.yml Parameters.PublicSubnetACIDRBlock.Default)
+fi
+if [[ $PUBLIC_SUBNET_B_CIDR_BLOCK == "" ]] ; then
+    PUBLIC_SUBNET_B_CIDR_BLOCK=$(yq r $(dirname $0)/../public.yml Parameters.PublicSubnetBCIDRBlock.Default)
+fi
+if [[ $PUBLIC_SUBNET_C_CIDR_BLOCK == "" ]] ; then
+    PUBLIC_SUBNET_C_CIDR_BLOCK=$(yq r $(dirname $0)/../public.yml Parameters.PublicSubnetCCIDRBlock.Default)
+fi
+
 update-stack $1 --template-url $AWS_MUSINGS_S3_URL/infrastructure/public.yml \
     --parameters ParameterKey=AWSMusingsS3URL,ParameterValue=$AWS_MUSINGS_S3_URL \
         ParameterKey=DNSZone,ParameterValue=$DNS_ZONE \
         ParameterKey=ExternalHostedZoneId,ParameterValue=$EXTERNAL_HOSTED_ZONE_ID \
         ParameterKey=FullyQualifiedExternalParentDNSZone,ParameterValue=$FULLY_QUALIFIED_EXTERNAL_PARENT_DNS_ZONE \
         ParameterKey=FullyQualifiedInternalParentDNSZone,ParameterValue=$FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE \
+        ParameterKey=InternalAccessCIDRBlock,ParameterValue=$INTERNAL_ACCESS_CIDR_BLOCK \
+        ParameterKey=InternalAccessIPv6CIDRBlock,ParameterValue=$INTERNAL_ACCESS_IPV6_CIDR_BLOCK \
         ParameterKey=InternalHostedZoneId,ParameterValue=$INTERNAL_HOSTED_ZONE_ID \
         ParameterKey=InternalKeyName,ParameterValue=$INTERNAL_KEY_NAME \
         ParameterKey=JumpBoxEIPAddress,ParameterValue=$JUMP_BOX_EIP_ADDRESS \
         ParameterKey=JumpBoxKeyName,ParameterValue=$JUMP_BOX_KEY_NAME \
         ParameterKey=JumpBoxSSHCIDRIP,ParameterValue=$JUMP_BOX_SSH_CIDR_IP \
         ParameterKey=JumpBoxInstanceType,ParameterValue=$JUMP_BOX_INSTANCE_TYPE \
-        ParameterKey=SecondOctet,ParameterValue=$SECOND_OCTET \
+        ParameterKey=PublicSubnetACIDRBlock,ParameterValue=$PUBLIC_SUBNET_A_CIDR_BLOCK \
+        ParameterKey=PublicSubnetBCIDRBlock,ParameterValue=$PUBLIC_SUBNET_B_CIDR_BLOCK \
+        ParameterKey=PublicSubnetCCIDRBlock,ParameterValue=$PUBLIC_SUBNET_C_CIDR_BLOCK \
+        ParameterKey=PublicSubnetAIPv6CIDRBlock,ParameterValue=$PUBLIC_SUBNET_A_IPV6_CIDR_BLOCK \
+        ParameterKey=PublicSubnetBIPv6CIDRBlock,ParameterValue=$PUBLIC_SUBNET_B_IPV6_CIDR_BLOCK \
+        ParameterKey=PublicSubnetCIPv6CIDRBlock,ParameterValue=$PUBLIC_SUBNET_C_IPV6_CIDR_BLOCK \
         ParameterKey=VPCId,ParameterValue=$VPC_ID \
-        ParameterKey=VPCIPv656CIDRPrefix,ParameterValue=$VPC_IPV6_56_CIDR_PREFIX \
         ParameterKey=VPNGatewayId,ParameterValue=$VPN_GATEWAY_ID
 
 if [[ $OUTPUT_RESULT == "true" ]] ; then

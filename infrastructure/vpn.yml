@@ -10,6 +10,12 @@ Parameters:
   CustomerGatewayIPAddress:
     Type: String
     Description: The public IP address of the customer gateway.
+  InternalAccessCIDRBlock:
+    Type: String
+    Description: The CIDR block that can access internal interfaces of public resources.
+    Default: 10.0.0.0/8
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/\\d{1,2}"
+    ConstraintDescription: must contain four dot-separated octets, a slash, and the network mask bit count
   VPCId:
     Type: AWS::EC2::VPC::Id
     Description: The id of the VPC in which the resources will be created.
@@ -23,7 +29,7 @@ Resources:
       IpAddress: !Ref CustomerGatewayIPAddress
       Tags:
       - Key: Name
-        Value: !Sub "${AWS::StackName}-${AWS::Region}-cgw"
+        Value: !Sub "${AWS::StackName}-cgw"
 
   VPNGateway:
     Type: AWS::EC2::VPNGateway
@@ -31,7 +37,7 @@ Resources:
       Type: ipsec.1
       Tags:
       - Key: Name
-        Value: !Sub "${AWS::StackName}-${AWS::Region}-vgw"
+        Value: !Sub "${AWS::StackName}-vgw"
 
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -48,12 +54,12 @@ Resources:
       VpnGatewayId: !Ref VPNGateway
       Tags:
       - Key: Name
-        Value: !Sub "${AWS::StackName}-${AWS::Region}-vpn"
+        Value: !Sub "${AWS::StackName}-vpn-connection"
 
   VPNConnectionRoute:
     Type: AWS::EC2::VPNConnectionRoute
     Properties:
-      DestinationCidrBlock: 10.0.0.0/8
+      DestinationCidrBlock: !Ref InternalAccessCIDRBlock
       VpnConnectionId: !Ref VPNConnection
 
 Outputs:
