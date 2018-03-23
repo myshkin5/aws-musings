@@ -12,6 +12,9 @@ fi
 if [[ $STACK_PREFIX == "" ]] ; then
     STACK_PREFIX=vkzone-dev
 fi
+if [[ $DNS_ZONE == "" ]] ; then
+    DNS_ZONE=dev
+fi
 
 update-stack() {
     if [[ $1 == "create" ]] ; then

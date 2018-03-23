@@ -115,6 +115,7 @@ Conditions:
   AddIPv6SubnetB: !Not [ !Equals [ !Ref PublicSubnetBIPv6CIDRBlock, "" ] ]
   AddIPv6SubnetC: !Not [ !Equals [ !Ref PublicSubnetCIPv6CIDRBlock, "" ] ]
   AddAnyIPv6: !Or [ Condition: AddIPv6SubnetA, Condition: AddIPv6SubnetB, Condition: AddIPv6SubnetC ]
+  AddIPv6InternalAccess: !Not [ !Equals [ !Ref InternalAccessIPv6CIDRBlock, "" ] ]
   VPNGatewayIdDefined: !Not [ !Equals [ !Ref VPNGatewayId, "" ] ]
 
 Resources:
@@ -293,13 +294,18 @@ Resources:
         CidrIp: !Ref JumpBoxSSHCIDRIP
       - IpProtocol: -1
         CidrIp: !Ref InternalAccessCIDRBlock
-      - IpProtocol: -1
-        CidrIpv6: !Ref InternalAccessIPv6CIDRBlock
       SecurityGroupEgress:
       - IpProtocol: -1
         CidrIp: 0.0.0.0/0
       - IpProtocol: -1
         CidrIpv6: ::/0
+  JumpBoxIPv6SecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: AddIPv6InternalAccess
+    Properties:
+      GroupId: !GetAtt JumpBoxSecurityGroup.GroupId
+      IpProtocol: -1
+      CidrIpv6: !Ref InternalAccessIPv6CIDRBlock
   NATSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -311,13 +317,18 @@ Resources:
       SecurityGroupIngress:
       - IpProtocol: -1
         CidrIp: !Ref InternalAccessCIDRBlock
-      - IpProtocol: -1
-        CidrIpv6: !Ref InternalAccessIPv6CIDRBlock
       SecurityGroupEgress:
       - IpProtocol: -1
         CidrIp: 0.0.0.0/0
       - IpProtocol: -1
         CidrIpv6: ::/0
+  NATIPv6SecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: AddIPv6InternalAccess
+    Properties:
+      GroupId: !GetAtt NATSecurityGroup.GroupId
+      IpProtocol: -1
+      CidrIpv6: !Ref InternalAccessIPv6CIDRBlock
 
   JumpBoxInstanceStack:
     Type: AWS::CloudFormation::Stack
