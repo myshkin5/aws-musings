@@ -4,7 +4,7 @@ set -e
 
 source $(dirname $0)/setenv.sh $@
 
-STACK_NAME=$STACK_PREFIX-infrastructure-public
+STACK_NAME=$STACK_ORG-$STACK_ENV-infrastructure-public
 
 if [[ $JUMP_BOX_KEY_NAME == "" ]] ; then
     JUMP_BOX_KEY_NAME=$(yq r $(dirname $0)/../public.yml Parameters.JumpBoxKeyName.Default)
@@ -30,12 +30,11 @@ fi
 
 update-stack $1 --template-url $AWS_MUSINGS_S3_URL/infrastructure/public.yml \
     --parameters ParameterKey=AWSMusingsS3URL,ParameterValue=$AWS_MUSINGS_S3_URL \
-        ParameterKey=DNSZone,ParameterValue=$DNS_ZONE \
         ParameterKey=ExternalHostedZoneId,ParameterValue=$EXTERNAL_HOSTED_ZONE_ID \
         ParameterKey=FullyQualifiedExternalParentDNSZone,ParameterValue=$FULLY_QUALIFIED_EXTERNAL_PARENT_DNS_ZONE \
-        ParameterKey=FullyQualifiedInternalParentDNSZone,ParameterValue=$FULLY_QUALIFIED_INTERNAL_PARENT_DNS_ZONE \
         ParameterKey=InternalAccessCIDRBlock,ParameterValue=$INTERNAL_ACCESS_CIDR_BLOCK \
         ParameterKey=InternalAccessIPv6CIDRBlock,ParameterValue=$INTERNAL_ACCESS_IPV6_CIDR_BLOCK \
+        ParameterKey=InternalDNSZone,ParameterValue=$INTERNAL_DNS_ZONE \
         ParameterKey=InternalHostedZoneId,ParameterValue=$INTERNAL_HOSTED_ZONE_ID \
         ParameterKey=InternalKeyName,ParameterValue=$INTERNAL_KEY_NAME \
         ParameterKey=JumpBoxEIPAddress,ParameterValue=$JUMP_BOX_EIP_ADDRESS \
@@ -48,6 +47,8 @@ update-stack $1 --template-url $AWS_MUSINGS_S3_URL/infrastructure/public.yml \
         ParameterKey=PublicSubnetAIPv6CIDRBlock,ParameterValue=$PUBLIC_SUBNET_A_IPV6_CIDR_BLOCK \
         ParameterKey=PublicSubnetBIPv6CIDRBlock,ParameterValue=$PUBLIC_SUBNET_B_IPV6_CIDR_BLOCK \
         ParameterKey=PublicSubnetCIPv6CIDRBlock,ParameterValue=$PUBLIC_SUBNET_C_IPV6_CIDR_BLOCK \
+        ParameterKey=StackEnv,ParameterValue=$STACK_ENV \
+        ParameterKey=StackOrg,ParameterValue=$STACK_ORG \
         ParameterKey=VPCId,ParameterValue=$VPC_ID \
         ParameterKey=VPNGatewayId,ParameterValue=$VPN_GATEWAY_ID
 

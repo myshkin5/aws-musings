@@ -6,55 +6,55 @@ Parameters:
   AWSMusingsS3URL:
     Type: String
     Description: S3 path to aws-musings.
-  DNSZone:
-    Type: String
-    Description: The DNS zone name of the VPC (should not end in 'vpc', used in naming the instance).
-    AllowedPattern: "[a-z0-9\\-]*"
-    ConstraintDescription: must contain only lowercase letters, numbers and dashes
   EIPAddress:
     Type: String
     Description: An EIP reserved for the jump box. Optional, a public IP address is reserved if not specified.
     AllowedPattern: "((\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3}))|(^$)"
     ConstraintDescription: must contain four dot-separated octets, optional
-  FullyQualifiedExternalParentDNSZone:
-    Type: String
-    Description: |
-      The external parent DNS zone (should not start or end with .). Optional, Route 53 resources will be created
-      if specified.
-    AllowedPattern: "([a-z][a-z0-9\\-.]*[a-z0-9])|(^$)"
-    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots, optional
   ExternalHostedZoneId:
     Type: String
     Description: The external DNS zone to which an external DNS A record will be added for the jump box.
-  FullyQualifiedInternalParentDNSZone:
+  FullyQualifiedExternalParentDNSZone:
     Type: String
-    Description: The internal parent DNS zone (should not start or end with .).
+    Description: The public DNS zone configured in Route 53 (should not start or end with .).
+    AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
+    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
+  ImageId:
+    Type: AWS::EC2::Image::Id
+    Description: The AMI used to create the instance.
+  InstanceType:
+    Type: String
+    Description: The instance type of the jump box.
+  InternalDNSZone:
+    Type: String
+    Description: The internal DNS zone (should not start or end with .).
     AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
     ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
   InternalHostedZoneId:
     Type: AWS::Route53::HostedZone::Id
     Description: The internal DNS zone to which an internal DNS A record will be added for the jump box.
-  ImageId:
-    Type: AWS::EC2::Image::Id
-    Description: The AMI used to create the instance.
   KeyName:
     Type: AWS::EC2::KeyPair::KeyName
     Description: SSH key name used to connect to the jump box.
   SecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
     Description: The id of the security group protecting the jump box.
+  StackEnv:
+    Type: String
+    Description: The environment name.
+    AllowedPattern: "[a-z0-9\\-]*"
+    ConstraintDescription: must contain only lowercase letters, numbers and dashes
+  StackOrg:
+    Type: String
+    Description: The organization name.
+    AllowedPattern: "[a-z0-9\\-]*"
+    ConstraintDescription: must contain only lowercase letters, numbers and dashes
   SubnetId:
     Type: AWS::EC2::Subnet::Id
     Description: The id of the subnet where the server will be added.
-  InstanceType:
-    Type: String
-    Description: The instance type of the jump box.
 
 Conditions:
   EIPAddressDefined: !Not [ !Equals [ !Ref EIPAddress, "" ] ]
-  FullyQualifiedExternalParentDNSZoneDefined: !And
-    - !Not [ !Equals [ !Ref FullyQualifiedExternalParentDNSZone, "" ] ]
-    - !Not [ !Equals [ !Ref ExternalHostedZoneId, "" ] ]
 
 Resources:
   JumpBoxInstance:
@@ -85,7 +85,7 @@ Resources:
       Monitoring: false
       Tags:
       - Key: Name
-        Value: !Sub "${DNSZone}-jump-box"
+        Value: !Sub "${StackOrg}-${StackEnv}-infrastructure-public-jump-box"
       NetworkInterfaces:
       - AssociatePublicIpAddress: true
         DeleteOnTermination: true
@@ -127,10 +127,9 @@ Resources:
 
   PublicJumpBoxRecordSet:
     Type: AWS::Route53::RecordSet
-    Condition: FullyQualifiedExternalParentDNSZoneDefined
     Properties:
       HostedZoneId: !Ref ExternalHostedZoneId
-      Name: !Sub "jump-box.${DNSZone}.${FullyQualifiedExternalParentDNSZone}"
+      Name: !Sub "jump-box.${StackEnv}.${FullyQualifiedExternalParentDNSZone}"
       ResourceRecords:
       - !GetAtt JumpBoxInstance.PublicIp
       TTL: 300
@@ -141,7 +140,7 @@ Resources:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneId: !Ref InternalHostedZoneId
-      Name: !Sub "jump-box.${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
+      Name: !Sub "jump-box.${InternalDNSZone}.${StackEnv}.${FullyQualifiedExternalParentDNSZone}"
       ResourceRecords:
       - !GetAtt JumpBoxInstance.PrivateIp
       TTL: 300

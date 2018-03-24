@@ -1,19 +1,13 @@
 AWSTemplateFormatVersion: 2010-09-09
 
 Description: |
-  An internal DNS hosted zone. Note this is a separate stack as the private zone it creates can be shared among
+  An external DNS hosted zone. Note this is a separate stack as the public zone it creates can be shared among
   several full infrastructure stacks.
 
 Parameters:
   FullyQualifiedExternalParentDNSZone:
     Type: String
     Description: The external parent DNS zone (should not start or end with .).
-    AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
-    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
-  InternalDNSZone:
-    Type: String
-    Description: The internal DNS zone (should not start or end with .).
-    Default: internal
     AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
     ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
   StackEnv:
@@ -26,15 +20,12 @@ Parameters:
     Description: The id of the VPC in which the resources will be created.
 
 Resources:
-  InternalHostedZone:
+  ExternalHostedZone:
     Type: "AWS::Route53::HostedZone"
     Properties:
-      Name: !Sub "${InternalDNSZone}.${StackEnv}.${FullyQualifiedExternalParentDNSZone}"
-      VPCs:
-      - VPCId: !Ref VPCId
-        VPCRegion: !Ref "AWS::Region"
+      Name: !Sub "${StackEnv}.${FullyQualifiedExternalParentDNSZone}"
 
 Outputs:
-  InternalHostedZoneId:
-    Description: The id of the internal DNS hosted zone.
-    Value: !Ref InternalHostedZone
+  ExternalHostedZoneId:
+    Description: The id of the external DNS hosted zone.
+    Value: !Ref ExternalHostedZone

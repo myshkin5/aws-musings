@@ -9,11 +9,12 @@ fi
 if [[ $PROFILE == "" ]] ; then
     PROFILE=default
 fi
-if [[ $STACK_PREFIX == "" ]] ; then
-    STACK_PREFIX=vkzone-dev
+if [[ $STACK_ORG == "" ]] ; then
+    >&2 echo "Environment variable \$STACK_ORG is not defined"
+    exit -1
 fi
-if [[ $DNS_ZONE == "" ]] ; then
-    DNS_ZONE=dev
+if [[ $STACK_ENV == "" ]] ; then
+    STACK_ENV=dev
 fi
 
 update-stack() {

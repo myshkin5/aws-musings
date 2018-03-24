@@ -27,7 +27,8 @@ All shell scripts support and use the following environment variables:
  `AWS_MUSINGS_S3_BUCKET` | `aws-musings-us-east-1` | The S3 bucket where the CloudFormation scripts and supporting files are uploaded to and loaded from.
  `AWS_MUSINGS_S3_URL` | `https://s3.amazonaws.com/$AWS_MUSINGS_S3_BUCKET` | The URL to the `aws-musings` S3 bucket.
  `PROFILE` | `default` | The AWS CLI configured profile used with all invocations of the `aws` CLI.
- `STACK_PREFIX` | `vkzone-dev` | Used as a prefix to all CloudFormation stacks. Multiple groups of stacks should all use the same prefix.
+ `STACK_ORG` | None | <a name="stack-org">The</a> organization name. Used as a prefix to all CloudFormation stacks names. Multiple stacks should all use the same organization. This variable will typically identify the entity as a whole. This variable is commonly set to the Top-Level Domain name (e.g.: `example` for `example.com`).
+ `STACK_ENV` | `dev` | <a name="stack-env">The</a> environment name. Also used as a prefix to all CloudFormation stack names. Multiple stacks can all use the same environment. Environments are commonly named `prod`, `stage` and `dev`. Names the DNS zones within the external and internal DNS zones (i.e.: with an external DNS of `example.com`, the full external zone would be `dev.example.com`.
  `ACL` | `public-read` | The Access Control List of files uploaded with the `upload.sh` script (see [Making Modifications](#making-modifications) below). See this [ACL overview](http://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) for more details.
 
 ## Chaining Outputs to Inputs

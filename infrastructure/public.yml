@@ -7,13 +7,6 @@ Parameters:
     Type: String
     Default: https://s3.amazonaws.com/aws-musings-us-east-1
     Description: S3 path to aws-musings.
-  DNSZone:
-    Type: String
-    Description: |
-      The DNS zone name of the VPC (should not end in 'vpc', The fully qualified external and internal zones will be
-      appended).
-    AllowedPattern: "[a-z0-9\\-]*"
-    ConstraintDescription: must contain only lowercase letters, numbers and dashes
   ExternalHostedZoneId:
     Type: String
     Description: |
@@ -21,16 +14,7 @@ Parameters:
       if specified.
   FullyQualifiedExternalParentDNSZone:
     Type: String
-    Description: |
-      The public DNS zone configured in Route 53 (should not start or end with .). Optional, external records will be
-      created if specified.
-    AllowedPattern: "([a-z][a-z0-9\\-.]*[a-z0-9])|(^$)"
-    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots, optional
-  FullyQualifiedInternalParentDNSZone:
-    Type: String
-    Description: |
-      The internal parent DNS zone (should not start or end with .). Note since this is a private zone and only used
-      internally, this DNS zone can be any valid DNS domain (e.g.: example.com).
+    Description: The public DNS zone configured in Route 53 (should not start or end with .).
     AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
     ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
   InternalAccessCIDRBlock:
@@ -44,6 +28,11 @@ Parameters:
     Description: |
       The IPv6 CIDR block that can access internal interfaces of public resources. Optional, if not specified, no
       internal IPv6 access will be configured.
+  InternalDNSZone:
+    Type: String
+    Description: The internal DNS zone (should not start or end with .).
+    AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
+    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
   InternalHostedZoneId:
     Type: AWS::Route53::HostedZone::Id
     Description: The internal DNS zone to which internal DNS records will be added.
@@ -94,6 +83,16 @@ Parameters:
   PublicSubnetCIPv6CIDRBlock:
     Type: String
     Description: The IPv6 CIDR block of the public C subnet. Optional.
+  StackEnv:
+    Type: String
+    Description: The environment name.
+    AllowedPattern: "[a-z0-9\\-]*"
+    ConstraintDescription: must contain only lowercase letters, numbers and dashes
+  StackOrg:
+    Type: String
+    Description: The organization name.
+    AllowedPattern: "[a-z0-9\\-]*"
+    ConstraintDescription: must contain only lowercase letters, numbers and dashes
   VPCId:
     Type: AWS::EC2::VPC::Id
     Description: The id of the VPC in which the resources will be created.
@@ -336,29 +335,32 @@ Resources:
       TemplateURL: !Sub "${AWSMusingsS3URL}/infrastructure/jump-box-instance.yml"
       Parameters:
         AWSMusingsS3URL: !Ref AWSMusingsS3URL
-        DNSZone: !Ref DNSZone
         EIPAddress: !Ref JumpBoxEIPAddress
         ExternalHostedZoneId: !Ref ExternalHostedZoneId
         FullyQualifiedExternalParentDNSZone: !Ref FullyQualifiedExternalParentDNSZone
-        FullyQualifiedInternalParentDNSZone: !Ref FullyQualifiedInternalParentDNSZone
         ImageId: !FindInMap [ AMIRegionMap, !Ref "AWS::Region", standard ]
+        InstanceType: !Ref JumpBoxInstanceType
+        InternalDNSZone: !Ref InternalDNSZone
         InternalHostedZoneId: !Ref InternalHostedZoneId
         KeyName: !Ref JumpBoxKeyName
         SecurityGroupId: !Ref JumpBoxSecurityGroup
+        StackEnv: !Ref StackEnv
+        StackOrg: !Ref StackOrg
         SubnetId: !Ref PublicSubnetA
-        InstanceType: !Ref JumpBoxInstanceType
   NATInstanceStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "${AWSMusingsS3URL}/infrastructure/nat-instance.yml"
       Parameters:
         AWSMusingsS3URL: !Ref AWSMusingsS3URL
-        DNSZone: !Ref DNSZone
-        FullyQualifiedInternalParentDNSZone: !Ref FullyQualifiedInternalParentDNSZone
+        FullyQualifiedExternalParentDNSZone: !Ref FullyQualifiedExternalParentDNSZone
         ImageId: !FindInMap [ AMIRegionMap, !Ref "AWS::Region", nat ]
+        InternalDNSZone: !Ref InternalDNSZone
         InternalHostedZoneId: !Ref InternalHostedZoneId
         KeyName: !Ref InternalKeyName
         SecurityGroupId: !Ref NATSecurityGroup
+        StackEnv: !Ref StackEnv
+        StackOrg: !Ref StackOrg
         SubnetId: !Ref PublicSubnetB
 
 Outputs:

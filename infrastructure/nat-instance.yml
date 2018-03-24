@@ -6,28 +6,38 @@ Parameters:
   AWSMusingsS3URL:
     Type: String
     Description: S3 path to aws-musings.
-  DNSZone:
+  FullyQualifiedExternalParentDNSZone:
     Type: String
-    Description: The DNS zone name of the VPC (should not end in 'vpc', used in naming the instance).
-    AllowedPattern: "[a-z0-9\\-]*"
-    ConstraintDescription: must contain only lowercase letters, numbers and dashes
-  FullyQualifiedInternalParentDNSZone:
+    Description: The public DNS zone configured in Route 53 (should not start or end with .).
+    AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
+    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
+  ImageId:
+    Type: AWS::EC2::Image::Id
+    Description: The AMI used to create the instance.
+  InternalDNSZone:
     Type: String
-    Description: The internal parent DNS zone (should not start or end with .).
+    Description: The internal DNS zone (should not start or end with .).
     AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
     ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
   InternalHostedZoneId:
     Type: AWS::Route53::HostedZone::Id
     Description: The internal DNS zone to which an internal DNS A record will be added for the NAT server.
-  ImageId:
-    Type: AWS::EC2::Image::Id
-    Description: The AMI used to create the instance.
   KeyName:
     Type: AWS::EC2::KeyPair::KeyName
     Description: SSH key name used to connect to the NAT server.
   SecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
     Description: The id of the security group protecting the NAT server.
+  StackEnv:
+    Type: String
+    Description: The environment name.
+    AllowedPattern: "[a-z0-9\\-]*"
+    ConstraintDescription: must contain only lowercase letters, numbers and dashes
+  StackOrg:
+    Type: String
+    Description: The organization name.
+    AllowedPattern: "[a-z0-9\\-]*"
+    ConstraintDescription: must contain only lowercase letters, numbers and dashes
   SubnetId:
     Type: AWS::EC2::Subnet::Id
     Description: The id of the subnet where the server will be added.
@@ -62,7 +72,7 @@ Resources:
       Monitoring: false
       Tags:
       - Key: Name
-        Value: !Sub "${DNSZone}-nat"
+        Value: !Sub "${StackOrg}-${StackEnv}-infrastructure-public-nat"
       NetworkInterfaces:
       - AssociatePublicIpAddress: true
         DeleteOnTermination: true
@@ -98,7 +108,7 @@ Resources:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneId: !Ref InternalHostedZoneId
-      Name: !Sub "nat.${DNSZone}.${FullyQualifiedInternalParentDNSZone}"
+      Name: !Sub "nat.${InternalDNSZone}.${StackEnv}.${FullyQualifiedExternalParentDNSZone}"
       ResourceRecords:
       - !GetAtt NATInstance.PrivateIp
       TTL: 300

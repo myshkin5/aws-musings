@@ -11,6 +11,8 @@ $SCRIPTS_DIR/private.sh delete
 $SCRIPTS_DIR/public.sh delete
 >&2 echo "Deleting internal-dns..."
 $SCRIPTS_DIR/internal-dns.sh delete
+>&2 echo "Deleting external-dns..."
+$SCRIPTS_DIR/external-dns.sh delete
 >&2 echo "Deleting vpc..."
 $SCRIPTS_DIR/vpc.sh delete
 >&2 echo -e "\033[1m\033[42m Complete.     \033[0m"
