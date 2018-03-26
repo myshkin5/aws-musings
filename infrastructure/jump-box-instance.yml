@@ -14,22 +14,18 @@ Parameters:
   ExternalHostedZoneId:
     Type: String
     Description: The external DNS zone to which an external DNS A record will be added for the jump box.
-  FullyQualifiedExternalParentDNSZone:
+  FullyQualifiedExternalDNSZone:
     Type: String
-    Description: The public DNS zone configured in Route 53 (should not start or end with .).
-    AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
-    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
+    Description: The external DNS zone (should not start or end with .).
+  FullyQualifiedInternalDNSZone:
+    Type: String
+    Description: The internal DNS zone (should not start or end with .).
   ImageId:
     Type: AWS::EC2::Image::Id
     Description: The AMI used to create the instance.
   InstanceType:
     Type: String
     Description: The instance type of the jump box.
-  InternalDNSZone:
-    Type: String
-    Description: The internal DNS zone (should not start or end with .).
-    AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
-    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
   InternalHostedZoneId:
     Type: AWS::Route53::HostedZone::Id
     Description: The internal DNS zone to which an internal DNS A record will be added for the jump box.
@@ -39,14 +35,9 @@ Parameters:
   SecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
     Description: The id of the security group protecting the jump box.
-  StackEnv:
+  StackName:
     Type: String
-    Description: The environment name.
-    AllowedPattern: "[a-z0-9\\-]*"
-    ConstraintDescription: must contain only lowercase letters, numbers and dashes
-  StackOrg:
-    Type: String
-    Description: The organization name.
+    Description: The stack name.
     AllowedPattern: "[a-z0-9\\-]*"
     ConstraintDescription: must contain only lowercase letters, numbers and dashes
   SubnetId:
@@ -85,7 +76,7 @@ Resources:
       Monitoring: false
       Tags:
       - Key: Name
-        Value: !Sub "${StackOrg}-${StackEnv}-infrastructure-public-jump-box"
+        Value: !Ref StackName
       NetworkInterfaces:
       - AssociatePublicIpAddress: true
         DeleteOnTermination: true
@@ -129,7 +120,7 @@ Resources:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneId: !Ref ExternalHostedZoneId
-      Name: !Sub "jump-box.${StackEnv}.${FullyQualifiedExternalParentDNSZone}"
+      Name: !Sub "jump-box.${FullyQualifiedExternalDNSZone}"
       ResourceRecords:
       - !GetAtt JumpBoxInstance.PublicIp
       TTL: 300
@@ -140,7 +131,7 @@ Resources:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneId: !Ref InternalHostedZoneId
-      Name: !Sub "jump-box.${InternalDNSZone}.${StackEnv}.${FullyQualifiedExternalParentDNSZone}"
+      Name: !Sub "jump-box.${FullyQualifiedInternalDNSZone}"
       ResourceRecords:
       - !GetAtt JumpBoxInstance.PrivateIp
       TTL: 300

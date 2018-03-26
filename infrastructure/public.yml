@@ -12,11 +12,12 @@ Parameters:
     Description: |
       The external DNS zone to which external DNS records will be added. Optional, external records will be created
       if specified.
-  FullyQualifiedExternalParentDNSZone:
+  FullyQualifiedExternalDNSZone:
     Type: String
-    Description: The public DNS zone configured in Route 53 (should not start or end with .).
-    AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
-    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
+    Description: The external DNS zone (should not start or end with .).
+  FullyQualifiedInternalDNSZone:
+    Type: String
+    Description: The internal DNS zone (should not start or end with .).
   InternalAccessCIDRBlock:
     Type: String
     Description: The CIDR block that can access internal interfaces of public resources.
@@ -28,11 +29,6 @@ Parameters:
     Description: |
       The IPv6 CIDR block that can access internal interfaces of public resources. Optional, if not specified, no
       internal IPv6 access will be configured.
-  InternalDNSZone:
-    Type: String
-    Description: The internal DNS zone (should not start or end with .).
-    AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
-    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
   InternalHostedZoneId:
     Type: AWS::Route53::HostedZone::Id
     Description: The internal DNS zone to which internal DNS records will be added.
@@ -83,16 +79,6 @@ Parameters:
   PublicSubnetCIPv6CIDRBlock:
     Type: String
     Description: The IPv6 CIDR block of the public C subnet. Optional.
-  StackEnv:
-    Type: String
-    Description: The environment name.
-    AllowedPattern: "[a-z0-9\\-]*"
-    ConstraintDescription: must contain only lowercase letters, numbers and dashes
-  StackOrg:
-    Type: String
-    Description: The organization name.
-    AllowedPattern: "[a-z0-9\\-]*"
-    ConstraintDescription: must contain only lowercase letters, numbers and dashes
   VPCId:
     Type: AWS::EC2::VPC::Id
     Description: The id of the VPC in which the resources will be created.
@@ -337,15 +323,14 @@ Resources:
         AWSMusingsS3URL: !Ref AWSMusingsS3URL
         EIPAddress: !Ref JumpBoxEIPAddress
         ExternalHostedZoneId: !Ref ExternalHostedZoneId
-        FullyQualifiedExternalParentDNSZone: !Ref FullyQualifiedExternalParentDNSZone
+        FullyQualifiedExternalDNSZone: !Ref FullyQualifiedExternalDNSZone
+        FullyQualifiedInternalDNSZone: !Ref FullyQualifiedInternalDNSZone
         ImageId: !FindInMap [ AMIRegionMap, !Ref "AWS::Region", standard ]
         InstanceType: !Ref JumpBoxInstanceType
-        InternalDNSZone: !Ref InternalDNSZone
         InternalHostedZoneId: !Ref InternalHostedZoneId
         KeyName: !Ref JumpBoxKeyName
         SecurityGroupId: !Ref JumpBoxSecurityGroup
-        StackEnv: !Ref StackEnv
-        StackOrg: !Ref StackOrg
+        StackName: !Sub "${AWS::StackName}-jump-box"
         SubnetId: !Ref PublicSubnetA
   NATInstanceStack:
     Type: AWS::CloudFormation::Stack
@@ -353,14 +338,12 @@ Resources:
       TemplateURL: !Sub "${AWSMusingsS3URL}/infrastructure/nat-instance.yml"
       Parameters:
         AWSMusingsS3URL: !Ref AWSMusingsS3URL
-        FullyQualifiedExternalParentDNSZone: !Ref FullyQualifiedExternalParentDNSZone
+        FullyQualifiedInternalDNSZone: !Ref FullyQualifiedInternalDNSZone
         ImageId: !FindInMap [ AMIRegionMap, !Ref "AWS::Region", nat ]
-        InternalDNSZone: !Ref InternalDNSZone
         InternalHostedZoneId: !Ref InternalHostedZoneId
         KeyName: !Ref InternalKeyName
         SecurityGroupId: !Ref NATSecurityGroup
-        StackEnv: !Ref StackEnv
-        StackOrg: !Ref StackOrg
+        StackName: !Sub "${AWS::StackName}-nat"
         SubnetId: !Ref PublicSubnetB
 
 Outputs:

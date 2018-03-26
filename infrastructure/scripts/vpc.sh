@@ -4,7 +4,7 @@ set -e
 
 source $(dirname $0)/setenv.sh $@
 
-STACK_NAME=$STACK_ORG-$STACK_ENV-infrastructure-vpc
+STACK_NAME=$STACK_PREFIX-infrastructure-vpc
 
 if [[ $CIDR_BLOCK == "" ]] ; then
     CIDR_BLOCK=$(yq r $(dirname $0)/../vpc.yml Parameters.CIDRBlock.Default)

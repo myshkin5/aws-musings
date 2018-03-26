@@ -4,7 +4,7 @@ set -e
 
 source $(dirname $0)/setenv.sh $@
 
-STACK_NAME=$STACK_ORG-$STACK_ENV-infrastructure-vpn
+STACK_NAME=$STACK_PREFIX-infrastructure-vpn
 
 if [[ $BGP_AS_NUMBER == "" ]] ; then
     BGP_AS_NUMBER=$(yq r $(dirname $0)/../vpn.yml Parameters.BGPASNumber.Default)

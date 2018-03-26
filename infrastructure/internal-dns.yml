@@ -5,22 +5,15 @@ Description: |
   several full infrastructure stacks.
 
 Parameters:
-  FullyQualifiedExternalParentDNSZone:
+  FullyQualifiedExternalDNSZone:
     Type: String
-    Description: The external parent DNS zone (should not start or end with .).
-    AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
-    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
+    Description: The external DNS zone (should not start or end with .).
   InternalDNSZone:
     Type: String
     Description: The internal DNS zone (should not start or end with .).
     Default: internal
     AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
     ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
-  StackEnv:
-    Type: String
-    Description: The environment name.
-    AllowedPattern: "[a-z0-9\\-]*"
-    ConstraintDescription: must contain only lowercase letters, numbers and dashes
   VPCId:
     Type: AWS::EC2::VPC::Id
     Description: The id of the VPC in which the resources will be created.
@@ -29,12 +22,15 @@ Resources:
   InternalHostedZone:
     Type: "AWS::Route53::HostedZone"
     Properties:
-      Name: !Sub "${InternalDNSZone}.${StackEnv}.${FullyQualifiedExternalParentDNSZone}"
+      Name: !Sub "${InternalDNSZone}.${FullyQualifiedExternalDNSZone}"
       VPCs:
       - VPCId: !Ref VPCId
         VPCRegion: !Ref "AWS::Region"
 
 Outputs:
+  FullyQualifiedInternalDNSZone:
+    Description: The fully qualified internal DNS zone.
+    Value: !Sub "${InternalDNSZone}.${FullyQualifiedExternalDNSZone}"
   InternalHostedZoneId:
     Description: The id of the internal DNS hosted zone.
     Value: !Ref InternalHostedZone

@@ -6,19 +6,12 @@ Parameters:
   AWSMusingsS3URL:
     Type: String
     Description: S3 path to aws-musings.
-  FullyQualifiedExternalParentDNSZone:
+  FullyQualifiedInternalDNSZone:
     Type: String
-    Description: The public DNS zone configured in Route 53 (should not start or end with .).
-    AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
-    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
+    Description: The internal DNS zone (should not start or end with .).
   ImageId:
     Type: AWS::EC2::Image::Id
     Description: The AMI used to create the instance.
-  InternalDNSZone:
-    Type: String
-    Description: The internal DNS zone (should not start or end with .).
-    AllowedPattern: "[a-z][a-z0-9\\-.]*[a-z0-9]"
-    ConstraintDescription: must contain only lowercase letters, numbers, dashes and dots
   InternalHostedZoneId:
     Type: AWS::Route53::HostedZone::Id
     Description: The internal DNS zone to which an internal DNS A record will be added for the NAT server.
@@ -28,14 +21,9 @@ Parameters:
   SecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
     Description: The id of the security group protecting the NAT server.
-  StackEnv:
+  StackName:
     Type: String
-    Description: The environment name.
-    AllowedPattern: "[a-z0-9\\-]*"
-    ConstraintDescription: must contain only lowercase letters, numbers and dashes
-  StackOrg:
-    Type: String
-    Description: The organization name.
+    Description: The stack name.
     AllowedPattern: "[a-z0-9\\-]*"
     ConstraintDescription: must contain only lowercase letters, numbers and dashes
   SubnetId:
@@ -72,7 +60,7 @@ Resources:
       Monitoring: false
       Tags:
       - Key: Name
-        Value: !Sub "${StackOrg}-${StackEnv}-infrastructure-public-nat"
+        Value: !Ref StackName
       NetworkInterfaces:
       - AssociatePublicIpAddress: true
         DeleteOnTermination: true
@@ -108,7 +96,7 @@ Resources:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneId: !Ref InternalHostedZoneId
-      Name: !Sub "nat.${InternalDNSZone}.${StackEnv}.${FullyQualifiedExternalParentDNSZone}"
+      Name: !Sub "nat.${FullyQualifiedInternalDNSZone}"
       ResourceRecords:
       - !GetAtt NATInstance.PrivateIp
       TTL: 300

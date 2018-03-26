@@ -6,7 +6,7 @@ PROJECT_DIR=$(dirname $0)/../../..
 
 source $PROJECT_DIR/scripts/cf-utils.sh $@
 
-STACK_NAME=$STACK_ORG-$STACK_ENV-api-gateway-with-lambda
+STACK_NAME=$STACK_PREFIX-api-gateway-with-lambda
 
 if [[ $LAMBDA_IAM_ROLE == "" ]] ; then
     LAMBDA_IAM_ROLE=$(yq r $(dirname $0)/../api-gateway-with-lambda.yml Parameters.BOSHLiteInstanceName.Default)

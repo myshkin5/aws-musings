@@ -23,7 +23,8 @@ Creates the core constructs starting with the VPC. This project is a prerequisit
     ssh-add $HOME/.ssh/id_rsa_internal
     ```
 
-3. **Public DNS Hosted Zone (optional):** Create a publicly accessible DNS hosted zone via the Route 53 console. The infrastructure project only uses this zone to create a DNS `A` record pointing to the `jump-box` instance (i.e.: `jump-box.prod.example.com` if [`StackEnv`](#stack-env) is set to `prod` and [`FullyQualifiedExternalParentDNSZone`](#fully-qualified-external-parent-dns-zone) is set to `example.com`). Also set `ExternalHostedZoneId` (TODO).
+3. **Public DNS Hosted Zone:** Create a publicly accessible DNS hosted zone via the Route 53 console. The infrastructure project only uses this zone to create a DNS `A` record pointing to the `jump-box` instance (i.e.: `jump-box.prod.example.com` if [`StackEnv`](#stack-env) is set to `prod` and [`FullyQualifiedExternalParentDNSZone`](#fully-qualified-external-parent-dns-zone) is set to `example.com`).
+    Note: A publicly accessible DNS zone is optional but `FullyQualifiedExternalParentDNSZone` must still be defined.
 
 4. **Virtual Private Network (optional):** Deploy either an [AWS-compatible hardware or software VPN](https://aws.amazon.com/vpc/faqs/#C9). By doing so, the site of the VPN will have direct connectivity to your VPC without having to use the jump box.
 
@@ -103,6 +104,7 @@ NOTE: This stack is not required by the other stacks. For instance, no public DN
  Name | Environment Variable | Description
 ---|---|---
  `ExternalHostedZoneId` | `EXTERNAL_HOSTED_ZONE_ID` | The id of the external DNS hosted zone.
+ `FullyQualifiedExternalDNSZone` | `FULLY_QUALIFIED_EXTERNAL_DNS_ZONE` | The fully qualified external DNS zone (not the parent zone passed in as a parameter).
 
 ## Internal DNS
 
@@ -118,15 +120,15 @@ Creates an internal DNS hosted zone. Note this is a separate stack as the privat
 
  Name | Environment Variable | Required/Default | Description
 ---|---|---|---
- `FullyQualifiedExternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_EXTERNAL _PARENT_DNS_ZONE` (without space) | Yes | <a name="fully-qualified-external-parent-dns-zone">The</a> public DNS zone configured in Route 53 (should not start or end with .). **REQUIRED, NO DEFAULT AND NOT SUPPLIED BY A PREVIOUS STACK**
+ `FullyQualifiedExternalDNSZone` | `FULLY_QUALIFIED_EXTERNAL_DNS_ZONE` | Yes | See the Outputs section of the [External DNS stack](#external-dns) above.
  `InternalDNSZone` | `INTERNAL_DNS_ZONE` | No / `internal` | The DNS zone prepended on a public DNS zone to hold internal DNS records.
- `StackEnv` | `STACK_ENV` | Yes | See [`STACK_ENV`](../README.md#stack-env).
  `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
 
 ### Outputs
 
  Name | Environment Variable | Description
 ---|---|---
+ `FullyQualifiedInternalDNSZone` | `FULLY_QUALIFIED_INTERNAL_DNS_ZONE` | The fully qualified internal DNS zone.
  `InternalHostedZoneId` | `INTERNAL_HOSTED_ZONE_ID` | The id of the internal DNS hosted zone.
 
 ## Public Infrastructure
@@ -145,10 +147,10 @@ Creates network routing artifacts for public subnets along with jump box and NAT
 ---|---|---|---
  `AWSMusingsS3URL` | `AWS_MUSINGS_S3_URL` | No / (see [README](../README.md#environment-variables)) | The URL of the uploaded `aws-musings` artifacts on S3.
  `ExternalHostedZoneId` | `EXTERNAL_HOSTED_ZONE_ID` | No | <a name="external-hosted-zone-id">The</a> external DNS zone to which external DNS records will be added. Optional, external records will be created if specified.
- `FullyQualifiedExternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_EXTERNAL _PARENT_DNS_ZONE` (without space) | No | <a name="fully-qualified-external-parent-dns-zone">The</a> public DNS zone configured in Route 53 (should not start or end with .). Optional, external records will be created if specified. See the [External DNS stack](#external-dns) above.
+ `FullyQualifiedExternalDNSZone` | `FULLY_QUALIFIED_EXTERNAL_DNS_ZONE` | Yes | See the Outputs section of the [External DNS stack](#external-dns) above.
+ `FullyQualifiedInternalDNSZone` | `FULLY_QUALIFIED_INTERNAL_DNS_ZONE` | Yes | See the Outputs section of the [Internal DNS stack](#internal-dns) above.
  `InternalAccessCIDRBlock` | `INTERNAL_ACCESS_CIDR_BLOCK` | No / `10.0.0.0/8` | The CIDR block that can access internal interfaces of public resources.
  `InternalAccessIPv6CIDRBlock` | `INTERNAL_ACCESS_IPV6_CIDR_BLOCK` | No | The IPv6 CIDR block that can access internal interfaces of public resources. Optional, if not specified, no internal IPv6 access will be configured. [*](#asterisk)
- `InternalDNSZone` | `INTERNAL_DNS_ZONE` | No / `internal` | See the [Internal DNS stack](#internal-dns) above.
  `InternalHostedZoneId` | `INTERNAL_HOSTED_ZONE_ID` | Yes | See the [Internal DNS stack](#internal-dns) above.
  `InternalKeyName` | `INTERNAL_KEY_NAME` | No / `internal` | <a name="internal-key-name">The</a> SSH key pair used to connect to internal EC2 instances.
  `JumpBoxEIPAddress` | `JUMP_BOX_EIP_ADDRESS` | No | The Elastic IP address that will be assigned to the jump box instance. If not specified, a new EIP address will be allocated. By pre-allocating an EIP and specifying it via this parameter, the jump box will be accessible with the same address even though the infrastructure may have been rebuilt repeatedly.
@@ -161,8 +163,6 @@ Creates network routing artifacts for public subnets along with jump box and NAT
  `PublicSubnetAIPv6CIDRBlock` | `PUBLIC_SUBNET_A_IPV6_CIDR_BLOCK` | No | The IPv6 CIDR block of the public A subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
  `PublicSubnetBIPv6CIDRBlock` | `PUBLIC_SUBNET_A_IPV6_CIDR_BLOCK` | No | The IPv6 CIDR block of the public B subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
  `PublicSubnetCIPv6CIDRBlock` | `PUBLIC_SUBNET_A_IPV6_CIDR_BLOCK` | No | The IPv6 CIDR block of the public C subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
- `StackEnv` | `STACK_ENV` | Yes | See [`STACK_ENV`](../README.md#stack-env).
- `StackOrg` | `STACK_ORG` | Yes | See [`STACK_ENV`](../README.md#stack-org).
  `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
  `VPNGatewayId` | `VPN_GATEWAY_ID` | No | See the [VPN stack](#vpn) above. Optional, if not specified, a VPN gateway will not be included in the public routing table.
 

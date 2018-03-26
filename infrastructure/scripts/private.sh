@@ -4,7 +4,7 @@ set -e
 
 source $(dirname $0)/setenv.sh $@
 
-STACK_NAME=$STACK_ORG-$STACK_ENV-infrastructure-private
+STACK_NAME=$STACK_PREFIX-infrastructure-private
 
 update-stack $1 --template-url $AWS_MUSINGS_S3_URL/infrastructure/private.yml \
     --parameters ParameterKey=NATInstanceId,ParameterValue=$NAT_INSTANCE_ID \

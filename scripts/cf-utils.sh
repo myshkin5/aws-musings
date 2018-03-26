@@ -16,6 +16,7 @@ fi
 if [[ $STACK_ENV == "" ]] ; then
     STACK_ENV=dev
 fi
+STACK_PREFIX=$STACK_ORG-$STACK_ENV
 
 update-stack() {
     if [[ $1 == "create" ]] ; then
