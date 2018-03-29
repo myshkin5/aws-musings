@@ -83,7 +83,9 @@ Creates network artifacts to route traffic through a VPN.
 
 Creates an external DNS hosted zone. Note this is a separate stack as the public zone it creates can be shared among several full infrastructure stacks.
 
-NOTE: This stack is not required by the other stacks. For instance, no public DNS records may be needed or desired and therefore no public domain name need be purchased.
+NOTE: If you are using a hosted zone created by the Route 53 Registrar **_in the same AWS account it was created_**, do not use this stack. Instead define the outputs as though this stack was run (set `ExternalHostedZoneId` to the zone id provided by Route 53 and set `FullyQualifiedExternalDNSZone` to `<StackEnv>.<FullyQualifiedExternalParentDNSZone>`; `ExternalHostedZoneNameServers` does not need to be set).
+
+NOTE: If you are using a hosted zone created by the Route 53 Registrar **_in a different AWS account than it was created_**, **_do_** use this stack. After this stack is created, you also need to add an NS record to the hosted zone created by the Route 53 Registrar (in the other AWS account) that points to the DNS servers in this zone's NS record which are output by `ExternalHostedZoneNameServers`.
 
 | | |
 ---|---
@@ -104,7 +106,8 @@ NOTE: This stack is not required by the other stacks. For instance, no public DN
  Name | Environment Variable | Description
 ---|---|---
  `ExternalHostedZoneId` | `EXTERNAL_HOSTED_ZONE_ID` | The id of the external DNS hosted zone.
- `FullyQualifiedExternalDNSZone` | `FULLY_QUALIFIED_EXTERNAL_DNS_ZONE` | The fully qualified external DNS zone (not the parent zone passed in as a parameter).
+ `ExternalHostedZoneNameServers` | `EXTERNAL_HOSTED_ZONE_NAME_SERVERS` | The name servers hosting this zone.
+ `FullyQualifiedExternalDNSZone` | `FULLY_QUALIFIED_EXTERNAL_DNS_ZONE` | The fully qualified external DNS zone (not the parent zone passed in as a parameter) in the form of `<StackEnv>.<FullyQualifiedExternalParentDNSZone>`.
 
 ## Internal DNS
 

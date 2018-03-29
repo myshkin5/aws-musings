@@ -29,6 +29,11 @@ Outputs:
   ExternalHostedZoneId:
     Description: The id of the external DNS hosted zone.
     Value: !Ref ExternalHostedZone
+  ExternalHostedZoneNameServers:
+    Description: The name servers to be used in creating a NS record to complete delegation to this zone.
+    Value: !Join
+    - ", "
+    - !GetAtt ExternalHostedZone.NameServers
   FullyQualifiedExternalDNSZone:
     Description: The fully qualified external DNS zone (not the parent zone passed in as a parameter).
     Value: !Sub "${StackEnv}.${FullyQualifiedExternalParentDNSZone}"

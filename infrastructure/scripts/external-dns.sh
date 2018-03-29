@@ -15,5 +15,6 @@ if [[ $OUTPUT_RESULT == "true" ]] ; then
     RESULT=$(describe-stack)
 
     echo "export EXTERNAL_HOSTED_ZONE_ID=$(get-output-value ExternalHostedZoneId)"
+    echo "export EXTERNAL_HOSTED_ZONE_NAME_SERVERS=$(get-output-value ExternalHostedZoneNameServers)"
     echo "export FULLY_QUALIFIED_EXTERNAL_DNS_ZONE=$(get-output-value FullyQualifiedExternalDNSZone)"
 fi
