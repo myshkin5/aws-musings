@@ -58,7 +58,8 @@ AWS will provide an IPv6 `/56` CIDR for each VPC (when using the AWS console). `
 # Sub-Projects
  Name | Description
 ------|-------------
-[infrastructure](./infrastructure) | Lays down the basic framework starting with the VPC
+[infrastructure](./infrastructure) | Creates the core constructs starting with the VPC. This project builds artifacts that are prerequisites for all other projects
+[containers](./containers) | Builds a basic container framework using Fargate.
  | **Other**
 [Gluster Proof of Concept](./gluster-poc-us-west-2) | Deploys a GlusterFS test framework
 

@@ -1,0 +1,154 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: The service definition of the test-endpoint.
+
+Parameters:
+  ContainersSubnetAId:
+    Type: AWS::EC2::Subnet::Id
+    Description: The id of the containers subnet A.
+  ContainersSubnetBId:
+    Type: AWS::EC2::Subnet::Id
+    Description: The id of the containers subnet B.
+  ContainersSubnetCId:
+    Type: AWS::EC2::Subnet::Id
+    Description: The id of the containers subnet C.
+  ClusterARN:
+    Type: String
+    Description: The ARN of the cluster.
+  LoadBalancerDNSName:
+    Type: String
+    Description: The DNS name of the load balancer for use in alias records sets.
+  LoadBalancerCanonicalHostedZoneId:
+    Type: String
+    Description: The hosted zone id of the load balancer for use in alias record sets.
+  LoadBalancerListenerARN:
+    Type: String
+    Description: The ARN of the load balancer listener.
+  LoadBalancerListenerPriority:
+    Type: Number
+    Description: The priority of the rule created on the load balancer listener (must be unique on the load balancer).
+    Default: 1
+  HostedZoneId:
+    Type: String
+    Description: The DNS zone to which a DNS A record will be added for the service.
+  FullyQualifiedDNSZone:
+    Type: String
+    Description: The DNS zone (should not start or end with .).
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: The id of the VPC in which the resources will be created.
+  StackPrefix:
+    Type: String
+    Description: The prefix prepended to all aws-musings stacks.
+
+Resources:
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/ecs/${StackPrefix}-test-endpoint"
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+      - Environment:
+        - Name: MESSAGE
+          Value: fargate
+        Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${StackPrefix}/test-endpoint:latest"
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group: !Sub "/ecs/${StackPrefix}-test-endpoint"
+            awslogs-region: !Ref AWS::Region
+            awslogs-stream-prefix: ecs
+        Memory: 512
+        Name: !Sub "${StackPrefix}-test-endpoint"
+        PortMappings:
+        - HostPort: 8080
+          Protocol: tcp
+          ContainerPort: 8080
+      Cpu: 256
+      ExecutionRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/ecsTaskExecutionRole"
+      Family: !Sub "${StackPrefix}-test-endpoint"
+      Memory: 0.5GB
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+      - FARGATE
+      TaskRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/ecsTaskExecutionRole"
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: test-endpoint service security group
+      VpcId: !Ref VPCId
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-sg"
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        CidrIpv6: ::/0
+      SecurityGroupEgress:
+      - IpProtocol: -1
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: -1
+        CidrIpv6: ::/0
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: 8080
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !Ref VPCId
+
+  ListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+      - Type: forward
+        TargetGroupArn: !Ref TargetGroup
+      Conditions:
+      - Field: host-header
+        Values:
+        - !Sub "test-endpoint.${FullyQualifiedDNSZone}"
+      ListenerArn: !Ref LoadBalancerListenerARN
+      Priority: !Ref LoadBalancerListenerPriority
+
+  Service:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref ClusterARN
+      DesiredCount: 2
+      LaunchType: FARGATE
+      ServiceName: !Sub "${StackPrefix}-test-endpoint"
+      TaskDefinition: !Ref TaskDefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          # TODO: Make configurable
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+          - !Ref SecurityGroup
+          Subnets:
+          - !Ref ContainersSubnetAId
+          - !Ref ContainersSubnetBId
+          - !Ref ContainersSubnetCId
+      LoadBalancers:
+      - ContainerName: !Sub "${StackPrefix}-test-endpoint"
+        ContainerPort: 8080
+        TargetGroupArn: !Ref TargetGroup
+
+  ServiceRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Sub "test-endpoint.${FullyQualifiedDNSZone}"
+      AliasTarget:
+        DNSName: !Ref LoadBalancerDNSName
+        HostedZoneId: !Ref LoadBalancerCanonicalHostedZoneId
+      Type: A

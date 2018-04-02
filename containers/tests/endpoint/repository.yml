@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: An ECR repository for the test-endpoint service.
+
+Parameters:
+  StackPrefix:
+    Type: String
+    Description: The prefix prepended to all aws-musings stacks.
+
+Resources:
+  Repository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "${StackPrefix}/test-endpoint"
+      RepositoryPolicyText:
+        Version: 2012-10-17
+        Statement:
+        - Sid: AllowPushPull
+          Effect: Allow
+          Principal:
+            AWS:
+            # TODO: This needs to be configurable
+            - !Sub "arn:aws:iam::${AWS::AccountId}:user/dwayne"
+          Action:
+            - ecr:GetDownloadUrlForLayer
+            - ecr:BatchGetImage
+            - ecr:BatchCheckLayerAvailability
+            - ecr:PutImage
+            - ecr:InitiateLayerUpload
+            - ecr:UploadLayerPart
+            - ecr:CompleteLayerUpload

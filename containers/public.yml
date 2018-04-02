@@ -1,0 +1,199 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Artifacts to supporting public facing applications in containers.
+
+Parameters:
+  ContainersPublicSubnetACIDRBlock:
+    Type: String
+    Description: The CIDR block of the public A subnet for containers.
+    Default: 10.0.3.0/24
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/\\d{1,2}"
+    ConstraintDescription: must contain four dot-separated octets, a slash, and the network mask bit count
+  ContainersPublicSubnetBCIDRBlock:
+    Type: String
+    Description: The CIDR block of the public B subnet for containers.
+    Default: 10.0.4.0/24
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/\\d{1,2}"
+    ConstraintDescription: must contain four dot-separated octets, a slash, and the network mask bit count
+  ContainersPublicSubnetCCIDRBlock:
+    Type: String
+    Description: The CIDR block of the public C subnet for containers.
+    Default: 10.0.5.0/24
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/\\d{1,2}"
+    ConstraintDescription: must contain four dot-separated octets, a slash, and the network mask bit count
+  ContainersPublicSubnetAIPv6CIDRBlock:
+    Type: String
+    Description: The IPv6 CIDR block of the public A subnet. Optional.
+  ContainersPublicSubnetBIPv6CIDRBlock:
+    Type: String
+    Description: The IPv6 CIDR block of the public B subnet. Optional.
+  ContainersPublicSubnetCIPv6CIDRBlock:
+    Type: String
+    Description: The IPv6 CIDR block of the public C subnet. Optional.
+  NetworkACLId:
+    Type: String
+    Description: The id of the network access control list used to protect instances in this project.
+  PublicRouteTableId:
+    Type: String
+    Description: The id of the public route table associated with the project's public subnets.
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: The id of the VPC in which the resources will be created.
+
+Conditions:
+  AddIPv6SubnetA: !Not [ !Equals [ !Ref ContainersPublicSubnetAIPv6CIDRBlock, "" ] ]
+  AddIPv6SubnetB: !Not [ !Equals [ !Ref ContainersPublicSubnetBIPv6CIDRBlock, "" ] ]
+  AddIPv6SubnetC: !Not [ !Equals [ !Ref ContainersPublicSubnetCIPv6CIDRBlock, "" ] ]
+  AddAnyIPv6: !Or [ Condition: AddIPv6SubnetA, Condition: AddIPv6SubnetB, Condition: AddIPv6SubnetC ]
+
+Resources:
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref ContainersPublicSubnetACIDRBlock
+      AvailabilityZone: !Select [ "0", !GetAZs "" ]
+      VpcId: !Ref VPCId
+      AssignIpv6AddressOnCreation: !If [ AddIPv6SubnetA, true, !Ref "AWS::NoValue" ]
+      Ipv6CidrBlock: !If [ AddIPv6SubnetA, !Ref ContainersPublicSubnetAIPv6CIDRBlock, !Ref "AWS::NoValue" ]
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-a-public-subnet"
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref ContainersPublicSubnetBCIDRBlock
+      AvailabilityZone: !Select [ "1", !GetAZs "" ]
+      VpcId: !Ref VPCId
+      AssignIpv6AddressOnCreation: !If [ AddIPv6SubnetB, true, !Ref "AWS::NoValue" ]
+      Ipv6CidrBlock: !If [ AddIPv6SubnetB, !Ref ContainersPublicSubnetBIPv6CIDRBlock, !Ref "AWS::NoValue" ]
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-b-public-subnet"
+  PublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref ContainersPublicSubnetCCIDRBlock
+      AvailabilityZone: !Select [ "2", !GetAZs "" ]
+      VpcId: !Ref VPCId
+      AssignIpv6AddressOnCreation: !If [ AddIPv6SubnetC, true, !Ref "AWS::NoValue" ]
+      Ipv6CidrBlock: !If [ AddIPv6SubnetC, !Ref ContainersPublicSubnetCIPv6CIDRBlock, !Ref "AWS::NoValue" ]
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-c-public-subnet"
+
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTableId
+      SubnetId: !Ref PublicSubnetA
+  PublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTableId
+      SubnetId: !Ref PublicSubnetB
+  PublicSubnetCRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTableId
+      SubnetId: !Ref PublicSubnetC
+
+  PublicSubnetANetworkACLAssociation:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref NetworkACLId
+      SubnetId: !Ref PublicSubnetA
+  PublicSubnetBNetworkACLAssociation:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref NetworkACLId
+      SubnetId: !Ref PublicSubnetB
+  PublicSubnetCNetworkACLAssociation:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref NetworkACLId
+      SubnetId: !Ref PublicSubnetC
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Application Load Balancer security group
+      VpcId: !Ref VPCId
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-alb-sg"
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIpv6: ::/0
+      SecurityGroupEgress:
+      - IpProtocol: -1
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: -1
+        CidrIpv6: ::/0
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Scheme: internet-facing
+      Subnets:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+        - !Ref PublicSubnetC
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-alb"
+
+  DefaultTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref VPCId
+      Port: 80
+      Protocol: HTTP
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-default-target-group"
+
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref DefaultTargetGroup
+
+  Cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub "${AWS::StackName}-cluster"
+
+Outputs:
+  ContainersPublicSubnetAId:
+    Description: The id of the containers public subnet A.
+    Value: !Ref PublicSubnetA
+  ContainersPublicSubnetBId:
+    Description: The id of the containers public subnet B.
+    Value: !Ref PublicSubnetB
+  ContainersPublicSubnetCId:
+    Description: The id of the containers public subnet C.
+    Value: !Ref PublicSubnetC
+  PublicClusterARN:
+    Description: The ARN of the public cluster.
+    Value: !GetAtt Cluster.Arn
+  PublicLoadBalancerDNSName:
+    Description: The DNS name of the public load balancer for use in alias record sets.
+    Value: !GetAtt LoadBalancer.DNSName
+  PublicLoadBalancerCanonicalHostedZoneId:
+    Description: The hosted zone id of the public load balancer for use in alias record sets.
+    Value: !GetAtt LoadBalancer.CanonicalHostedZoneID
+  PublicLoadBalancerListenerARN:
+    Description: The ARN of the public load balancer listener.
+    Value: !Ref LoadBalancerListener

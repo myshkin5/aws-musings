@@ -1,7 +1,7 @@
 infrastructure
 ==============
 
-Creates the core constructs starting with the VPC. This project is a prerequisite for all other projects.
+Creates the core constructs starting with the VPC. This project builds artifacts that are prerequisites for all other projects.
 
 # Prerequisites
 
