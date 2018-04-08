@@ -95,9 +95,9 @@ Resources:
             export STACK_NAME="${AWS::StackName}"
             export RESOURCE=JumpBoxInstance
             export REGION="${AWS::Region}"
-            export AWS_MUSINGS_S3_URL="${AWSMusingsS3URL}"
+            export AWSMusingsS3URL="${AWSMusingsS3URL}"
 
-            curl --output /tmp/bootstrap.sh --silent $AWS_MUSINGS_S3_URL/common/bootstrap.sh
+            curl --output /tmp/bootstrap.sh --silent $AWSMusingsS3URL/common/bootstrap.sh
             source /tmp/bootstrap.sh
             aws-bootstrap
 

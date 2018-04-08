@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 
-if [[ $AWS_MUSINGS_S3_BUCKET == "" ]] ; then
-    AWS_MUSINGS_S3_BUCKET=aws-musings-us-east-1
+if [[ $AWSMusingsS3Bucket == "" ]] ; then
+    AWSMusingsS3Bucket=aws-musings-us-east-1
 fi
-if [[ $AWS_MUSINGS_S3_URL == "" ]] ; then
-    AWS_MUSINGS_S3_URL=https://s3.amazonaws.com/$AWS_MUSINGS_S3_BUCKET
+if [[ $AWSMusingsS3URL == "" ]] ; then
+    AWSMusingsS3URL=https://s3.amazonaws.com/$AWSMusingsS3Bucket
 fi
-if [[ $PROFILE == "" ]] ; then
-    PROFILE=default
+if [[ $AWSMusingsProfile == "" ]] ; then
+    AWSMusingsProfile=default
 fi
-if [[ $STACK_ORG == "" ]] ; then
-    >&2 echo "Environment variable \$STACK_ORG is not defined"
+if [[ $StackOrg == "" ]] ; then
+    >&2 echo "Environment variable \$StackOrg is not defined"
     exit -1
 fi
-if [[ $STACK_ENV == "" ]] ; then
-    STACK_ENV=dev
+if [[ $StackEnv == "" ]] ; then
+    StackEnv=dev
 fi
-STACK_PREFIX=$STACK_ORG-$STACK_ENV
+StackPrefix=$StackOrg-$StackEnv
 
 update-stack() {
     if [[ $1 == "create" ]] ; then
@@ -35,7 +35,7 @@ update-stack() {
         exit -1
     fi
 
-    aws cloudformation $VERB --stack-name $STACK_NAME $PARAMS $ROLLBACK --profile $PROFILE > /dev/null
+    aws cloudformation $VERB --stack-name $STACK_NAME $PARAMS $ROLLBACK --profile $AWSMusingsProfile > /dev/null
 
     if [[ $VERB == "delete-stack" ]] ; then
         wait-for-stack-deletion
@@ -48,7 +48,7 @@ update-stack() {
 
 wait-for-stack-completion() {
     while $(true) ; do
-        STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --profile $PROFILE \
+        STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --profile $AWSMusingsProfile \
             | jq -r .Stacks[0].StackStatus)
         if [[ $STATUS == "CREATE_COMPLETE" || $STATUS == "UPDATE_COMPLETE" ]] ; then
             break
@@ -63,7 +63,7 @@ wait-for-stack-completion() {
 
 wait-for-stack-deletion() {
     while $(true) ; do
-        STATUS=$(aws cloudformation describe-stacks --profile $PROFILE | \
+        STATUS=$(aws cloudformation describe-stacks --profile $AWSMusingsProfile | \
             jq -r ".Stacks[] | select(.StackName == \"$STACK_NAME\") | .StackStatus")
         if [[ $STATUS == "" ]] ; then
             break
@@ -77,7 +77,7 @@ wait-for-stack-deletion() {
 }
 
 describe-stack() {
-    aws cloudformation describe-stacks --stack-name $STACK_NAME --profile $PROFILE
+    aws cloudformation describe-stacks --stack-name $STACK_NAME --profile $AWSMusingsProfile
 }
 
 get-output-value() {

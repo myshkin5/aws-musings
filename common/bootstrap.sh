@@ -75,7 +75,7 @@ aws-bootstrap() {
     git clone --depth=1 https://github.com/Bash-it/bash-it.git /root/.bash_it
     sudo -u $OS_USER git clone --depth=1 https://github.com/Bash-it/bash-it.git $USER_HOME/.bash_it
 
-    curl --output /tmp/bashrc.sh --silent $AWS_MUSINGS_S3_URL/common/bashrc.sh
+    curl --output /tmp/bashrc.sh --silent $AWSMusingsS3URL/common/bashrc.sh
     cat /tmp/bashrc.sh >> /root/.bashrc
     cat /tmp/bashrc.sh >> $USER_HOME/.bashrc
 }

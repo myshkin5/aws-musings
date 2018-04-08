@@ -17,31 +17,31 @@ Creates artifacts to support publicly facing applications.
 
 ### Parameters
 
- Name | Environment Variable | Required/Default | Description
----|---|---|---
- `ContainersPublicSubnetACIDRBlock` | `CONTAINERS_PUBLIC_SUBNET_A_CIDR_BLOCK` | No / `10.0.3.0/24` | The CIDR block of the container public A subnet.
- `ContainersPublicSubnetBCIDRBlock` | `CONTAINERS_PUBLIC_SUBNET_B_CIDR_BLOCK` | No / `10.0.4.0/24` | The CIDR block of the container public B subnet.
- `ContainersPublicSubnetCCIDRBlock` | `CONTAINERS_PUBLIC_SUBNET_C_CIDR_BLOCK` | No / `10.0.5.0/24` | The CIDR block of the container public C subnet.
- `ContainersSubnetAIPv6CIDRBlock` | `CONTAINERS_SUBNET_A_IPV6_CIDR_BLOCK` | No | The IPv6 CIDR block of the public A subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
- `ContainersSubnetBIPv6CIDRBlock` | `CONTAINERS_SUBNET_A_IPV6_CIDR_BLOCK` | No | The IPv6 CIDR block of the public B subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
- `ContainersSubnetCIPv6CIDRBlock` | `CONTAINERS_SUBNET_A_IPV6_CIDR_BLOCK` | No | The IPv6 CIDR block of the public C subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
- `NetworkACLId` | `NETWORK_ACL_ID` | Yes | The id of the network access control list. See the `NetworkACLId` output of the [Public stack](../infrastructure#public-infrastructure).
- `PublicRouteTableId` | `PUBLIC_ROUTE_TABLE_ID` | Yes | The id of the public routing table to be used in public subnets. See the `PublicRouteTableId` output of the [Public stack](../infrastructure#public-infrastructure).
- `VPCId` | `VPC_ID` | Yes | See the `VPCId` output of the [VPC stack](../infrastructure#vpc).
+ Name | Required/Default | Description
+---|---|---
+ `ContainersPublicSubnetACIDRBlock` | No / `10.0.3.0/24` | The CIDR block of the container public A subnet.
+ `ContainersPublicSubnetBCIDRBlock` | No / `10.0.4.0/24` | The CIDR block of the container public B subnet.
+ `ContainersPublicSubnetCCIDRBlock` | No / `10.0.5.0/24` | The CIDR block of the container public C subnet.
+ `ContainersPublicSubnetAIPv6CIDRBlock` | No | The IPv6 CIDR block of the public A subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
+ `ContainersPublicSubnetBIPv6CIDRBlock` | No | The IPv6 CIDR block of the public B subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
+ `ContainersPublicSubnetCIPv6CIDRBlock` | No | The IPv6 CIDR block of the public C subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
+ `NetworkACLId` | Yes | The id of the network access control list. See the `NetworkACLId` output of the [Public stack](../infrastructure#public-infrastructure).
+ `PublicRouteTableId` | Yes | The id of the public routing table to be used in public subnets. See the `PublicRouteTableId` output of the [Public stack](../infrastructure#public-infrastructure).
+ `VPCId` | Yes | See the `VPCId` output of the [VPC stack](../infrastructure#vpc).
 
 <a name="asterisk">\*</a> Default values for these parameters can be supplied by the [`ipv6-defaults.sh`](#ipv6-defaults) scripts.
 
 ### Outputs
 
- Name | Environment Variable | Description
----|---|---
- `ContainersPublicSubnetAId` | `CONTAINERS_PUBLIC_SUBNET_A_ID` | The id of the containers public subnet A.
- `ContainersPublicSubnetBId` | `CONTAINERS_PUBLIC_SUBNET_B_ID` | The id of the containers public subnet B.
- `ContainersPublicSubnetCId` | `CONTAINERS_PUBLIC_SUBNET_C_ID` | The id of the containers public subnet C.
- `PublicClusterARN` | `PUBLIC_CLUSTER_ARN` | The ARN of the public cluster.
- `PublicLoadBalancerDNSName` | `PUBLIC_LOAD_BALANCER_DNS_NAME` | The DNS name of the public load balancer for use in alias record sets.
- `PublicLoadBalancerCanonicalHostedZoneId` | `PUBLIC_LOAD_BALANCER_CANONICAL_HOSTED_ZONE_ID` | The hosted zone id of the public load balancer for use in alias record sets.
- `PublicLoadBalancerListenerARN` | `PUBLIC_LOAD_BALANCER_LISTENER_ARN` | The ARN of the public load balancer listener.
+ Name | Description
+---|---
+ `ContainersPublicSubnetAId` | The id of the containers public subnet A.
+ `ContainersPublicSubnetBId` | The id of the containers public subnet B.
+ `ContainersPublicSubnetCId` | The id of the containers public subnet C.
+ `PublicClusterARN` | The ARN of the public cluster.
+ `PublicLoadBalancerDNSName` | The DNS name of the public load balancer for use in alias record sets.
+ `PublicLoadBalancerCanonicalHostedZoneId` | The hosted zone id of the public load balancer for use in alias record sets.
+ `PublicLoadBalancerListenerARN` | The ARN of the public load balancer listener.
 
 ## Test Endpoint Repository - Example
 
@@ -55,9 +55,9 @@ Creates an ECR repository for deploying the [test endpoint app](tests/endpoint/s
 
 ### Parameters
 
- Name | Environment Variable | Required/Default | Description
----|---|---|---
- `StackPrefix` | `STACK_PREFIX` | No / `<STACK_ORG>-<STACK_ENV>` | The prefix prepended to all aws-musings stacks.
+ Name | Required/Default | Description
+---|---|---
+ `StackPrefix` | No / `<StackOrg>-<StackEnv>` | The prefix prepended to all aws-musings stacks.
 
 ## Test Endpoint Service - Example
 
@@ -71,20 +71,20 @@ Creates the [test endpoint app](tests/endpoint/src/main.go) service. All of the 
 
 ### Parameters
 
- Name | Environment Variable | Required/Default | Description
----|---|---|---
- `ContainersSubnetAId` | Various | Yes | The id of the containers subnet A.
- `ContainersSubnetBId` | Various | Yes | The id of the containers subnet B.
- `ContainersSubnetCId` | Various | Yes | The id of the containers subnet C.
- `ClusterARN` | Various | Yes | The ARN of the cluster.
- `LoadBalancerDNSName` | Various | Yes | The DNS name of the load balancer for use in alias records sets.
- `LoadBalancerCanonicalHostedZoneId` | Various | Yes | The hosted zone id of the load balancer for use in alias record sets.
- `LoadBalancerListenerARN` | Various | Yes | The ARN of the load balancer listener.
- `LoadBalancerListenerPriority` | `LOAD_BALANCER_LISTENER_PRIORITY` | No / `1` | The priority of the rule created on the load balancer listener (must be unique on the load balancer).
- `HostedZoneId` | Various | Yes | The DNS zone to which a DNS A record will be added for the service.
- `FullyQualifiedDNSZone` | Various | Yes | The DNS zone (should not start or end with .).
- `VPCId` | `VPC_ID` | Yes | See the `VPCId` output of the [VPC stack](../infrastructure#vpc).
- `StackPrefix` | `STACK_PREFIX` | No / `<STACK_ORG>-<STACK_ENV>` | The prefix prepended to all aws-musings stacks.
+ Name | Required/Default | Description
+---|---|---
+ `ContainersSubnetAId` | Yes | The id of the containers subnet A.
+ `ContainersSubnetBId` | Yes | The id of the containers subnet B.
+ `ContainersSubnetCId` | Yes | The id of the containers subnet C.
+ `ClusterARN` | Yes | The ARN of the cluster.
+ `LoadBalancerDNSName` | Yes | The DNS name of the load balancer for use in alias records sets.
+ `LoadBalancerCanonicalHostedZoneId` | Yes | The hosted zone id of the load balancer for use in alias record sets.
+ `LoadBalancerListenerARN` | Yes | The ARN of the load balancer listener.
+ `LoadBalancerListenerPriority` | No / `1` | The priority of the rule created on the load balancer listener (must be unique on the load balancer).
+ `HostedZoneId` | Yes | The DNS zone to which a DNS A record will be added for the service.
+ `FullyQualifiedDNSZone` | Yes | The DNS zone (should not start or end with .).
+ `VPCId` | Yes | See the `VPCId` output of the [VPC stack](../infrastructure#vpc).
+ `StackPrefix` | No / `<StackOrg>-<StackEnv>` | The prefix prepended to all aws-musings stacks.
 
 ## Miscellaneous Scripts
 
@@ -95,9 +95,9 @@ When configuring a VPC from the AWS console, an IPv6 `/56` CIDR block can be all
 Here is the actual output when calling the script (`./scripts/ipv6-defaults.sh 2600:52f9:4d75:2200::/56`):
 
 ```bash
-export CONTAINERS_PUBLIC_SUBNET_A_IPV6_CIDR_BLOCK=2600:52f9:4d75:2200::/64
-export CONTAINERS_PUBLIC_SUBNET_B_IPV6_CIDR_BLOCK=2600:52f9:4d75:2201::/64
-export CONTAINERS_PUBLIC_SUBNET_C_IPV6_CIDR_BLOCK=2600:52f9:4d75:2202::/64
+export ContainersPublicSubnetAIPv6CIDRBlock=2600:52f9:4d75:2203::/64
+export ContainersPublicSubnetBIPv6CIDRBlock=2600:52f9:4d75:2204::/64
+export ContainersPublicSubnetCIPv6CIDRBlock=2600:52f9:4d75:2205::/64
 ```
 
 ### Test Images

@@ -5,17 +5,17 @@ if [[ $# != 1 ]] ; then
     exit -1
 fi
 
-IPV6_CIDR_BLOCK=$1
+IPv6CIDRBlock=$1
 
 SUFFIX_56=00::/56
-if [[ $IPV6_CIDR_BLOCK != *$SUFFIX_56 ]] ; then
+if [[ $IPv6CIDRBlock != *$SUFFIX_56 ]] ; then
     >&2 echo "$0 currently only works with /56 CIDR blocks (must end in $SUFFIX_56)"
     exit -1
 fi
-RAW_56=${IPV6_CIDR_BLOCK%$SUFFIX_56}
+RAW_56=${IPv6CIDRBlock%$SUFFIX_56}
 
-echo "export IPV6_CIDR_BLOCK=$IPV6_CIDR_BLOCK"
-echo "export INTERNAL_ACCESS_IPV6_CIDR_BLOCK=$IPV6_CIDR_BLOCK"
-echo "export PUBLIC_SUBNET_A_IPV6_CIDR_BLOCK=${RAW_56}00::/64"
-echo "export PUBLIC_SUBNET_B_IPV6_CIDR_BLOCK=${RAW_56}01::/64"
-echo "export PUBLIC_SUBNET_C_IPV6_CIDR_BLOCK=${RAW_56}02::/64"
+echo "export IPv6CIDRBlock=$IPv6CIDRBlock"
+echo "export InternalAccessIPv6CIDRBlock=$IPv6CIDRBlock"
+echo "export PublicSubnetAIPv6CIDRBlock=${RAW_56}00::/64"
+echo "export PublicSubnetBIPv6CIDRBlock=${RAW_56}01::/64"
+echo "export PublicSubnetCIPv6CIDRBlock=${RAW_56}02::/64"

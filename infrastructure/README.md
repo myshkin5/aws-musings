@@ -44,15 +44,15 @@ Note that because CloudFormation currently can't create a VPC with IPv6, this st
 
 ### Parameters
 
- Name | Environment Variable | Required/Default | Description
----|---|---|---
- `CIDRBlock` | `CIDR_BLOCK` | No / `10.0.0.0/16` | The CIDR of the entire VPC.
+ Name | Required/Default | Description
+---|---|---
+ `CIDRBlock` | No / `10.0.0.0/16` | The CIDR of the entire VPC.
 
 ### Outputs
 
- Name | Environment Variable | Description
----|---|---
- `VPCId` | `VPC_ID` | The id of the freshly created VPC.
+ Name | Description
+---|---
+ `VPCId` | The id of the freshly created VPC.
 
 ## VPN
 
@@ -66,18 +66,18 @@ Creates network artifacts to route traffic through a VPN.
 
 ### Parameters
 
- Name | Environment Variable | Required/Default | Description
----|---|---|---
- `BGPASNumber` | `BGP_AS_NUMBER` | No / `65000` | The Border Gateway Protocol Autonomous System Number.
- `CustomerGatewayIPAddress` | `CUSTOMER_GATEWAY_IP_ADDRESS` | Yes | The public IP address of the customer gateway. **REQUIRED, NO DEFAULT AND NOT SUPPLIED BY A PREVIOUS STACK**
- `InternalAccessCIDRBlock` | `INTERNAL_ACCESS_CIDR_BLOCK` | No / `10.0.0.0/8` | The CIDR block that can access internal interfaces of public resources.
- `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
+ Name | Required/Default | Description
+---|---|---
+ `BGPASNumber` | No / `65000` | The Border Gateway Protocol Autonomous System Number.
+ `CustomerGatewayIPAddress` | Yes | The public IP address of the customer gateway. **REQUIRED, NO DEFAULT AND NOT SUPPLIED BY A PREVIOUS STACK**
+ `InternalAccessCIDRBlock` | No / `10.0.0.0/8` | The CIDR block that can access internal interfaces of public resources.
+ `VPCId` | Yes | See the [VPC stack](#vpc) above.
 
 ### Outputs
 
- Name | Environment Variable | Description
----|---|---
- `VPNGatewayId` | `VPN_GATEWAY_ID` | The VPN gateway to which route tables will be connected via route propagation.
+ Name | Description
+---|---
+ `VPNGatewayId` | The VPN gateway to which route tables will be connected via route propagation.
 
 ## External DNS
 
@@ -95,19 +95,19 @@ NOTE: If you are using a hosted zone created by the Route 53 Registrar **_in a d
 
 ### Parameters
 
- Name | Environment Variable | Required/Default | Description
----|---|---|---
- `FullyQualifiedExternal ParentDNSZone` (without space) | `FULLY_QUALIFIED_EXTERNAL _PARENT_DNS_ZONE` (without space) | Yes | <a name="fully-qualified-external-parent-dns-zone">The</a> public DNS zone configured in Route 53 (should not start or end with .). **REQUIRED, NO DEFAULT AND NOT SUPPLIED BY A PREVIOUS STACK**
- `StackEnv` | `STACK_ENV` | Yes | See [`STACK_ENV`](../README.md#stack-env).
- `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
+ Name | Required/Default | Description
+---|---|---
+ `FullyQualifiedExternal ParentDNSZone` (without space) | Yes | <a name="fully-qualified-external-parent-dns-zone">The</a> public DNS zone configured in Route 53 (should not start or end with .). **REQUIRED, NO DEFAULT AND NOT SUPPLIED BY A PREVIOUS STACK**
+ `StackEnv` | Yes | See [`StackEnv`](../README.md#stack-env).
+ `VPCId` | Yes | See the [VPC stack](#vpc) above.
 
 ### Outputs
 
- Name | Environment Variable | Description
----|---|---
- `ExternalHostedZoneId` | `EXTERNAL_HOSTED_ZONE_ID` | The id of the external DNS hosted zone.
- `ExternalHostedZoneNameServers` | `EXTERNAL_HOSTED_ZONE_NAME_SERVERS` | The name servers hosting this zone.
- `FullyQualifiedExternalDNSZone` | `FULLY_QUALIFIED_EXTERNAL_DNS_ZONE` | The fully qualified external DNS zone (not the parent zone passed in as a parameter) in the form of `<StackEnv>.<FullyQualifiedExternalParentDNSZone>`.
+ Name | Description
+---|---
+ `ExternalHostedZoneId` | The id of the external DNS hosted zone.
+ `ExternalHostedZoneNameServers` | The name servers hosting this zone.
+ `FullyQualifiedExternalDNSZone` | The fully qualified external DNS zone (not the parent zone passed in as a parameter) in the form of `<StackEnv>.<FullyQualifiedExternalParentDNSZone>`.
 
 ## Internal DNS
 
@@ -121,18 +121,18 @@ Creates an internal DNS hosted zone. Note this is a separate stack as the privat
 
 ### Parameters
 
- Name | Environment Variable | Required/Default | Description
----|---|---|---
- `FullyQualifiedExternalDNSZone` | `FULLY_QUALIFIED_EXTERNAL_DNS_ZONE` | Yes | See the Outputs section of the [External DNS stack](#external-dns) above.
- `InternalDNSZone` | `INTERNAL_DNS_ZONE` | No / `internal` | The DNS zone prepended on a public DNS zone to hold internal DNS records.
- `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
+ Name | Required/Default | Description
+---|---|---
+ `FullyQualifiedExternalDNSZone` | Yes | See the Outputs section of the [External DNS stack](#external-dns) above.
+ `InternalDNSZone` | No / `internal` | The DNS zone prepended on a public DNS zone to hold internal DNS records.
+ `VPCId` | Yes | See the [VPC stack](#vpc) above.
 
 ### Outputs
 
- Name | Environment Variable | Description
----|---|---
- `FullyQualifiedInternalDNSZone` | `FULLY_QUALIFIED_INTERNAL_DNS_ZONE` | The fully qualified internal DNS zone.
- `InternalHostedZoneId` | `INTERNAL_HOSTED_ZONE_ID` | The id of the internal DNS hosted zone.
+ Name | Description
+---|---
+ `FullyQualifiedInternalDNSZone` | The fully qualified internal DNS zone.
+ `InternalHostedZoneId` | The id of the internal DNS hosted zone.
 
 ## Public Infrastructure
 
@@ -146,40 +146,40 @@ Creates network routing artifacts for public subnets along with jump box and NAT
 
 ### Parameters
 
- Name | Environment Variable | Required/Default | Description
----|---|---|---
- `AWSMusingsS3URL` | `AWS_MUSINGS_S3_URL` | No / (see [README](../README.md#environment-variables)) | The URL of the uploaded `aws-musings` artifacts on S3.
- `ExternalHostedZoneId` | `EXTERNAL_HOSTED_ZONE_ID` | No | <a name="external-hosted-zone-id">The</a> external DNS zone to which external DNS records will be added. Optional, external records will be created if specified.
- `FullyQualifiedExternalDNSZone` | `FULLY_QUALIFIED_EXTERNAL_DNS_ZONE` | Yes | See the Outputs section of the [External DNS stack](#external-dns) above.
- `FullyQualifiedInternalDNSZone` | `FULLY_QUALIFIED_INTERNAL_DNS_ZONE` | Yes | See the Outputs section of the [Internal DNS stack](#internal-dns) above.
- `InternalAccessCIDRBlock` | `INTERNAL_ACCESS_CIDR_BLOCK` | No / `10.0.0.0/8` | The CIDR block that can access internal interfaces of public resources.
- `InternalAccessIPv6CIDRBlock` | `INTERNAL_ACCESS_IPV6_CIDR_BLOCK` | No | The IPv6 CIDR block that can access internal interfaces of public resources. Optional, if not specified, no internal IPv6 access will be configured. [*](#asterisk)
- `InternalHostedZoneId` | `INTERNAL_HOSTED_ZONE_ID` | Yes | See the [Internal DNS stack](#internal-dns) above.
- `InternalKeyName` | `INTERNAL_KEY_NAME` | No / `internal` | <a name="internal-key-name">The</a> SSH key pair used to connect to internal EC2 instances.
- `JumpBoxEIPAddress` | `JUMP_BOX_EIP_ADDRESS` | No | The Elastic IP address that will be assigned to the jump box instance. If not specified, a new EIP address will be allocated. By pre-allocating an EIP and specifying it via this parameter, the jump box will be accessible with the same address even though the infrastructure may have been rebuilt repeatedly.
- `JumpBoxKeyName` | `JUMP_BOX_KEY_NAME` | No / `jump-box` | <a name="jump-box-key-name">The</a> SSH key pair used to connect to the jump box EC2 instances.
- `JumpBoxSSHCIDRIP` | `JUMP_BOX_SSH_CIDR_IP` | No / `<current public ip>/32` | Any IP address included in this CIDR will be able to access the jump box via SSH (client must also use the `JumpBoxKeyName` SSH key pair). It is highly recommended to restrict this CIDR to only IP addresses that need to access the jump box. **DEFAULT VALUE MAY BE A SECURITY CONCERN**
- `JumpBoxInstanceType` | `JUMP_BOX_INSTANCE_TYPE` | No / `t2.nano` | The EC2 instance type of the jump box.
- `PublicSubnetACIDRBlock` | `PUBLIC_SUBNET_A_CIDR_BLOCK` | No / `10.0.0.0/24` | The CIDR block of the public A subnet.
- `PublicSubnetBCIDRBlock` | `PUBLIC_SUBNET_B_CIDR_BLOCK` | No / `10.0.1.0/24` | The CIDR block of the public B subnet.
- `PublicSubnetCCIDRBlock` | `PUBLIC_SUBNET_C_CIDR_BLOCK` | No / `10.0.2.0/24` | The CIDR block of the public C subnet.
- `PublicSubnetAIPv6CIDRBlock` | `PUBLIC_SUBNET_A_IPV6_CIDR_BLOCK` | No | The IPv6 CIDR block of the public A subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
- `PublicSubnetBIPv6CIDRBlock` | `PUBLIC_SUBNET_A_IPV6_CIDR_BLOCK` | No | The IPv6 CIDR block of the public B subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
- `PublicSubnetCIPv6CIDRBlock` | `PUBLIC_SUBNET_A_IPV6_CIDR_BLOCK` | No | The IPv6 CIDR block of the public C subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
- `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
- `VPNGatewayId` | `VPN_GATEWAY_ID` | No | See the [VPN stack](#vpn) above. Optional, if not specified, a VPN gateway will not be included in the public routing table.
+ Name | Required/Default | Description
+---|---|---
+ `AWSMusingsS3URL` | No / (see [README](../README.md#environment-variables)) | The URL of the uploaded `aws-musings` artifacts on S3.
+ `ExternalHostedZoneId` | No | <a name="external-hosted-zone-id">The</a> external DNS zone to which external DNS records will be added. Optional, external records will be created if specified.
+ `FullyQualifiedExternalDNSZone` | Yes | See the Outputs section of the [External DNS stack](#external-dns) above.
+ `FullyQualifiedInternalDNSZone` | Yes | See the Outputs section of the [Internal DNS stack](#internal-dns) above.
+ `InternalAccessCIDRBlock` | No / `10.0.0.0/8` | The CIDR block that can access internal interfaces of public resources.
+ `InternalAccessIPv6CIDRBlock` | No | The IPv6 CIDR block that can access internal interfaces of public resources. Optional, if not specified, no internal IPv6 access will be configured. [*](#asterisk)
+ `InternalHostedZoneId` | Yes | See the [Internal DNS stack](#internal-dns) above.
+ `InternalKeyName` | No / `internal` | <a name="internal-key-name">The</a> SSH key pair used to connect to internal EC2 instances.
+ `JumpBoxEIPAddress` | No | The Elastic IP address that will be assigned to the jump box instance. If not specified, a new EIP address will be allocated. By pre-allocating an EIP and specifying it via this parameter, the jump box will be accessible with the same address even though the infrastructure may have been rebuilt repeatedly.
+ `JumpBoxKeyName` | No / `jump-box` | <a name="jump-box-key-name">The</a> SSH key pair used to connect to the jump box EC2 instances.
+ `JumpBoxSSHCIDRIP` | No / `<current public ip>/32` | Any IP address included in this CIDR will be able to access the jump box via SSH (client must also use the `JumpBoxKeyName` SSH key pair). It is highly recommended to restrict this CIDR to only IP addresses that need to access the jump box. **DEFAULT VALUE MAY BE A SECURITY CONCERN**
+ `JumpBoxInstanceType` | No / `t2.nano` | The EC2 instance type of the jump box.
+ `PublicSubnetACIDRBlock` | No / `10.0.0.0/24` | The CIDR block of the public A subnet.
+ `PublicSubnetBCIDRBlock` | No / `10.0.1.0/24` | The CIDR block of the public B subnet.
+ `PublicSubnetCCIDRBlock` | No / `10.0.2.0/24` | The CIDR block of the public C subnet.
+ `PublicSubnetAIPv6CIDRBlock` | No | The IPv6 CIDR block of the public A subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
+ `PublicSubnetBIPv6CIDRBlock` | No | The IPv6 CIDR block of the public B subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
+ `PublicSubnetCIPv6CIDRBlock` | No | The IPv6 CIDR block of the public C subnet. Optional, if not specified, no IPv6 address are allocated. [*](#asterisk)
+ `VPCId` | Yes | See the [VPC stack](#vpc) above.
+ `VPNGatewayId` | No | See the [VPN stack](#vpn) above. Optional, if not specified, a VPN gateway will not be included in the public routing table.
 
 <a name="asterisk">\*</a> Default values for these parameters can be supplied by the [`ipv6-defaults.sh`](#ipv6-defaults) scripts.
 
 ### Outputs
 
- Name | Environment Variable | Description
----|---|---
- `JumpBoxPublicIPAddress` | `JUMP_BOX_PUBLIC_IP_ADDRESS` | The public IP address of the jump box.
- `NetworkACLId` | `NETWORK_ACL_ID` | The id of the network access control list.
- `NATInstanceId` | `NAT_INSTANCE_ID` | The id of the NAT instance to be used in the private route table.
- `EgressOnlyInternetGatewayId` | `EGRESS_ONLY_INTERNET_GATEWAY_ID` | The id of the IPv6 egress-only internet gateway.
- `PublicRouteTableId` | `PUBLIC_ROUTE_TABLE_ID` | The id of the public routing table to be used in public subnets.
+ Name | Description
+---|---
+ `JumpBoxPublicIPAddress` | The public IP address of the jump box.
+ `NetworkACLId` | The id of the network access control list.
+ `NATInstanceId` | The id of the NAT instance to be used in the private route table.
+ `EgressOnlyInternetGatewayId` | The id of the IPv6 egress-only internet gateway.
+ `PublicRouteTableId` | The id of the public routing table to be used in public subnets.
 
 ## Private Infrastructure
 
@@ -193,19 +193,19 @@ Creates network routing artifacts for private subnets.
 
 ### Parameters
 
- Name | Environment Variable | Required/Default | Description
----|---|---|---
- `NATInstanceId` | `NAT_INSTANCE_ID` | Yes | See the [public infrastructure stack](#public-infrastructure) above.
- `EgressOnlyInternetGatewayId` | `EGRESS_ONLY_INTERNET_GATEWAY_ID` | Yes | See the [public infrastructure stack](#public-infrastructure) above.
- `VPCId` | `VPC_ID` | Yes | See the [VPC stack](#vpc) above.
- `IPv6CIDRBlock` | `IPV6_CIDR_BLOCK` | No | The IPv6 CIDR block of the VPC. Optional, if not specified, no IPv6 capabilities will be configured.
- `VPNGatewayId` | `VPN_GATEWAY_ID` | No | See the [VPN stack](#vpn) above. Optional, if not specified, a VPN gateway will not be included in the private routing table.
+ Name | Required/Default | Description
+---|---|---
+ `NATInstanceId` | Yes | See the [public infrastructure stack](#public-infrastructure) above.
+ `EgressOnlyInternetGatewayId` | Yes | See the [public infrastructure stack](#public-infrastructure) above.
+ `VPCId` | Yes | See the [VPC stack](#vpc) above.
+ `IPv6CIDRBlock` | No | The IPv6 CIDR block of the VPC. Optional, if not specified, no IPv6 capabilities will be configured.
+ `VPNGatewayId` | No | See the [VPN stack](#vpn) above. Optional, if not specified, a VPN gateway will not be included in the private routing table.
 
 ### Outputs
 
- Name | Environment Variable | Description
----|---|---
- `PrivateRouteTableId` | `PRIVATE_ROUTE_TABLE_ID` | The id of the private routing table to be used in private subnets.
+ Name | Description
+---|---
+ `PrivateRouteTableId` | The id of the private routing table to be used in private subnets.
 
 ## Miscellaneous Scripts
 
@@ -227,9 +227,9 @@ When configuring a VPC from the AWS console, an IPv6 `/56` CIDR block can be all
 Here is the actual output when calling the script (`./scripts/ipv6-defaults.sh 2600:52f9:4d75:2200::/56`):
 
 ```bash
-export IPV6_CIDR_BLOCK=2600:52f9:4d75:2200::/56
-export INTERNAL_ACCESS_IPV6_CIDR_BLOCK=2600:52f9:4d75:2200::/56
-export PUBLIC_SUBNET_A_IPV6_CIDR_BLOCK=2600:52f9:4d75:2200::/64
-export PUBLIC_SUBNET_B_IPV6_CIDR_BLOCK=2600:52f9:4d75:2201::/64
-export PUBLIC_SUBNET_C_IPV6_CIDR_BLOCK=2600:52f9:4d75:2202::/64
+export IPv6CIDRBlock=2600:52f9:4d75:2200::/56
+export InternalAccessIPv6CIDRBlock=2600:52f9:4d75:2200::/56
+export PublicSubnetAIPv6CIDRBlock=2600:52f9:4d75:2200::/64
+export PublicSubnetBIPv6CIDRBlock=2600:52f9:4d75:2201::/64
+export PublicSubnetCIPv6CIDRBlock=2600:52f9:4d75:2202::/64
 ```

@@ -24,12 +24,12 @@ All shell scripts support and use the following environment variables:
 
  Name | Default | Description
 ---|---|---
- `AWS_MUSINGS_S3_BUCKET` | `aws-musings-us-east-1` | The S3 bucket where the CloudFormation scripts and supporting files are uploaded to and loaded from.
- `AWS_MUSINGS_S3_URL` | `https://s3.amazonaws.com/$AWS_MUSINGS_S3_BUCKET` | The URL to the `aws-musings` S3 bucket.
- `PROFILE` | `default` | The AWS CLI configured profile used with all invocations of the `aws` CLI.
- `STACK_ORG` | None | <a name="stack-org">The</a> organization name. Used as a prefix to all CloudFormation stacks names. Multiple stacks should all use the same organization. This variable will typically identify the entity as a whole. This variable is commonly set to the Top-Level Domain name (e.g.: `example` for `example.com`).
- `STACK_ENV` | `dev` | <a name="stack-env">The</a> environment name. Also used as a prefix to all CloudFormation stack names. Multiple stacks can all use the same environment. Environments are commonly named `prod`, `stage` and `dev`. Names the DNS zones within the external and internal DNS zones (i.e.: with an external DNS of `example.com`, the full external zone would be `dev.example.com`.
- `ACL` | `public-read` | The Access Control List of files uploaded with the `upload.sh` script (see [Making Modifications](#making-modifications) below). See this [ACL overview](http://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) for more details.
+ `AWSMusingsProfile` | `default` | The AWS CLI configured profile used with all invocations of the `aws` CLI.
+ `AWSMusingsS3Bucket` | `aws-musings-us-east-1` | The S3 bucket where the CloudFormation scripts and supporting files are uploaded to and loaded from.
+ `AWSMusingsS3URL` | `https://s3.amazonaws.com/$AWSMusingsS3Bucket` | The URL to the `aws-musings` S3 bucket.
+ `AWSMusingsS3ACL` | `public-read` | The Access Control List of files uploaded with the `upload.sh` script (see [Making Modifications](#making-modifications) below). See this [ACL overview](http://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) for more details.
+ `StackOrg` | None | <a name="stack-org">The</a> organization name. Used as a prefix to all CloudFormation stacks names. Multiple stacks should all use the same organization. This variable will typically identify the entity as a whole. This variable is commonly set to the Top-Level Domain name (e.g.: `example` for `example.com`).
+ `StackEnv` | `dev` | <a name="stack-env">The</a> environment name. Also used as a prefix to all CloudFormation stack names. Multiple stacks can all use the same environment. Environments are commonly named `prod`, `stage` and `dev`. Names the DNS zones within the external and internal DNS zones (i.e.: with an external DNS of `example.com`, the full external zone would be `dev.example.com`.
 
 ## Chaining Outputs to Inputs
 
@@ -38,14 +38,14 @@ Several scripts will print out environment variables for use by subsequent scrip
 The following shows the output of the script to create a VPC and the subsequent invocation of the private infrastructure script:
 ```bash
 $ ./infrastructure/scripts/vpc.sh create
-export VPC_ID=vpc-12345678
+export VPCId=vpc-0123456789abcdef0
 
-$ export VPC_ID=vpc-12345678
+$ export VPCId=vpc-0123456789abcdef0
 
 $ ./infrastructure/scripts/public.sh create
 ...
 ```
-**Note:** The environment variable `VPC_ID` was output by the `vpc.sh` script and *_manually_* copied and executed after the `vpc.sh create` completed. The `public.sh create` script then was able to use the value when it was subsequently executed.
+**Note:** The environment variable `VPCId` was output by the `vpc.sh` script and *_manually_* copied and executed after the `vpc.sh create` completed. The `public.sh create` script then was able to use the value when it was subsequently executed.
 
 # CIDR Addressing Scheme for Private IPv4 Addresses
 
@@ -67,6 +67,6 @@ AWS will provide an IPv6 `/56` CIDR for each VPC (when using the AWS console). `
 
 Whether you are adding new content or forking `aws-musings` into a whole new direction (pull requests are always welcome), you will need to have an S3 bucket to host the CloudFormation scripts. You can upload some of the simple scripts directly into the AWS console but most of the scripts pull down supporting scripts from S3 or have nested CloudFormation scripts (which must be pulled from S3). In most cases you won't have update permissions to the default `aws-musings-us-east-1` S3 bucket.
 
-Simply create your own S3 bucket that you can read and write to, set the path to the bucket via the `AWS_MUSINGS_S3_URL` environment variable, then run the `./scripts/upload.sh` script. All scripts executed with the same `AWS_MUSINGS_S3_URL` variable will pull all scripts (CloudFormation and otherwise) from the specified S3 bucket.
+Simply create your own S3 bucket that you can read and write to, set the path to the bucket via the `AWSMusingsS3URL` environment variable, then run the `./scripts/upload.sh` script. All scripts executed with the same `AWSMusingsS3URL` variable will pull all scripts (CloudFormation and otherwise) from the specified S3 bucket.
 
 **NOTE:** Take care not to put sensitive content in your `aws-musings` working directory such as passwords or private keys. All files in your working directory are uploaded to the S3 bucket

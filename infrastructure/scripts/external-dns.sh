@@ -4,17 +4,17 @@ set -e
 
 source $(dirname $0)/setenv.sh $@
 
-STACK_NAME=$STACK_PREFIX-infrastructure-external-dns
+STACK_NAME=$StackPrefix-infrastructure-external-dns
 
-update-stack $1 --template-url $AWS_MUSINGS_S3_URL/infrastructure/external-dns.yml \
-    --parameters ParameterKey=FullyQualifiedExternalParentDNSZone,ParameterValue=$FULLY_QUALIFIED_EXTERNAL_PARENT_DNS_ZONE \
-        ParameterKey=StackEnv,ParameterValue=$STACK_ENV \
-        ParameterKey=VPCId,ParameterValue=$VPC_ID
+update-stack $1 --template-url $AWSMusingsS3URL/infrastructure/external-dns.yml \
+    --parameters ParameterKey=FullyQualifiedExternalParentDNSZone,ParameterValue=$FullyQualifiedExternalParentDNSZone \
+        ParameterKey=StackEnv,ParameterValue=$StackEnv \
+        ParameterKey=VPCId,ParameterValue=$VPCId
 
 if [[ $OUTPUT_RESULT == "true" ]] ; then
     RESULT=$(describe-stack)
 
-    echo "export EXTERNAL_HOSTED_ZONE_ID=$(get-output-value ExternalHostedZoneId)"
-    echo "export EXTERNAL_HOSTED_ZONE_NAME_SERVERS=\"$(get-output-value ExternalHostedZoneNameServers)\""
-    echo "export FULLY_QUALIFIED_EXTERNAL_DNS_ZONE=$(get-output-value FullyQualifiedExternalDNSZone)"
+    echo "export ExternalHostedZoneId=$(get-output-value ExternalHostedZoneId)"
+    echo "export ExternalHostedZoneNameServers=\"$(get-output-value ExternalHostedZoneNameServers)\""
+    echo "export FullyQualifiedExternalDNSZone=$(get-output-value FullyQualifiedExternalDNSZone)"
 fi
