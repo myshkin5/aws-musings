@@ -1,8 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
 
-Description: An ECR repository for the test-endpoint service.
+Description: An ECR repository for the service.
 
 Parameters:
+  ServiceName:
+    Type: String
+    Description: The name of the service.
   StackPrefix:
     Type: String
     Description: The prefix prepended to all aws-musings stacks.
@@ -11,16 +14,14 @@ Resources:
   Repository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: !Sub "${StackPrefix}/test-endpoint"
+      RepositoryName: !Sub "${StackPrefix}/${ServiceName}"
       RepositoryPolicyText:
         Version: 2012-10-17
         Statement:
         - Sid: AllowPushPull
           Effect: Allow
           Principal:
-            AWS:
-            # TODO: This needs to be configurable
-            - !Sub "arn:aws:iam::${AWS::AccountId}:user/dwayne"
+            AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
           Action:
             - ecr:GetDownloadUrlForLayer
             - ecr:BatchGetImage

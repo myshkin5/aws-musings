@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $(dirname $0)/cf-utils.sh $@
+source $(dirname $0)/cf-utils.sh
 
 if [[ $AWSMusingsS3ACL == "" ]] ; then
     AWSMusingsS3ACL=public-read

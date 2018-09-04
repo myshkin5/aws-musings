@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"time"
-	"math/rand"
 )
 
 func main() {
@@ -24,6 +24,11 @@ func main() {
 
 	random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
+	http.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
+		fmt.Fprintln(w, "ok")
+		log.Print("Handled health check")
+	})
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		sleep := r.URL.Query().Get("sleep")
 		var duration time.Duration
@@ -36,7 +41,7 @@ func main() {
 		}
 		rNum := random.Intn(10000)
 		out := fmt.Sprintf("request: %04d, message: %s, sleep(s): %f", rNum, message, duration.Seconds())
-		fmt.Fprint(w, out+"\n")
+		fmt.Fprintln(w, out)
 		log.Print("Handled ", out)
 	})
 

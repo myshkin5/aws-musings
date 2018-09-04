@@ -2,19 +2,29 @@
 
 set -e
 
-PROJECT_DIR=$(dirname $0)/../..
+PROJECT_DIR=$(dirname $0)/../../..
 
-source $PROJECT_DIR/scripts/cf-utils.sh $@
+source $PROJECT_DIR/scripts/cf-utils.sh
 
-STACK_NAME=$StackPrefix-containers-test-endpoint-service
+STACK_NAME=$StackPrefix-containers-test-forwarder-service
 
 if [[ $LoadBalancerListenerPriority == "" ]] ; then
-    LoadBalancerListenerPriority=$(yq r $(dirname $0)/../tests/endpoint/service.yml \
+    LoadBalancerListenerPriority=$(yq r $(dirname $0)/../forwarder/service.yml \
         Parameters.LoadBalancerListenerPriority.Default)
 fi
 
-update-stack $1 --template-url $AWSMusingsS3URL/containers/tests/endpoint/service.yml \
-    --parameters ParameterKey=ContainersSubnetAId,ParameterValue=$ContainersPublicSubnetAId \
+if [[ $Message == "" ]] ; then
+    Message=$(yq r $(dirname $0)/../forwarder/service.yml Parameters.Message.Default)
+fi
+if [[ $ForwardToUrl == "" ]] ; then
+    ForwardToUrl=$(yq r $(dirname $0)/../endpoint/service.yml Parameters.ForwardToUrl.Default)
+fi
+
+update-stack $1 --template-url $AWSMusingsS3URL/containers/tests/forwarder/service.yml \
+    --parameters ParameterKey=ServiceName,ParameterValue=$ServiceName \
+        ParameterKey=Message,ParameterValue=$Message \
+        ParameterKey=ForwardToUrl,ParameterValue=$ForwardToUrl \
+        ParameterKey=ContainersSubnetAId,ParameterValue=$ContainersPublicSubnetAId \
         ParameterKey=ContainersSubnetBId,ParameterValue=$ContainersPublicSubnetBId \
         ParameterKey=ContainersSubnetCId,ParameterValue=$ContainersPublicSubnetCId \
         ParameterKey=ClusterARN,ParameterValue=$PublicClusterARN \

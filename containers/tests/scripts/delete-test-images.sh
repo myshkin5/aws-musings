@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 
-PROJECT_DIR=$(dirname $0)/../..
+# Delayed calling set -e as list-images returns an error when there are no images
+#set -e
 
-source $PROJECT_DIR/scripts/cf-utils.sh $@
+PROJECT_DIR=$(dirname $0)/../../..
+
+source $PROJECT_DIR/scripts/cf-utils.sh
 
 IMAGES=$(aws ecr list-images \
-    --repository-name $StackPrefix/test-endpoint \
+    --repository-name $StackPrefix/$ServiceName \
     --query 'imageIds[*]' \
     --output json \
     --profile $AWSMusingsProfile)
@@ -15,7 +18,9 @@ if [[ $IMAGES == "" || $IMAGES = "[]" ]] ; then
     exit
 fi
 
+set -e
+
 aws ecr batch-delete-image \
-    --repository-name $StackPrefix/test-endpoint \
+    --repository-name $StackPrefix/$ServiceName \
     --image-ids "$IMAGES" \
     --profile $AWSMusingsProfile

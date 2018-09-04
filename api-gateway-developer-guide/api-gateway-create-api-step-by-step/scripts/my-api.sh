@@ -4,7 +4,7 @@ set -e
 
 PROJECT_DIR=$(dirname $0)/../../..
 
-source $PROJECT_DIR/scripts/cf-utils.sh $@
+source $PROJECT_DIR/scripts/cf-utils.sh
 
 STACK_NAME=$StackPrefix-my-api
 

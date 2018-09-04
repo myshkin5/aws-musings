@@ -55,7 +55,7 @@ Resources:
       DisableApiTermination: false
       SourceDestCheck: false
       ImageId: !Ref ImageId
-      InstanceType: t2.nano
+      InstanceType: t3.nano
       KeyName: !Ref KeyName
       Monitoring: false
       Tags:

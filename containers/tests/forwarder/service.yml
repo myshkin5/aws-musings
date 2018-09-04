@@ -1,16 +1,20 @@
 AWSTemplateFormatVersion: 2010-09-09
 
-Description: The service definition of the test-endpoint.
+Description: The service definition of the test-forwarder.
 
 Parameters:
   ServiceName:
     Type: String
     Description: The name of the service.
-    Default: test-endpoint
+    Default: test-forwarder
   Message:
     Type: String
     Description: The message returned via the service endpoint.
-    Default: fargate-test-endpoint
+    Default: fargate-test-forwarder
+  ForwardToUrl:
+    Type: String
+    Description: The endpoint to forward requests to.
+    Default: http://localhost:8080/health
   ContainersSubnetAId:
     Type: AWS::EC2::Subnet::Id
     Description: The id of the containers subnet A.
@@ -35,7 +39,7 @@ Parameters:
   LoadBalancerListenerPriority:
     Type: Number
     Description: The priority of the rule created on the load balancer listener (must be unique on the load balancer).
-    Default: 1
+    Default: 2
   HostedZoneId:
     Type: String
     Description: The DNS zone to which a DNS A record will be added for the service.
@@ -59,9 +63,12 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       ContainerDefinitions:
+      # TODO: Make configurable
       - Environment:
         - Name: MESSAGE
           Value: !Ref Message
+        - Name: FORWARD_TO_URL
+          Value: !Ref ForwardToUrl
         Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${StackPrefix}/${ServiceName}:latest"
         LogConfiguration:
           LogDriver: awslogs

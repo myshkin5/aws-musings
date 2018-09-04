@@ -97,7 +97,7 @@ NOTE: If you are using a hosted zone created by the Route 53 Registrar **_in a d
 
  Name | Required/Default | Description
 ---|---|---
- `FullyQualifiedExternal ParentDNSZone` (without space) | Yes | <a name="fully-qualified-external-parent-dns-zone">The</a> public DNS zone configured in Route 53 (should not start or end with .). **REQUIRED, NO DEFAULT AND NOT SUPPLIED BY A PREVIOUS STACK**
+ `FullyQualifiedExternalParentDNSZone` | Yes | <a name="fully-qualified-external-parent-dns-zone">The</a> public DNS zone configured in Route 53 (should not start or end with .). **REQUIRED, NO DEFAULT AND NOT SUPPLIED BY A PREVIOUS STACK**
  `StackEnv` | Yes | See [`StackEnv`](../README.md#stack-env).
  `VPCId` | Yes | See the [VPC stack](#vpc) above.
 
@@ -159,7 +159,7 @@ Creates network routing artifacts for public subnets along with jump box and NAT
  `JumpBoxEIPAddress` | No | The Elastic IP address that will be assigned to the jump box instance. If not specified, a new EIP address will be allocated. By pre-allocating an EIP and specifying it via this parameter, the jump box will be accessible with the same address even though the infrastructure may have been rebuilt repeatedly.
  `JumpBoxKeyName` | No / `jump-box` | <a name="jump-box-key-name">The</a> SSH key pair used to connect to the jump box EC2 instances.
  `JumpBoxSSHCIDRIP` | No / `<current public ip>/32` | Any IP address included in this CIDR will be able to access the jump box via SSH (client must also use the `JumpBoxKeyName` SSH key pair). It is highly recommended to restrict this CIDR to only IP addresses that need to access the jump box. **DEFAULT VALUE MAY BE A SECURITY CONCERN**
- `JumpBoxInstanceType` | No / `t2.nano` | The EC2 instance type of the jump box.
+ `JumpBoxInstanceType` | No / `t3.nano` | The EC2 instance type of the jump box.
  `PublicSubnetACIDRBlock` | No / `10.0.0.0/24` | The CIDR block of the public A subnet.
  `PublicSubnetBCIDRBlock` | No / `10.0.1.0/24` | The CIDR block of the public B subnet.
  `PublicSubnetCCIDRBlock` | No / `10.0.2.0/24` | The CIDR block of the public C subnet.
