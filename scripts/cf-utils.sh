@@ -24,12 +24,15 @@ update-stack() {
         VERB=create-stack
         PARAMS=$@
         ROLLBACK=--disable-rollback
+        >&2 echo "Creating $STACK_NAME..."
     elif [[ $1 == "update" ]] ; then
         shift
         VERB=update-stack
         PARAMS=$@
+        >&2 echo "Updating $STACK_NAME..."
     elif [[ $1 == "delete" ]] ; then
         VERB=delete-stack
+        >&2 echo "Deleting $STACK_NAME..."
     else
         >&2 echo "First parameter to a stack script must be 'create', 'update' or 'delete'"
         exit -1

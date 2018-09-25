@@ -34,7 +34,7 @@ Creates the core constructs starting with the VPC. This project builds artifacts
 
 Just creates a VPC.
 
-Note that because CloudFormation currently can't create a VPC with IPv6, this stack can't be used with the subsequent stacks if IPv6 support is required. Instead of using this stack, manually create a VPC with IPv6 support (via the console or CLI) then pass the `VPCId` and IPv6 parameters to the lower stacks. Note default IPv6 parameters are supplied by the [`ipv6-defaults.sh`](#ipv6-defaults) script.
+Note that, as of this edition, CloudFormation can't create a VPC with IPv6 enabled and therefore this stack can't be used with the subsequent stacks if IPv6 support is required. If IPv6 is required, do not use this stack and instead manually create a VPC with IPv6 support (via the console or CLI *with* DNS hostnames and DNS resolution *both* enabled) then pass the `VPCId` and IPv6 parameters to the lower stacks. Also note default IPv6 parameters are supplied by the [`ipv6-defaults.sh`](#ipv6-defaults) script.
 
 | | |
 ---|---

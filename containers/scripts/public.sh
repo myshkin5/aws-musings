@@ -38,7 +38,7 @@ if [[ $OUTPUT_RESULT == "true" ]] ; then
     echo "export ContainersPublicSubnetAId=$(get-output-value ContainersPublicSubnetAId)"
     echo "export ContainersPublicSubnetBId=$(get-output-value ContainersPublicSubnetBId)"
     echo "export ContainersPublicSubnetCId=$(get-output-value ContainersPublicSubnetCId)"
-    echo "export PublicClusterARN=$(get-output-value PublicClusterARN)"
+    echo "export ClusterARN=$(get-output-value ClusterARN)"
     echo "export PublicLoadBalancerDNSName=$(get-output-value PublicLoadBalancerDNSName)"
     echo "export PublicLoadBalancerCanonicalHostedZoneId=$(get-output-value PublicLoadBalancerCanonicalHostedZoneId)"
     echo "export PublicLoadBalancerListenerARN=$(get-output-value PublicLoadBalancerListenerARN)"

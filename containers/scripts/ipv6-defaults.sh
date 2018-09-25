@@ -17,3 +17,7 @@ RAW_56=${IPv6CIDRBlock%$SUFFIX_56}
 echo "export ContainersPublicSubnetAIPv6CIDRBlock=${RAW_56}03::/64"
 echo "export ContainersPublicSubnetBIPv6CIDRBlock=${RAW_56}04::/64"
 echo "export ContainersPublicSubnetCIPv6CIDRBlock=${RAW_56}05::/64"
+
+echo "export ContainersPrivateSubnetAIPv6CIDRBlock=${RAW_56}33::/64"
+echo "export ContainersPrivateSubnetBIPv6CIDRBlock=${RAW_56}34::/64"
+echo "export ContainersPrivateSubnetCIPv6CIDRBlock=${RAW_56}35::/64"

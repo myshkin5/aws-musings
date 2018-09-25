@@ -1,7 +1,7 @@
 FROM scratch
 
-COPY test-endpoint ./
+COPY endpoint ./
 
 EXPOSE 8080
 
-CMD ["./test-endpoint"]
+CMD ["./endpoint"]

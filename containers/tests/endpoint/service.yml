@@ -7,10 +7,12 @@ Parameters:
     Type: String
     Description: The name of the service.
     Default: test-endpoint
-  Message:
+  IsPublicService:
     Type: String
-    Description: The message returned via the service endpoint.
-    Default: fargate-test-endpoint
+    Description: When `true`, a public IP address is allocated.
+    AllowedValues:
+    - true
+    - false
   ContainersSubnetAId:
     Type: AWS::EC2::Subnet::Id
     Description: The id of the containers subnet A.
@@ -49,6 +51,13 @@ Parameters:
     Type: String
     Description: The prefix prepended to all aws-musings stacks.
 
+Mappings:
+  IsPublicServiceToAssignPublicIP:
+    'true':
+      Value: ENABLED
+    'false':
+      Value: DISABLED
+
 Resources:
   LogGroup:
     Type: AWS::Logs::LogGroup
@@ -60,9 +69,10 @@ Resources:
     Properties:
       ContainerDefinitions:
       - Environment:
-        - Name: MESSAGE
-          Value: !Ref Message
-        Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${StackPrefix}/${ServiceName}:latest"
+        - Name: SERVICE_NAME
+          Value: !Ref ServiceName
+        # Note service name is hardcoded in this repository image (all endpoint services use the same image)
+        Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${StackPrefix}/endpoint:latest"
         LogConfiguration:
           LogDriver: awslogs
           Options:
@@ -87,11 +97,11 @@ Resources:
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: !Sub "${ServiceName} service security group"
+      GroupDescription: !Sub "${StackPrefix}-${ServiceName} service security group"
       VpcId: !Ref VPCId
       Tags:
       - Key: Name
-        Value: !Sub "${AWS::StackName}-sg"
+        Value: !Sub "${StackPrefix}-${ServiceName}-sg"
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: 8080
@@ -115,6 +125,9 @@ Resources:
       TargetType: ip
       HealthCheckPath: /health
       VpcId: !Ref VPCId
+      Tags:
+      - Key: Name
+        Value: !Sub "${StackPrefix}-${ServiceName}-target-group"
 
   ListenerRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
@@ -139,8 +152,7 @@ Resources:
       TaskDefinition: !Ref TaskDefinition
       NetworkConfiguration:
         AwsvpcConfiguration:
-          # TODO: Make configurable
-          AssignPublicIp: ENABLED
+          AssignPublicIp: !FindInMap [IsPublicServiceToAssignPublicIP, !Ref IsPublicService, Value]
           SecurityGroups:
           - !Ref SecurityGroup
           Subnets:
@@ -151,6 +163,7 @@ Resources:
       - ContainerName: !Sub "${StackPrefix}-${ServiceName}"
         ContainerPort: 8080
         TargetGroupArn: !Ref TargetGroup
+    DependsOn: ListenerRule
 
   ServiceRecordSet:
     Type: AWS::Route53::RecordSet

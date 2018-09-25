@@ -1,7 +1,7 @@
 containers
 ==========
 
-Builds a basic container framework using Fargate.
+Builds a basic container framework using Fargate. TODO: Needs lots of updates!
 
 # Stacks
 
@@ -38,7 +38,7 @@ Creates artifacts to support publicly facing applications.
  `ContainersPublicSubnetAId` | The id of the containers public subnet A.
  `ContainersPublicSubnetBId` | The id of the containers public subnet B.
  `ContainersPublicSubnetCId` | The id of the containers public subnet C.
- `PublicClusterARN` | The ARN of the public cluster.
+ `ClusterARN` | The ARN of the cluster.
  `PublicLoadBalancerDNSName` | The DNS name of the public load balancer for use in alias record sets.
  `PublicLoadBalancerCanonicalHostedZoneId` | The hosted zone id of the public load balancer for use in alias record sets.
  `PublicLoadBalancerListenerARN` | The ARN of the public load balancer listener.

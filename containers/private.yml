@@ -1,117 +1,117 @@
 AWSTemplateFormatVersion: 2010-09-09
 
-Description: Artifacts to supporting public facing applications in containers.
+Description: Artifacts to supporting private applications in containers.
 
 Parameters:
-  ContainersPublicSubnetACIDRBlock:
+  ContainersPrivateSubnetACIDRBlock:
     Type: String
-    Description: The CIDR block of the public A subnet for containers.
-    Default: 10.0.3.0/24
+    Description: The CIDR block of the private A subnet for containers.
+    Default: 10.0.50.0/24
     AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/\\d{1,2}"
     ConstraintDescription: must contain four dot-separated octets, a slash, and the network mask bit count
-  ContainersPublicSubnetBCIDRBlock:
+  ContainersPrivateSubnetBCIDRBlock:
     Type: String
-    Description: The CIDR block of the public B subnet for containers.
-    Default: 10.0.4.0/24
+    Description: The CIDR block of the private B subnet for containers.
+    Default: 10.0.51.0/24
     AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/\\d{1,2}"
     ConstraintDescription: must contain four dot-separated octets, a slash, and the network mask bit count
-  ContainersPublicSubnetCCIDRBlock:
+  ContainersPrivateSubnetCCIDRBlock:
     Type: String
-    Description: The CIDR block of the public C subnet for containers.
-    Default: 10.0.5.0/24
+    Description: The CIDR block of the private C subnet for containers.
+    Default: 10.0.52.0/24
     AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/\\d{1,2}"
     ConstraintDescription: must contain four dot-separated octets, a slash, and the network mask bit count
-  ContainersPublicSubnetAIPv6CIDRBlock:
+  ContainersPrivateSubnetAIPv6CIDRBlock:
     Type: String
-    Description: The IPv6 CIDR block of the public A subnet. Optional.
-  ContainersPublicSubnetBIPv6CIDRBlock:
+    Description: The IPv6 CIDR block of the private A subnet. Optional.
+  ContainersPrivateSubnetBIPv6CIDRBlock:
     Type: String
-    Description: The IPv6 CIDR block of the public B subnet. Optional.
-  ContainersPublicSubnetCIPv6CIDRBlock:
+    Description: The IPv6 CIDR block of the private B subnet. Optional.
+  ContainersPrivateSubnetCIPv6CIDRBlock:
     Type: String
-    Description: The IPv6 CIDR block of the public C subnet. Optional.
+    Description: The IPv6 CIDR block of the private C subnet. Optional.
   NetworkACLId:
     Type: String
     Description: The id of the network access control list used to protect instances in this project.
-  PublicRouteTableId:
+  PrivateRouteTableId:
     Type: String
-    Description: The id of the public route table associated with the project's public subnets.
+    Description: The id of the private route table associated with the project's private subnets.
   VPCId:
     Type: AWS::EC2::VPC::Id
     Description: The id of the VPC in which the resources will be created.
 
 Conditions:
-  AddIPv6SubnetA: !Not [ !Equals [ !Ref ContainersPublicSubnetAIPv6CIDRBlock, "" ] ]
-  AddIPv6SubnetB: !Not [ !Equals [ !Ref ContainersPublicSubnetBIPv6CIDRBlock, "" ] ]
-  AddIPv6SubnetC: !Not [ !Equals [ !Ref ContainersPublicSubnetCIPv6CIDRBlock, "" ] ]
+  AddIPv6SubnetA: !Not [ !Equals [ !Ref ContainersPrivateSubnetAIPv6CIDRBlock, "" ] ]
+  AddIPv6SubnetB: !Not [ !Equals [ !Ref ContainersPrivateSubnetBIPv6CIDRBlock, "" ] ]
+  AddIPv6SubnetC: !Not [ !Equals [ !Ref ContainersPrivateSubnetCIPv6CIDRBlock, "" ] ]
   AddAnyIPv6: !Or [ Condition: AddIPv6SubnetA, Condition: AddIPv6SubnetB, Condition: AddIPv6SubnetC ]
 
 Resources:
-  PublicSubnetA:
+  PrivateSubnetA:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: !Ref ContainersPublicSubnetACIDRBlock
+      CidrBlock: !Ref ContainersPrivateSubnetACIDRBlock
       AvailabilityZone: !Select [ "0", !GetAZs "" ]
       VpcId: !Ref VPCId
       AssignIpv6AddressOnCreation: !If [ AddIPv6SubnetA, true, !Ref "AWS::NoValue" ]
-      Ipv6CidrBlock: !If [ AddIPv6SubnetA, !Ref ContainersPublicSubnetAIPv6CIDRBlock, !Ref "AWS::NoValue" ]
+      Ipv6CidrBlock: !If [ AddIPv6SubnetA, !Ref ContainersPrivateSubnetAIPv6CIDRBlock, !Ref "AWS::NoValue" ]
       Tags:
       - Key: Name
-        Value: !Sub "${AWS::StackName}-a-public-subnet"
-  PublicSubnetB:
+        Value: !Sub "${AWS::StackName}-a-private-subnet"
+  PrivateSubnetB:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: !Ref ContainersPublicSubnetBCIDRBlock
+      CidrBlock: !Ref ContainersPrivateSubnetBCIDRBlock
       AvailabilityZone: !Select [ "1", !GetAZs "" ]
       VpcId: !Ref VPCId
       AssignIpv6AddressOnCreation: !If [ AddIPv6SubnetB, true, !Ref "AWS::NoValue" ]
-      Ipv6CidrBlock: !If [ AddIPv6SubnetB, !Ref ContainersPublicSubnetBIPv6CIDRBlock, !Ref "AWS::NoValue" ]
+      Ipv6CidrBlock: !If [ AddIPv6SubnetB, !Ref ContainersPrivateSubnetBIPv6CIDRBlock, !Ref "AWS::NoValue" ]
       Tags:
       - Key: Name
-        Value: !Sub "${AWS::StackName}-b-public-subnet"
-  PublicSubnetC:
+        Value: !Sub "${AWS::StackName}-b-private-subnet"
+  PrivateSubnetC:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: !Ref ContainersPublicSubnetCCIDRBlock
+      CidrBlock: !Ref ContainersPrivateSubnetCCIDRBlock
       AvailabilityZone: !Select [ "2", !GetAZs "" ]
       VpcId: !Ref VPCId
       AssignIpv6AddressOnCreation: !If [ AddIPv6SubnetC, true, !Ref "AWS::NoValue" ]
-      Ipv6CidrBlock: !If [ AddIPv6SubnetC, !Ref ContainersPublicSubnetCIPv6CIDRBlock, !Ref "AWS::NoValue" ]
+      Ipv6CidrBlock: !If [ AddIPv6SubnetC, !Ref ContainersPrivateSubnetCIPv6CIDRBlock, !Ref "AWS::NoValue" ]
       Tags:
       - Key: Name
-        Value: !Sub "${AWS::StackName}-c-public-subnet"
+        Value: !Sub "${AWS::StackName}-c-private-subnet"
 
-  PublicSubnetARouteTableAssociation:
+  PrivateSubnetARouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PublicRouteTableId
-      SubnetId: !Ref PublicSubnetA
-  PublicSubnetBRouteTableAssociation:
+      RouteTableId: !Ref PrivateRouteTableId
+      SubnetId: !Ref PrivateSubnetA
+  PrivateSubnetBRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PublicRouteTableId
-      SubnetId: !Ref PublicSubnetB
-  PublicSubnetCRouteTableAssociation:
+      RouteTableId: !Ref PrivateRouteTableId
+      SubnetId: !Ref PrivateSubnetB
+  PrivateSubnetCRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PublicRouteTableId
-      SubnetId: !Ref PublicSubnetC
+      RouteTableId: !Ref PrivateRouteTableId
+      SubnetId: !Ref PrivateSubnetC
 
-  PublicSubnetANetworkACLAssociation:
+  PrivateSubnetANetworkACLAssociation:
     Type: AWS::EC2::SubnetNetworkAclAssociation
     Properties:
       NetworkAclId: !Ref NetworkACLId
-      SubnetId: !Ref PublicSubnetA
-  PublicSubnetBNetworkACLAssociation:
+      SubnetId: !Ref PrivateSubnetA
+  PrivateSubnetBNetworkACLAssociation:
     Type: AWS::EC2::SubnetNetworkAclAssociation
     Properties:
       NetworkAclId: !Ref NetworkACLId
-      SubnetId: !Ref PublicSubnetB
-  PublicSubnetCNetworkACLAssociation:
+      SubnetId: !Ref PrivateSubnetB
+  PrivateSubnetCNetworkACLAssociation:
     Type: AWS::EC2::SubnetNetworkAclAssociation
     Properties:
       NetworkAclId: !Ref NetworkACLId
-      SubnetId: !Ref PublicSubnetC
+      SubnetId: !Ref PrivateSubnetC
 
   ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -140,14 +140,14 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       # Shortened name as only 32 characters is supported
-      Name: public-alb
+      Name: private-alb
       SecurityGroups:
         - !Ref ALBSecurityGroup
-      Scheme: internet-facing
+      Scheme: internal
       Subnets:
-        - !Ref PublicSubnetA
-        - !Ref PublicSubnetB
-        - !Ref PublicSubnetC
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+        - !Ref PrivateSubnetC
       Tags:
       - Key: Name
         Value: !Sub "${AWS::StackName}-alb"
@@ -156,7 +156,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       # Shortened name as only 32 characters is supported
-      Name: public-default-target-group
+      Name: private-default-target-group
       VpcId: !Ref VPCId
       Port: 80
       Protocol: HTTP
@@ -174,30 +174,22 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref DefaultTargetGroup
 
-  Cluster:
-    Type: AWS::ECS::Cluster
-    Properties:
-      ClusterName: !Sub "${AWS::StackName}-cluster"
-
 Outputs:
-  ContainersPublicSubnetAId:
-    Description: The id of the containers public subnet A.
-    Value: !Ref PublicSubnetA
-  ContainersPublicSubnetBId:
-    Description: The id of the containers public subnet B.
-    Value: !Ref PublicSubnetB
-  ContainersPublicSubnetCId:
-    Description: The id of the containers public subnet C.
-    Value: !Ref PublicSubnetC
-  ClusterARN:
-    Description: The ARN of the cluster.
-    Value: !GetAtt Cluster.Arn
-  PublicLoadBalancerDNSName:
-    Description: The DNS name of the public load balancer for use in alias record sets.
+  ContainersPrivateSubnetAId:
+    Description: The id of the containers private subnet A.
+    Value: !Ref PrivateSubnetA
+  ContainersPrivateSubnetBId:
+    Description: The id of the containers private subnet B.
+    Value: !Ref PrivateSubnetB
+  ContainersPrivateSubnetCId:
+    Description: The id of the containers private subnet C.
+    Value: !Ref PrivateSubnetC
+  PrivateLoadBalancerDNSName:
+    Description: The DNS name of the private load balancer for use in alias record sets.
     Value: !GetAtt LoadBalancer.DNSName
-  PublicLoadBalancerCanonicalHostedZoneId:
-    Description: The hosted zone id of the public load balancer for use in alias record sets.
+  PrivateLoadBalancerCanonicalHostedZoneId:
+    Description: The hosted zone id of the private load balancer for use in alias record sets.
     Value: !GetAtt LoadBalancer.CanonicalHostedZoneID
-  PublicLoadBalancerListenerARN:
-    Description: The ARN of the public load balancer listener.
+  PrivateLoadBalancerListenerARN:
+    Description: The ARN of the private load balancer listener.
     Value: !Ref LoadBalancerListener

@@ -6,22 +6,29 @@ PROJECT_DIR=$(dirname $0)/../../..
 
 source $PROJECT_DIR/scripts/cf-utils.sh
 
-cd $(dirname $0)/..
+if [[ $# != 1 ]] ; then
+    >&2 echo "Usage: $0 <test service name>"
+    exit -1
+fi
 
-IMAGE_DIR=tmp/$ServiceName
+SERVICE_NAME=$1
+
+cd $PROJECT_DIR/containers/tests
+
+IMAGE_DIR=tmp/$SERVICE_NAME
 
 rm -rf $IMAGE_DIR/ 2> /dev/null
 mkdir -p $IMAGE_DIR/
-cp $SERVICE_SOURCE_DIR/Dockerfile $IMAGE_DIR/
+cp $SERVICE_NAME/Dockerfile $IMAGE_DIR/
 
-GOOS=linux GOARCH=amd64 go build -o $IMAGE_DIR/$ServiceName $SERVICE_SOURCE_DIR/src/main.go
-docker build -t $StackPrefix/$ServiceName:latest $IMAGE_DIR
+GOOS=linux GOARCH=amd64 go build -o $IMAGE_DIR/$SERVICE_NAME $SERVICE_NAME/src/main.go
+docker build --tag $StackPrefix/$SERVICE_NAME:latest $IMAGE_DIR
 
 ACCOUNT_ID=$(aws sts get-caller-identity --output text --query 'Account' --profile $AWSMusingsProfile)
 REGION=$(aws configure get region --profile $AWSMusingsProfile)
-IMAGE_ID=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$StackPrefix/$ServiceName:latest
+IMAGE_ID=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$StackPrefix/$SERVICE_NAME:latest
 
-docker tag $StackPrefix/$ServiceName:latest $IMAGE_ID
+docker tag $StackPrefix/$SERVICE_NAME:latest $IMAGE_ID
 
 eval $(aws ecr get-login --no-include-email --profile $AWSMusingsProfile)
 

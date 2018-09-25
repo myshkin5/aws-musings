@@ -1,7 +1,7 @@
 FROM scratch
 
-COPY test-forwarder ./
+COPY forwarder ./
 
 EXPOSE 8080
 
-CMD ["./test-forwarder"]
+CMD ["./forwarder"]

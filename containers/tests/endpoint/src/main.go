@@ -14,20 +14,19 @@ func main() {
 	if !ok {
 		addr = "0.0.0.0:8080"
 	}
-	message, ok := os.LookupEnv("MESSAGE")
+	serviceName, ok := os.LookupEnv("SERVICE_NAME")
 	if !ok {
-		message = "hi"
+		serviceName = "test-endpoint"
 	}
 
-	log.Print("Listening on (env ADDR) ", addr)
-	log.Print("Message of (env MESSAGE) ", message)
-
-	random := rand.New(rand.NewSource(time.Now().UnixNano()))
+	log.Printf("Service (env SERVICE_NAME) %s listening on (env ADDR) %s", serviceName, addr)
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		fmt.Fprintln(w, "ok")
 		log.Print("Handled health check")
 	})
+
+	random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		sleep := r.URL.Query().Get("sleep")
@@ -40,7 +39,8 @@ func main() {
 			}
 		}
 		rNum := random.Intn(10000)
-		out := fmt.Sprintf("request: %04d, message: %s, sleep(s): %f", rNum, message, duration.Seconds())
+		out := fmt.Sprintf("service: %s, request: %04d, sleep(s): %f, from: %s",
+			serviceName, rNum, duration.Seconds(), r.RemoteAddr)
 		fmt.Fprintln(w, out)
 		log.Print("Handled ", out)
 	})

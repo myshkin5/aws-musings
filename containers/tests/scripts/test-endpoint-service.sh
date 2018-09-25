@@ -6,30 +6,26 @@ PROJECT_DIR=$(dirname $0)/../../..
 
 source $PROJECT_DIR/scripts/cf-utils.sh
 
-STACK_NAME=$StackPrefix-containers-test-endpoint-service
+STACK_NAME=$StackPrefix-containers-$ServiceName-service
 
 if [[ $LoadBalancerListenerPriority == "" ]] ; then
     LoadBalancerListenerPriority=$(yq r $(dirname $0)/../endpoint/service.yml \
         Parameters.LoadBalancerListenerPriority.Default)
 fi
 
-if [[ $Message == "" ]] ; then
-    Message=$(yq r $(dirname $0)/../endpoint/service.yml Parameters.Message.Default)
-fi
-
 update-stack $1 --template-url $AWSMusingsS3URL/containers/tests/endpoint/service.yml \
     --parameters ParameterKey=ServiceName,ParameterValue=$ServiceName \
-        ParameterKey=Message,ParameterValue=$Message \
-        ParameterKey=ContainersSubnetAId,ParameterValue=$ContainersPublicSubnetAId \
-        ParameterKey=ContainersSubnetBId,ParameterValue=$ContainersPublicSubnetBId \
-        ParameterKey=ContainersSubnetCId,ParameterValue=$ContainersPublicSubnetCId \
-        ParameterKey=ClusterARN,ParameterValue=$PublicClusterARN \
-        ParameterKey=LoadBalancerDNSName,ParameterValue=$PublicLoadBalancerDNSName \
-        ParameterKey=LoadBalancerCanonicalHostedZoneId,ParameterValue=$PublicLoadBalancerCanonicalHostedZoneId \
-        ParameterKey=LoadBalancerListenerARN,ParameterValue=$PublicLoadBalancerListenerARN \
+        ParameterKey=IsPublicService,ParameterValue=$IsPublicService \
+        ParameterKey=ContainersSubnetAId,ParameterValue=$ContainersSubnetAId \
+        ParameterKey=ContainersSubnetBId,ParameterValue=$ContainersSubnetBId \
+        ParameterKey=ContainersSubnetCId,ParameterValue=$ContainersSubnetCId \
+        ParameterKey=ClusterARN,ParameterValue=$ClusterARN \
+        ParameterKey=LoadBalancerDNSName,ParameterValue=$LoadBalancerDNSName \
+        ParameterKey=LoadBalancerCanonicalHostedZoneId,ParameterValue=$LoadBalancerCanonicalHostedZoneId \
+        ParameterKey=LoadBalancerListenerARN,ParameterValue=$LoadBalancerListenerARN \
         ParameterKey=LoadBalancerListenerPriority,ParameterValue=$LoadBalancerListenerPriority \
-        ParameterKey=HostedZoneId,ParameterValue=$ExternalHostedZoneId \
-        ParameterKey=FullyQualifiedDNSZone,ParameterValue=$FullyQualifiedExternalDNSZone \
+        ParameterKey=HostedZoneId,ParameterValue=$HostedZoneId \
+        ParameterKey=FullyQualifiedDNSZone,ParameterValue=$FullyQualifiedDNSZone \
         ParameterKey=VPCId,ParameterValue=$VPCId \
         ParameterKey=StackPrefix,ParameterValue=$StackPrefix
 
